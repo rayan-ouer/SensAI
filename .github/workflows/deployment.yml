@@ -7,7 +7,7 @@ on:
 jobs:
   push_to_mirror:
     if: ${{ format('git@github.com:{0}.git', github.repository) != vars.MIRROR_URL }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
         with:
