@@ -3,9 +3,11 @@ import ollama
 SYSTEM_PROMPT = """
 """
 
+MODEL = 'mistral'
+
 def send_user_prompt(user_prompt: str, context: dict) -> str:
     stream = ollama.chat(
-        model='mistral',
+        model=MODEL,
         messages=[{'role': 'system', 'content': SYSTEM_PROMPT},
                   {"role": "user", "content": user_prompt}],
         stream=True,
@@ -27,5 +29,4 @@ def send_user_prompt(user_prompt: str, context: dict) -> str:
                 print('\n\nAnswer:\n', end='', flush=True)
             print(chunk.message.content, end='', flush=True)
             content += chunk.message.content
-
     return content
