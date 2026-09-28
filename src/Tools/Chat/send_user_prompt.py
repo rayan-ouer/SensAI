@@ -1,7 +1,14 @@
+##
+## EPITECH PROJECT, 2026
+## G-AIA-500-PAR-5-1-sensai-1
+## File description:
+## send_user_prompt
+##
+
 import ollama
 
-def send_user_prompt(messages: list, model: str) -> str:
-    stream = ollama.chat(
+def send_user_prompt(messages: list, model: str, ollama_client_instance: ollama.Client) -> str:
+    stream = ollama_client_instance.chat(
         model=model,
         messages=messages,
         stream=True,

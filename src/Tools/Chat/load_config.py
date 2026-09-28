@@ -1,8 +1,15 @@
+##
+## EPITECH PROJECT, 2026
+## G-AIA-500-PAR-5-1-sensai-1
+## File description:
+## load_config
+##
+
 import argparse
 import yaml
 import os
 
-EXIT_ERR = 84
+from src.Tools.Chat.module import EXIT_ERR
 
 def load_config(parser: argparse.ArgumentParser):
     parser.add_argument("config", help="path to the yaml config file")
