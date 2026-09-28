@@ -16,7 +16,7 @@ This project requires :
 ### Installation for linux
 
 1. Clone the repository
-```zsh
+```sh
 git clone git@github.com:EpitechPGE3-2026/G-AIA-500-PAR-5-1-sensai-1.git
 cd G-AIA-500-PAR-5-1-sensai-1.git
 ```
