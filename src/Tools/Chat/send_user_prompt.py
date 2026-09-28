@@ -1,15 +1,9 @@
 import ollama
 
-SYSTEM_PROMPT = """
-"""
-
-MODEL = 'mistral'
-
-def send_user_prompt(user_prompt: str, context: dict) -> str:
+def send_user_prompt(messages: list, model: str) -> str:
     stream = ollama.chat(
-        model=MODEL,
-        messages=[{'role': 'system', 'content': SYSTEM_PROMPT},
-                  {"role": "user", "content": user_prompt}],
+        model=model,
+        messages=messages,
         stream=True,
     )
 
