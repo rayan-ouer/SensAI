@@ -11,10 +11,12 @@ import ollama
 import os
 import dotenv
 
+from src.Tools.Chat.module import EXIT_ERR
+
 from src.Tools.Chat.send_user_prompt import send_user_prompt
 from src.Tools.Chat.load_config import load_config
 from src.Tools.Chat.create_client import ollama_client
-
+from src.Tools.Chat.model_list import get_model_list
 
 if __name__ == '__main__':
     dotenv.load_dotenv()
