@@ -1,15 +1,16 @@
+##
+## EPITECH PROJECT, 2026
+## G-AIA-500-PAR-5-1-sensai-1
+## File description:
+## send_user_prompt
+##
+
 import ollama
 
-SYSTEM_PROMPT = """
-"""
-
-MODEL = 'mistral'
-
-def send_user_prompt(user_prompt: str, context: dict) -> str:
-    stream = ollama.chat(
-        model=MODEL,
-        messages=[{'role': 'system', 'content': SYSTEM_PROMPT},
-                  {"role": "user", "content": user_prompt}],
+def send_user_prompt(messages: list, model: str, ollama_client_instance: ollama.Client) -> str:
+    stream = ollama_client_instance.chat(
+        model=model,
+        messages=messages,
         stream=True,
     )
 

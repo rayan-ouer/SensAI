@@ -1,0 +1,5 @@
+model: "mistral" # local model, key required
+
+system: "prompt/system.txt" # key required
+
+host: "https://ollama.com" # optional key, host by default
