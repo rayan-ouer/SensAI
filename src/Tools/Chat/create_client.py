@@ -8,13 +8,13 @@
 import ollama
 import sys
 
-from src.Tools.Chat.module import EXIT_ERR
+from src.Tools.Chat.module import EXIT_E
 
-def ollama_client(config, ollama_api_key: str) -> ollama.Client:
+def ollama_client(config: dict[str, str], ollama_api_key: str) -> ollama.Client:
     if config.get("host"):
         if not ollama_api_key:
             print("Error: OLLAMA_API_KEY environment variable not set.")
-            sys.exit(EXIT_ERR)
+            sys.exit(EXIT_E)
         return ollama.Client(
             host=config["host"],
             headers={"Authorization": f"Bearer {ollama_api_key}"}
