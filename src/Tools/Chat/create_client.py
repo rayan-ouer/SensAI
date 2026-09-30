@@ -6,17 +6,25 @@
 ##
 
 import ollama
-import sys
 
-from src.Tools.Chat.module import EXIT_E
+from src.Tools.Chat.settings import Settings
+from src.Tools.Chat.model_list import get_model_list
 
-def ollama_client(config: dict[str, str], ollama_api_key: str) -> ollama.Client:
-    if config.get("host"):
-        if not ollama_api_key:
-            print("Error: OLLAMA_API_KEY environment variable not set.")
-            sys.exit(EXIT_E)
-        return ollama.Client(
-            host=config["host"],
-            headers={"Authorization": f"Bearer {ollama_api_key}"}
-            )
-    return ollama.Client()
+def create_ollama_client(settings: Settings, model: str) -> ollama.Client:
+    local = ollama.Client(
+        host=settings.ollama_local_host
+    )
+    try:
+        if model in get_model_list(local):
+            return local
+    except ConnectionError:
+        pass
+    if settings.ollama_api_key is None:
+        raise ValueError(f"Model '{model}' not found locally and OLLAMA_API_KEY is not set")
+    cloud = ollama.Client(
+        host=settings.ollama_cloud_host,
+        headers={"Authorization": f"Bearer {settings.ollama_api_key.get_secret_value()}"}
+    )
+    if model in get_model_list(cloud):
+        return cloud
+    raise ValueError(f"Model '{model}' not found neither locally nor in the cloud")
