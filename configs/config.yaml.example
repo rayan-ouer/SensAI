@@ -1,5 +1,10 @@
-model: "mistral" # local model, key required
+## REQUIRED KEYS
+model: "mistral" # cloud or local model name, key required
 
 system: "prompt/system.txt" # key required
 
-host: "https://ollama.com" # optional key, host by default
+spec_prompt: "prompt/wu_spec.txt" # key required
+
+host: "https://ollama.com" # optional key, host by default (local)
+
+spec_path: "workspace/WU.md"  # optional key, default "workspace/WU.md"
