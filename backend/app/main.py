@@ -8,20 +8,23 @@
 import argparse
 import sys
 import ollama
-import os
-import dotenv
+
+from pydantic import ValidationError
 
 from src.Tools.Chat.module import EXIT_S, EXIT_E
 
+from src.Tools.Chat.settings import Settings
 from src.Tools.Chat.send_user_prompt import send_user_prompt
 from src.Tools.Chat.load_config import load_config
-from src.Tools.Chat.create_client import ollama_client
-from src.Tools.Chat.model_list import get_model_list
+from src.Tools.Chat.create_client import create_ollama_client
 from src.Tools.Wu.spec import load_spec, update_spec, save_spec, build_system_prompt
 
 if __name__ == '__main__':
-    dotenv.load_dotenv()
-    ollama_api_key = os.environ.get("OLLAMA_API_KEY")
+    try:
+        settings = Settings()
+    except ValidationError as e:
+        print(f"Error: {e}")
+        sys.exit(EXIT_E)
 
     parser = argparse.ArgumentParser()
     ret, config = load_config(parser)
@@ -30,7 +33,11 @@ if __name__ == '__main__':
 
     spec = load_spec(config["spec_path"])
 
-    ollama_client_instance = ollama_client(config, ollama_api_key)
+    try:
+        ollama_client_instance = create_ollama_client(settings, config["model"])
+    except ValueError as e:
+        print(f"Error: {e}")
+        sys.exit(EXIT_E)
 
     messages = [{"role": "system", "content": config["system"]}]
     while True:
