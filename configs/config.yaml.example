@@ -1,10 +1,9 @@
 ## REQUIRED KEYS
-model: "mistral" # cloud or local model name, key required
+model: "qwen2.5-coder:7b" # cloud or local model name, key required
 
 system: "prompt/system.txt" # key required
 
 spec_prompt: "prompt/wu_spec.txt" # key required
 
-host: "https://ollama.com" # optional key, host by default (local)
-
+## OPTIONAL KEYS
 spec_path: "workspace/WU.md"  # optional key, default "workspace/WU.md"
