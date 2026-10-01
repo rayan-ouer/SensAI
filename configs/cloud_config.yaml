@@ -1,0 +1,9 @@
+## REQUIRED KEYS
+model: "nemotron-3-nano:30b" # cloud model name, key required
+
+system: "prompt/system.txt" # key required
+
+spec_prompt: "prompt/wu_spec.txt" # key required
+
+## OPTIONAL KEYS
+spec_path: "workspace/WU.md"  # optional key, default "workspace/WU.md"

@@ -1,5 +1,0 @@
-model: "nemotron-3-nano:30b-cloud" # cloud model name, key required
-
-system: "prompt/system.txt"
-
-host: "https://ollama.com" # optional key, host by default

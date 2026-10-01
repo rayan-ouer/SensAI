@@ -7,27 +7,26 @@
 
 import ollama
 
-def send_user_prompt(messages: list, model: str, ollama_client_instance: ollama.Client) -> str:
-    stream = ollama_client_instance.chat(
-        model=model,
-        messages=messages,
-        stream=True,
-    )
+def print_part(text: str, header: str, show_header: bool):
+    if show_header:
+        print(header, end='', flush=True)
+    print(text, end='', flush=True)
 
+def print_chunk(message: ollama.Message, in_thinking: bool) -> bool:
+    if message.thinking:
+        print_part(message.thinking, 'Thinking:\n', not in_thinking)
+        return True
+    if message.content:
+        print_part(message.content, '\n\nAnswer:\n', in_thinking)
+        return False
+    return in_thinking
+
+def send_user_prompt(messages: list, model: str, ollama_client_instance: ollama.Client) -> str:
+    stream = ollama_client_instance.chat(model=model, messages=messages, stream=True)
     in_thinking = False
     content = ''
-    thinking = ''
     for chunk in stream:
-        if chunk.message.thinking:
-            if not in_thinking:
-                in_thinking = True
-                print('Thinking:\n', end='', flush=True)
-            print(chunk.message.thinking, end='', flush=True)
-            thinking += chunk.message.thinking
-        elif chunk.message.content:
-            if in_thinking:
-                in_thinking = False
-                print('\n\nAnswer:\n', end='', flush=True)
-            print(chunk.message.content, end='', flush=True)
+        in_thinking = print_chunk(chunk.message, in_thinking)
+        if chunk.message.content and not chunk.message.thinking:
             content += chunk.message.content
     return content
