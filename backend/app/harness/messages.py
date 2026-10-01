@@ -1,36 +1,58 @@
 from enum import Enum
-from dataclasses import dataclass
+
+from dataclasses import dataclass, field
 from dataclasses_json import dataclass_json
 
 from .tools import ToolCall
+from app.core.types import MessageType, ToolStatus
 
 
-@dataclass_json
+
 @dataclass
+@dataclass_json
 class IMessage:
-    content: str | list[str | dict]
-    type: str
     id: str
+    content: str
+
+    @property
+    def role(self) -> MessageType:
+        raise NotImplementedError
 
 
-class SystemMessage(IMessage):
-    type: str = "system"
-
-
-class AIMessage(IMessage):
-    type: str = "ai"
-    tool_calls: list[ToolCall] = []
-
-
+@dataclass
 class HumanMessage(IMessage):
-    type: str = "human"
+
+    @property
+    def role(self) -> MessageType:
+        return MessageType.HUMAN
 
 
-class ToolStatus(Enum):
-    SUCCESS = ("success",)
-    ERROR = "error"
+@dataclass
+class AIMessage(IMessage):
+
+    tool_calls: list[ToolCall] = field(default_factory=list)
+
+    @property
+    def role(self) -> MessageType:
+        return MessageType.AI
 
 
+@dataclass
+class SystemMessage(IMessage):
+
+    @property
+    def role(self) -> MessageType:
+        return MessageType.SYSTEM
+
+
+@dataclass
 class ToolMessage(IMessage):
-    type: str = "tool"
+
+    tool_call_id: str
+    tool_name: str
+    result: dict
     status: ToolStatus = ToolStatus.SUCCESS
+
+    @property
+    def role(self) -> MessageType:
+        return MessageType.TOOL
