@@ -109,5 +109,12 @@ def main():
     print()
     print("Bye bye")
 
+<<<<<<< HEAD
 if __name__ == '__main__':
     main()
+=======
+if __name__ == "__main__":
+    user_prompt = input("Quel est votre prompt ?\n")
+    context = {}
+    response = send_user_prompt(user_prompt, context)
+>>>>>>> feat/architecture/messages_and_tools

@@ -1,3 +1,14 @@
+<<<<<<< HEAD
 ollama
 PyYAML
 pydantic-settings
+=======
+# Backend requirements
+fastapi[standard]
+sqlalchemy
+
+
+## LLM requirements
+ollama
+dataclasses-json
+>>>>>>> feat/architecture/messages_and_tools
