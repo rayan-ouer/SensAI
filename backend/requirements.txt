@@ -3,6 +3,7 @@ fastapi[standard]
 sqlalchemy
 
 ## Core requirements
+docker
 PyYAML
 pydantic-settings
 
