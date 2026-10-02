@@ -1,3 +1,4 @@
 ollama
+docker
 PyYAML
 pydantic-settings
