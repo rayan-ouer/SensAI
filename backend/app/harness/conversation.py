@@ -32,30 +32,85 @@ class MessageNotFoundError(Exception):
         super().__init__(f"Message {message_id} not found.")
 
 
-
 class IConversation(ABC):
-    def add_message(message: IMessage):
+    def get_conversation_by_id_or_none(self, conversation_id: str):
         pass
 
-    def add_ai_message(message: AIMessage):
+    def get_message_by_id_or_none(self, message_id: str):
         pass
 
-    def add_human_message(message: HumanMessage):
+    def get_conversation_by_id(self, conversation_id: str):
         pass
 
-    def get_used_history():
+    def get_message_by_id(self, message_id: str):
         pass
 
-    def get_full_history():
+    def get_active_message(self, conversation_id: str):
         pass
 
-    def get_conversation_by_id(id: str):
+    def get_full_history(self, conversation_id: str):
         pass
 
-    def edit_message(message_id: str, _: IMessage):
+    def get_used_history(self, conversation_id: str):
         pass
 
-    def clear():
+    def add_message(self, conversation_id: str, message: IMessage):
+        pass
+
+    def add_ai_message(self, conversation_id: str, message: AIMessage):
+        pass
+
+    def add_human_message(self, conversation_id: str, message: HumanMessage):
+        pass
+
+    def add_system_message(self, conversation_id: str, message: SystemMessage):
+        pass
+
+    def edit_message(self, conversation_id: str, message_id: str, message: IMessage):
+        pass
+
+    def clear(self, conversation_id: str):
+        pass
+
+
+class FileConversation(IConversation):
+    def get_conversation_by_id_or_none(self, conversation_id: str):
+        pass
+
+    def get_message_by_id_or_none(self, message_id: str):
+        pass
+
+    def get_conversation_by_id(self, conversation_id: str):
+        pass
+
+    def get_message_by_id(self, message_id: str):
+        pass
+
+    def get_active_message(self, conversation_id: str):
+        pass
+
+    def get_full_history(self, conversation_id: str):
+        pass
+
+    def get_used_history(self, conversation_id: str):
+        pass
+
+    def add_message(self, conversation_id: str, message: IMessage):
+        pass
+
+    def add_ai_message(self, conversation_id: str, message: AIMessage):
+        pass
+
+    def add_human_message(self, conversation_id: str, message: HumanMessage):
+        pass
+
+    def add_system_message(self, conversation_id: str, message: SystemMessage):
+        pass
+
+    def edit_message(self, conversation_id: str, message_id: str, message: IMessage):
+        pass
+
+    def clear(self, conversation_id: str):
         pass
 
 
@@ -170,7 +225,7 @@ class DatabaseConversation(IConversation):
     def add_human_message(self, conversation_id: str, message: HumanMessage) -> Message:
         return self.add_message(conversation_id, message)
 
-    def add_system_message(self, conversation_id: str, message: IMessage) -> Message:
+    def add_system_message(self, conversation_id: str, message: SystemMessage) -> Message:
         return self.add_message(conversation_id, message)
     
     def clear(self, conversation_id: str) -> None:
@@ -178,3 +233,4 @@ class DatabaseConversation(IConversation):
         conversation.active_message = None
         self._db.delete(conversation)
         
+
