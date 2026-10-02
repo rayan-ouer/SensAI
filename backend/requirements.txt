@@ -1,4 +1,12 @@
-ollama
+## Backend requirements
+fastapi[standard]
+sqlalchemy
+
+## Core requirements
 docker
 PyYAML
 pydantic-settings
+
+## LLM requirements
+ollama
+dataclasses-json
