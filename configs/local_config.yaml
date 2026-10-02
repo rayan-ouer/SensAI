@@ -1,0 +1,8 @@
+## REQUIRED KEYS
+model: "qwen2.5-coder:7b" # local model name, key required
+
+system: "prompt/system.txt" # key required
+
+spec_prompt: "prompt/wu_spec.txt" # key required
+
+## OPTIONAL KEYS

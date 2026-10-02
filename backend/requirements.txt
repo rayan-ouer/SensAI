@@ -1,7 +1,10 @@
-# Backend requirements
+## Backend requirements
 fastapi[standard]
 sqlalchemy
 
+## Core requirements
+PyYAML
+pydantic-settings
 
 ## LLM requirements
 ollama
