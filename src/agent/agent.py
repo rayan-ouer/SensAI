@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .messages import SystemMessage
+from ..core.messages import SystemMessage
 
 
 class Agent:

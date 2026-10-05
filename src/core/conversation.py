@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from ..messages import AIMessage, HumanMessage, IMessage, SystemMessage
+from .messages import AIMessage, HumanMessage, IMessage, SystemMessage
 
 
 class ConversationError(Exception):
@@ -33,7 +33,7 @@ class IConversation(ABC):
         pass
 
     @abstractmethod
-    def get_message_by_id_or_none(self, message_id: str):
+    def get_message_by_id_or_none(self, conversation_id: str, message_id: str):
         pass
 
     @abstractmethod
@@ -41,7 +41,7 @@ class IConversation(ABC):
         pass
 
     @abstractmethod
-    def get_message_by_id(self, message_id: str):
+    def get_message_by_id(self, conversation_id: str, message_id: str):
         pass
 
     @abstractmethod

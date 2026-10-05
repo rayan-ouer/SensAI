@@ -3,9 +3,9 @@ from typing import Optional
 from sqlalchemy import literal, select
 from sqlalchemy.orm import Session
 
-from app.db.models import Conversation, Message, ToolCall as DBToolCall
-from ..messages import AIMessage, HumanMessage, IMessage, SystemMessage
-from .iconversation import (
+from .models import Conversation, Message
+from ....core.messages import AIMessage, HumanMessage, IMessage, SystemMessage
+from ....core.conversation import (
     ConversationNotFoundError,
     IConversation,
     MessageNotFoundError,
@@ -26,23 +26,26 @@ class DatabaseConversation(IConversation):
 
         return result.scalar_one_or_none()
 
-    def get_message_by_id_or_none(self, message_id: str) -> Optional[Message]:
-        statement = select(Message).where(Message.id == message_id)
+    def get_message_by_id_or_none(
+        self, conversation_id: str, message_id: str
+    ) -> Optional[Message]:
+        statement = select(Message).where(
+            Message.id == message_id,
+            Message.conversation_id == conversation_id,
+        )
         result = self._db.execute(statement)
-
         return result.scalar_one_or_none()
 
     def get_conversation_by_id(self, conversation_id: str) -> Conversation:
         conversation: Optional[Conversation] = self.get_conversation_by_id_or_none(
             conversation_id
         )
-
         if not conversation:
             raise ConversationNotFoundError(conversation_id)
         return conversation
 
-    def get_message_by_id(self, message_id: str) -> Message:
-        db_message: Optional[Message] = self.get_message_by_id_or_none(message_id)
+    def get_message_by_id(self, conversation_id: str, message_id: str) -> Message:
+        db_message: Optional[Message] = self.get_message_by_id_or_none(conversation_id, message_id)
 
         if not db_message:
             raise MessageNotFoundError(message_id)
@@ -110,7 +113,7 @@ class DatabaseConversation(IConversation):
         self, conversation_id: str, message_id: str, message: IMessage
     ) -> Message:
         conversation: Conversation = self.get_conversation_by_id(conversation_id)
-        old_message: Message = self.get_message_by_id(message_id)
+        old_message: Message = self.get_message_by_id(conversation_id, message_id)
 
         db_message: Message = self._create_db_message(conversation_id, message)
         db_message.parent_id = old_message.parent_id

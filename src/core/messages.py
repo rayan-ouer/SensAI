@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from dataclasses_json import dataclass_json
 
 from .tools import ToolCall
-from app.core.types import MessageType, ToolStatus
+from core.types import MessageType, ToolStatus
 
 
 @dataclass
@@ -19,6 +19,7 @@ class IMessage:
 
 
 @dataclass
+@dataclass_json
 class HumanMessage(IMessage):
     @property
     def role(self) -> MessageType:
@@ -26,6 +27,7 @@ class HumanMessage(IMessage):
 
 
 @dataclass
+@dataclass_json
 class AIMessage(IMessage):
     tool_calls: list[ToolCall] = field(default_factory=list)
 
@@ -35,6 +37,7 @@ class AIMessage(IMessage):
 
 
 @dataclass
+@dataclass_json
 class SystemMessage(IMessage):
     @property
     def role(self) -> MessageType:
@@ -42,6 +45,7 @@ class SystemMessage(IMessage):
 
 
 @dataclass
+@dataclass_json
 class ToolMessage(IMessage):
     tool_call_id: str
     tool_name: str

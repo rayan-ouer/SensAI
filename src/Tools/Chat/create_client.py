@@ -6,11 +6,12 @@
 ##
 
 import ollama
+from typing import Optional
 
-from src.Tools.Chat.settings import Settings
-from src.Tools.Chat.model_list import get_model_list
+from Tools.Chat.settings import Settings
+from Tools.Chat.model_list import get_model_list
 
-def find_local_client(settings: Settings, model: str) -> ollama.Client | None:
+def find_local_client(settings: Settings, model: str) -> Optional[ollama.Client]:
     local = ollama.Client(host=settings.ollama_local_host)
     try:
         if model in get_model_list(local):
