@@ -14,7 +14,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from app.core.types import MessageType, ToolStatus
+from core.types import MessageType, ToolStatus
 
 
 class Base(DeclarativeBase):

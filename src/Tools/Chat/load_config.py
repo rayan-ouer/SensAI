@@ -8,14 +8,15 @@
 import argparse
 import yaml
 import os
+from typing import Optional
 
-from src.Tools.Chat.module import EXIT_S, EXIT_E
+from Tools.Chat.module import EXIT_S, EXIT_E
 
 REQUIRED_KEYS = ("model", "system", "spec_prompt")
 PROMPT_KEYS = ("system", "spec_prompt")
 DEFAULT_SPEC_PATH = "workspace/WU.md"
 
-def read_prompt(config_dir: str, relative_path: str) -> str | None:
+def read_prompt(config_dir: str, relative_path: str) -> Optional[str]:
     full_path = os.path.join(config_dir, relative_path)
     try:
         with open(full_path, "r", encoding="utf-8") as f:
@@ -24,7 +25,7 @@ def read_prompt(config_dir: str, relative_path: str) -> str | None:
         print(f"Error: prompt file not found : {full_path}")
         return None
 
-def read_yaml(path: str) -> dict | None:
+def read_yaml(path: str) -> Optional[dict]:
     try:
         with open(path, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
@@ -52,8 +53,8 @@ def load_prompts(config_dir: str, config: dict) -> bool:
         config[key] = content
     return True
 
-def load_config(parser: argparse.ArgumentParser) -> tuple[int, dict | None]:
-    parser.add_argument("config", help="path to the yaml config file")
+def load_config(parser: argparse.ArgumentParser) -> tuple[int, Optional[dict]]:
+    parser.add_argument("-c", dest="config", type=str, help="path to the yaml config file")
     args = parser.parse_args()
     config = read_yaml(args.config)
     if config is None or not validate_config(config):

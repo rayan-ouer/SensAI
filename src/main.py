@@ -8,16 +8,17 @@
 import argparse
 import sys
 import ollama
+from typing import Optional
 
 from pydantic import ValidationError
 
-from src.Tools.Chat.module import EXIT_S, EXIT_E
+from Tools.Chat.module import EXIT_S, EXIT_E
 
-from src.Tools.Chat.settings import Settings
-from src.Tools.Chat.send_user_prompt import send_user_prompt
-from src.Tools.Chat.load_config import load_config
-from src.Tools.Chat.create_client import create_ollama_client
-from src.Tools.Wu.spec import load_spec, update_spec, save_spec, build_system_prompt
+from Tools.Chat.settings import Settings
+from Tools.Chat.send_user_prompt import send_user_prompt
+from Tools.Chat.load_config import load_config
+from Tools.Chat.create_client import create_ollama_client
+from Tools.Wu.spec import load_spec, update_spec, save_spec, build_system_prompt
 
 def fatal(message: object):
     print(f"Error: {message}")
@@ -41,7 +42,7 @@ def get_client(settings: Settings, model: str) -> ollama.Client:
     except ValueError as e:
         fatal(e)
 
-def read_user_input() -> str | None:
+def read_user_input() -> Optional[str]:
     print("> ", end="", flush=True)
     try:
         return input()
@@ -60,7 +61,7 @@ def handle_chat_error(e: BaseException):
     else:
         print(f"Error: {e.error}")
 
-def ask_wu(messages: list, model: str, ollama_client_instance: ollama.Client) -> str | None:
+def ask_wu(messages: list, model: str, ollama_client_instance: ollama.Client) -> Optional[str]:
     try:
         reply = send_user_prompt(messages, model, ollama_client_instance)
     except (ollama.ResponseError, ConnectionError, KeyboardInterrupt) as e:
@@ -109,12 +110,5 @@ def main():
     print()
     print("Bye bye")
 
-<<<<<<< HEAD
 if __name__ == '__main__':
     main()
-=======
-if __name__ == "__main__":
-    user_prompt = input("Quel est votre prompt ?\n")
-    context = {}
-    response = send_user_prompt(user_prompt, context)
->>>>>>> feat/architecture/messages_and_tools
