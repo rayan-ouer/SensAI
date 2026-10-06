@@ -9,7 +9,7 @@ class Document:
     text: str
     source: str
     position: int = 0
-    kind: str = ""
+    kind: str = "long_text"
     meta: dict = field(default_factory=dict)
 
 class BaseLoader(ABC):
@@ -36,5 +36,3 @@ class BaseLoader(ABC):
     def for_path(cls, path: Path) -> "BaseLoader | None":
         loader_cls = BaseLoader._registry.get(Path(path).suffix.lower())
         return loader_cls(path) if loader_cls else None
-
-
