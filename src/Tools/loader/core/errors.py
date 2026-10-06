@@ -23,4 +23,4 @@ class FileReaderError(Exception):
     def __init__(self, path: Path):
         self.path = path
     def __str__(self) -> str:
-        return (f"{self.path.name}: Invalid file.\n")
+        return f"{self.path.name}: Invalid file.\n"

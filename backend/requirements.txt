@@ -5,6 +5,8 @@ sqlalchemy
 ## Core requirements
 docker
 PyYAML
+pypdf
+fonttools
 pydantic-settings
 
 ## LLM requirements
