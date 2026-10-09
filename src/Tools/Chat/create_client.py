@@ -7,11 +7,12 @@
 
 import ollama
 
-from src.Tools.Chat.settings import Settings
+from Tools.Chat.module import OLLAMA_CLOUD_HOST, OLLAMA_LOCAL_HOST
+from src.Tools.Chat.errors import ModelNotFoundError
 from src.Tools.Chat.model_list import get_model_list
 
-def find_local_client(settings: Settings, model: str) -> ollama.Client | None:
-    local = ollama.Client(host=settings.ollama_local_host)
+def find_local_client(local_host: str, model: str) -> ollama.Client | None:
+    local = ollama.Client(host=local_host.ollama_local_host)
     try:
         if model in get_model_list(local):
             return local
@@ -19,19 +20,19 @@ def find_local_client(settings: Settings, model: str) -> ollama.Client | None:
         pass
     return None
 
-def create_cloud_client(settings: Settings) -> ollama.Client:
+def create_cloud_client(cloud_host: str, api_key: str) -> ollama.Client:
     return ollama.Client(
-        host=settings.ollama_cloud_host,
-        headers={"Authorization": f"Bearer {settings.ollama_api_key.get_secret_value()}"}
+        host=cloud_host.ollama_cloud_host,
+        headers={"Authorization": f"Bearer {api_key}"}
     )
 
-def create_ollama_client(settings: Settings, model: str) -> ollama.Client:
-    local = find_local_client(settings, model)
+def create_ollama_client(model: str, api_key: str | None = None, local_host: str = OLLAMA_LOCAL_HOST, cloud_host: str = OLLAMA_CLOUD_HOST) -> ollama.Client:
+    local = find_local_client(local_host, model)
     if local is not None:
         return local
-    if settings.ollama_api_key is None:
-        raise ValueError(f"Model '{model}' not found locally and OLLAMA_API_KEY is not set")
-    cloud = create_cloud_client(settings)
+    if not api_key:
+        raise ModelNotFoundError(model, "not found locally and no API key was provided")
+    cloud = create_cloud_client(cloud_host, api_key)
     if model in get_model_list(cloud):
         return cloud
-    raise ValueError(f"Model '{model}' not found neither locally nor in the cloud")
+    raise ModelNotFoundError(model, "not found neither locally nor in the cloud")
