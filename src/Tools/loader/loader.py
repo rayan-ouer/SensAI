@@ -39,4 +39,3 @@ class FileReader:
 
 def read_file(path: str | Path) -> str:
     return FileReader(path).read()
-
