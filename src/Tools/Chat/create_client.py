@@ -7,6 +7,7 @@
 
 import ollama
 
+from src.Tools.Chat.errors import ModelNotFoundError
 from src.Tools.Chat.settings import Settings
 from src.Tools.Chat.model_list import get_model_list
 
@@ -30,8 +31,8 @@ def create_ollama_client(settings: Settings, model: str) -> ollama.Client:
     if local is not None:
         return local
     if settings.ollama_api_key is None:
-        raise ValueError(f"Model '{model}' not found locally and OLLAMA_API_KEY is not set")
+        raise ModelNotFoundError(model, "not found locally and OLLAMA_API_KEY is not set")
     cloud = create_cloud_client(settings)
     if model in get_model_list(cloud):
         return cloud
-    raise ValueError(f"Model '{model}' not found neither locally nor in the cloud")
+    raise ModelNotFoundError(model, "not found neither locally nor in the cloud")
