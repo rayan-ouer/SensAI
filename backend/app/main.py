@@ -20,10 +20,17 @@ from src.Tools.Agent.profiles import init_profiles
 
 def run():
     settings = Settings()
+    key = settings.ollama_api_key
+    api_key = key.get_secret_value() if key else None
     config = load_config(argparse.ArgumentParser())
     init_profiles(config)
     spec = load_spec(config["spec_path"])
-    ollama_client_instance = create_ollama_client(settings, config["model"])
+    ollama_client_instance = create_ollama_client(
+        config["model"],
+        api_key,
+        settings.ollama_local_host,
+        settings.ollama_cloud_host
+        )
     chat_loop(ollama_client_instance, config, spec)
     print()
     print("Bye bye")
