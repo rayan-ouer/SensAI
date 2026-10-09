@@ -7,12 +7,12 @@
 
 import ollama
 
-from Tools.Chat.module import OLLAMA_CLOUD_HOST, OLLAMA_LOCAL_HOST
+from src.Tools.Chat.module import OLLAMA_CLOUD_HOST, OLLAMA_LOCAL_HOST
 from src.Tools.Chat.errors import ModelNotFoundError
 from src.Tools.Chat.model_list import get_model_list
 
 def find_local_client(local_host: str, model: str) -> ollama.Client | None:
-    local = ollama.Client(host=local_host.ollama_local_host)
+    local = ollama.Client(host=local_host)
     try:
         if model in get_model_list(local):
             return local
@@ -22,7 +22,7 @@ def find_local_client(local_host: str, model: str) -> ollama.Client | None:
 
 def create_cloud_client(cloud_host: str, api_key: str) -> ollama.Client:
     return ollama.Client(
-        host=cloud_host.ollama_cloud_host,
+        host=cloud_host,
         headers={"Authorization": f"Bearer {api_key}"}
     )
 
