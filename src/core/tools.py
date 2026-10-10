@@ -1,6 +1,9 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from dataclasses_json import dataclass_json
-from typing import Any, Callable
+from typing import Any
+
+from .types import ToolStatus
 
 
 @dataclass_json
@@ -11,8 +14,81 @@ class ToolCall:
     arguments: dict[str, Any]
 
 
-class Tool:
-    name: str
-    description: str
+@dataclass
+class ToolExecution:
+    content: str
+    result: dict[str, Any]
+    status: ToolStatus
 
-    function: Callable[...] = None
+
+class ToolNotFoundError(Exception):
+    def __init__(self, tool_name: str):
+        self.tool_name = tool_name
+        super().__init__(f"Tool '{tool_name}' is not registered.")
+
+
+class ITool(ABC):
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def description(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def args(self) -> dict[str, Any]:
+        pass
+
+    @abstractmethod
+    def run(self, arguments: dict[str, Any]) -> str:
+        pass
+
+
+class ToolManager:
+    def __init__(self) -> None:
+        self._tools: dict[str, ITool] = {}
+
+    def register(self, tool: ITool) -> None:
+        if tool.name in self._tools:
+            raise ValueError(f"Tool '{tool.name}' is already registered")
+        self._tools[tool.name] = tool
+
+    def register_many(self, tools: list[ITool]) -> None:
+        for tool in tools:
+            self.register(tool)
+
+    def list_tools(self) -> list[ITool]:
+        return list(self._tools.values())
+
+    def get(self, name: str) -> ITool:
+        tool = self._tools.get(name)
+        if tool is None:
+            raise ToolNotFoundError(name)
+        return tool
+
+    def execute(self, call: ToolCall) -> ToolExecution:
+        arguments = call.arguments if isinstance(call.arguments, dict) else {}
+        try:
+            output = self.get(call.name).run(arguments)
+        except ToolNotFoundError as error:
+            return ToolExecution(
+                content=str(error),
+                result={"error": str(error)},
+                status=ToolStatus.ERROR,
+            )
+        except Exception as error:
+            message = str(error) or error.__class__.__name__
+            return ToolExecution(
+                content=message,
+                result={"error": message},
+                status=ToolStatus.ERROR,
+            )
+        return ToolExecution(
+            content=output,
+            result={"output": output},
+            status=ToolStatus.SUCCESS,
+        )

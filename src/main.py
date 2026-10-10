@@ -13,12 +13,16 @@ from typing import Optional
 from pydantic import ValidationError
 
 from Tools.Chat.module import EXIT_S, EXIT_E
-
 from Tools.Chat.settings import Settings
 from Tools.Chat.send_user_prompt import send_user_prompt
 from Tools.Chat.load_config import load_config
 from Tools.Chat.create_client import create_ollama_client
 from Tools.Wu.spec import load_spec, update_spec, save_spec, build_system_prompt
+
+from llm.ollama import OllamaClient
+from agent.agent import Agent
+from core.messages import SystemMessage
+
 
 def fatal(message: object):
     print(f"Error: {message}")
@@ -101,14 +105,22 @@ def chat_loop(ollama_client_instance: ollama.Client, config: dict, spec: str):
         if user_input:
             spec = run_turn(ollama_client_instance, config, messages, spec, user_input)
 
+#def main():
+#    settings = load_settings()
+#    config = load_app_config()
+#    spec = load_spec(config["spec_path"])
+#    ollama_client_instance = get_client(settings, config["model"])
+#    chat_loop(ollama_client_instance, config, spec)
+#    print()
+#    print("Bye bye")
+
 def main():
-    settings = load_settings()
-    config = load_app_config()
-    spec = load_spec(config["spec_path"])
-    ollama_client_instance = get_client(settings, config["model"])
-    chat_loop(ollama_client_instance, config, spec)
-    print()
-    print("Bye bye")
+    settings: Settings = load_settings()
+    config: dict = load_app_config()
+    spec: str = load_spec(config["spec_path"])
+    prompt: SystemMessage = SystemMessage(content="Tu es un agent qui m'appelle monsieur.")
+    llm: OllamaClient = OllamaClient(config["model"], settings.api_key, prompt)
+    agent: Agent = Agent(name="Corporate agent", model=config["model"], tools=[], role=prompt, response_format=config["response_format"], llm=llm, max_loops=config["max_loops"])
 
 if __name__ == '__main__':
     main()
