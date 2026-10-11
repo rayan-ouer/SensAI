@@ -48,7 +48,7 @@ class ITool(ABC):
         pass
 
 
-class ToolManager:
+class ToolHandler:
     def __init__(self) -> None:
         self._tools: dict[str, ITool] = {}
 
@@ -62,16 +62,17 @@ class ToolManager:
             self.register(tool)
 
     def list_tools(self) -> list[ITool]:
-        return list(self._tools.values())
+        return list[ITool](self._tools.values())
 
     def get(self, name: str) -> ITool:
         tool = self._tools.get(name)
-        if tool is None:
+        if not tool:
             raise ToolNotFoundError(name)
         return tool
 
     def execute(self, call: ToolCall) -> ToolExecution:
-        arguments = call.arguments if isinstance(call.arguments, dict) else {}
+        arguments: dict = call.arguments if isinstance(call.arguments, dict) else {}
+
         try:
             output = self.get(call.name).run(arguments)
         except ToolNotFoundError as error:
@@ -81,7 +82,7 @@ class ToolManager:
                 status=ToolStatus.ERROR,
             )
         except Exception as error:
-            message = str(error) or error.__class__.__name__
+            message = str(error)
             return ToolExecution(
                 content=message,
                 result={"error": message},

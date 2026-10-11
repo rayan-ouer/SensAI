@@ -6,7 +6,7 @@ from typing import Optional
 
 from fastmcp import FastMCP
 
-from core.tools import ToolManager
+from core.tools import ToolHandler
 from Tools.mcp.adapter import MCPAdapter
 from Tools.mcp.client import MCPClient
 
@@ -27,6 +27,7 @@ class _LiteResultParser(HTMLParser):
     def handle_starttag(self, tag: str, attrs: list[tuple[str, Optional[str]]]) -> None:
         attributes = {key: value or "" for key, value in attrs}
         classes = attributes.get("class", "").split()
+    
         if tag == "a" and "result-link" in classes:
             self._capture = "link"
             self._href = attributes.get("href", "")
@@ -85,6 +86,7 @@ def _format_results(results: list[dict[str, str]]) -> str:
 
 def run_web_search(query: str, max_results: int = 5) -> str:
     text = (query or "").strip()
+
     if not text:
         raise ValueError("query is required")
     try:
@@ -92,7 +94,7 @@ def run_web_search(query: str, max_results: int = 5) -> str:
     except (TypeError, ValueError) as error:
         raise ValueError("max_results must be an integer") from error
     limit = max(1, min(limit, _MAX_RESULTS))
-    parser = _LiteResultParser()
+    parser: _LiteResultParser = _LiteResultParser()
     parser.feed(_fetch_page(text))
     results = parser.results[:limit]
     if not results:
@@ -115,6 +117,6 @@ def create_search_server() -> FastMCP:
     return mcp
 
 
-def register_search_tools(manager: ToolManager) -> None:
+def register_search_tools(manager: ToolHandler) -> None:
     adapter = MCPAdapter(MCPClient(create_search_server()))
     manager.register_many(adapter.list_tools())

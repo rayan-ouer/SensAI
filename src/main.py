@@ -21,7 +21,9 @@ from Tools.Wu.spec import load_spec, update_spec, save_spec, build_system_prompt
 
 from llm.ollama import OllamaClient
 from agent.agent import Agent
-from core.messages import SystemMessage
+from core.messages import HumanMessage, SystemMessage
+from core.tools import ToolHandler
+from Tools.search.web import register_search_tools
 
 
 def fatal(message: object):
@@ -118,9 +120,34 @@ def main():
     settings: Settings = load_settings()
     config: dict = load_app_config()
     spec: str = load_spec(config["spec_path"])
-    prompt: SystemMessage = SystemMessage(content="Tu es un agent qui m'appelle monsieur.")
-    llm: OllamaClient = OllamaClient(config["model"], settings.api_key, prompt)
-    agent: Agent = Agent(name="Corporate agent", model=config["model"], tools=[], role=prompt, response_format=config["response_format"], llm=llm, max_loops=config["max_loops"])
+    prompt: SystemMessage = SystemMessage(content="Tu es un agent qui as acces a des tools pour realiser des taches.")
+    llm: OllamaClient = OllamaClient(model=config["model"], api_key=settings.ollama_api_key, prompt=prompt)
+    tools_handler: ToolHandler = ToolHandler()
+    register_search_tools(tools_handler)
+    shown = {"kind": None}
+
+    def show_chunk(kind: str, text: str):
+        if shown["kind"] != kind:
+            if shown["kind"] is not None:
+                print()
+            shown["kind"] = kind
+        print(text, end="", flush=True)
+
+    agent: Agent = Agent(
+        name="Corporate agent",
+        model=config["model"],
+        tools=[tool.name for tool in tools_handler.list_tools()],
+        role=prompt,
+        response_format=config.get("response_format"),
+        llm=llm,
+        handler=tools_handler,
+        max_loops=config.get("max_loops", 10),
+        on_chunk=show_chunk,
+    )
+    messages = [HumanMessage(content="Quel est le nombre de joueurs dans le monde ?")]
+    reply = agent.invoke(messages)
+    print()
+    print(reply.content)
 
 if __name__ == '__main__':
     main()
