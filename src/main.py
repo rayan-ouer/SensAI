@@ -107,31 +107,18 @@ def chat_loop(ollama_client_instance: ollama.Client, config: dict, spec: str):
         if user_input:
             spec = run_turn(ollama_client_instance, config, messages, spec, user_input)
 
-#def main():
-#    settings = load_settings()
-#    config = load_app_config()
-#    spec = load_spec(config["spec_path"])
-#    ollama_client_instance = get_client(settings, config["model"])
-#    chat_loop(ollama_client_instance, config, spec)
-#    print()
-#    print("Bye bye")
+def display_chunk(kind: str, text: str):
+    if kind == "thinking":
+        print(f"{kind}: {text}\n", end="", flush=True)
 
 def main():
     settings: Settings = load_settings()
     config: dict = load_app_config()
     spec: str = load_spec(config["spec_path"])
-    prompt: SystemMessage = SystemMessage(content="Tu es un agent qui as acces a des tools pour realiser des taches.")
+    prompt: SystemMessage = SystemMessage(content="Tu es un agent de recherche, tu as acces a des tools, utilise le tool web_search si tu n'est pas sur de la reponse.")
     llm: OllamaClient = OllamaClient(model=config["model"], api_key=settings.ollama_api_key, prompt=prompt)
     tools_handler: ToolHandler = ToolHandler()
     register_search_tools(tools_handler)
-    shown = {"kind": None}
-
-    def show_chunk(kind: str, text: str):
-        if shown["kind"] != kind:
-            if shown["kind"] is not None:
-                print()
-            shown["kind"] = kind
-        print(text, end="", flush=True)
 
     agent: Agent = Agent(
         name="Corporate agent",
@@ -142,12 +129,11 @@ def main():
         llm=llm,
         handler=tools_handler,
         max_loops=config.get("max_loops", 10),
-        on_chunk=show_chunk,
+        on_chunk=display_chunk,
     )
-    messages = [HumanMessage(content="Quel est le nombre de joueurs dans le monde ?")]
+    messages = [HumanMessage(content="Quel est le nombre d'habitants du pays qui as gagné la coupe du monde de football 2026 ?")]
     reply = agent.invoke(messages)
-    print()
-    print(reply.content)
+    print(f"Content: {reply.content}")
 
 if __name__ == '__main__':
     main()

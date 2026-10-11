@@ -1,4 +1,4 @@
-from typing import Callable, NoReturn, Optional
+from typing import Callable, Optional
 
 import httpx
 import ollama
@@ -15,10 +15,10 @@ from llm.errors import (
     LLMUnreachableError,
 )
 from .ollama_stream import StreamAccumulator, interrupted_message
-from .ollama_mappers import convert_messages, convert_tools
+from .ollama_mappers import OllamaMapper
 
 
-def _raise_domain_error(error: BaseException) -> NoReturn:
+def _raise_domain_error(error: BaseException):
     if isinstance(error, LLMError):
         raise error
     if isinstance(error, ollama.ResponseError):
@@ -32,17 +32,16 @@ def _raise_domain_error(error: BaseException) -> NoReturn:
         raise LLMUnreachableError(str(error)) from error
     raise error
 
-
 class OllamaClient(ILLMClient):
     def __init__(self, model: str, api_key: Optional[str], prompt: Optional[IMessage] = None):
-        self._model = model
-        self._prompt = prompt
+        self._model = model # the model to use
+        self._prompt = prompt # the prompt to use
         self._host = "https://ollama.com"
         if not api_key:
             self._host = "http://localhost:11434"
         settings = Settings(ollama_api_key=api_key, ollama_cloud_host=self._host)
-        self._llm = create_ollama_client(settings, model)
-        self._thinking_support: dict[str, bool] = {}
+        self._llm = create_ollama_client(settings, model) # a ollama client instance
+        self._thinking_support: dict[str, bool] = {} # a dictionary to cache the thinking support for each model
 
     def chat(
         self,
@@ -63,8 +62,8 @@ class OllamaClient(ILLMClient):
         try:
             stream = self._llm.chat(
                 model=model,
-                messages=convert_messages(messages, include_thinking),
-                tools=convert_tools(tools),
+                messages=OllamaMapper.convert_messages(messages, include_thinking),
+                tools=OllamaMapper.convert_tools(tools),
                 stream=True,
                 think=resolved_think,
                 format=response_format,
@@ -75,6 +74,7 @@ class OllamaClient(ILLMClient):
         except Exception as error:
             _raise_domain_error(error)
 
+    # embed text into a vector
     def embed(self, embed_model: Optional[str], text: str) -> list[float]:
         try:
             response = self._llm.embed(model=embed_model or self._model, input=text)
@@ -84,6 +84,7 @@ class OllamaClient(ILLMClient):
             return []
         return [float(value) for value in response.embeddings[0]]
 
+    # check if the model supports thinking
     def _supports_thinking(self, model: str) -> bool:
         cached = self._thinking_support.get(model)
 

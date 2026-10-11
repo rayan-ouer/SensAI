@@ -13,23 +13,22 @@ class AgentIterationLimitError(Exception):
         self.message = message
         super().__init__(f"Agent stopped after {max_loops} iterations")
 
-
 class Agent:
     def __init__(
         self,
-        name: str,
-        model: str,
-        tools: list[str],
-        role: SystemMessage,
-        response_format: Optional[dict],
-        llm: ILLMClient,
-        handler: ToolHandler,
-        max_loops: int = 10,
-        think: Optional[bool] = None,
-        keep_thinking: bool = False,
-        extract_thinking_tags: bool = False,
-        on_chunk: Optional[Callable[[str, str], None]] = None,
-        is_cancelled: Optional[Callable[[], bool]] = None,
+        name: str, # the name of the agent
+        model: str, # the model to use
+        tools: list[str], # the tools to use
+        role: SystemMessage, # the role of the agent
+        response_format: Optional[dict], # the response format to use
+        llm: ILLMClient, # the llm client to use
+        handler: ToolHandler, # the tool handler to use
+        max_loops: int = 10, # the maximum number of loops to run
+        think: Optional[bool] = None, # whether to think or not
+        keep_thinking: bool = False, # whether to keep thinking or not
+        extract_thinking_tags: bool = False, # whether to extract thinking tags or not
+        on_chunk: Optional[Callable[[str, str], None]] = None, # the function to call when a chunk is received
+        is_cancelled: Optional[Callable[[], bool]] = None, # the function to call to check if the agent is cancelled
     ):
         self._name = name
         self._model = model
@@ -50,10 +49,11 @@ class Agent:
 
     def invoke(self, messages: list[IMessage]) -> AIMessage:
         self._ensure_role(messages)
+
         if self._max_loops < 1:
             raise AgentIterationLimitError(self._max_loops, AIMessage(content="", truncated=True))
         for index in range(self._max_loops):
-            response = self._llm.chat(
+            response: AIMessage = self._llm.chat(
                 self._model,
                 messages,
                 self._resolve_tools(),
@@ -76,7 +76,7 @@ class Agent:
             if not response.tool_calls:
                 return response
             for tool_call in response.tool_calls:
-                execution = self.execute_tool(tool_call, self._handler)
+                execution: ToolExecution = self.execute_tool(tool_call, self._handler)
                 messages.append(ToolMessage(
                     content=json.dumps(execution.result, ensure_ascii=False),
                     tool_call_id=tool_call.id,

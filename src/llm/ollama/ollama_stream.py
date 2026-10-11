@@ -4,7 +4,7 @@ from typing import Any, Callable, Iterable, Optional
 from core.messages import AIMessage
 from core.tools import ToolCall
 from llm.errors import LLMUnreachableError
-from .ollama_mappers import parse_tool_call
+from .ollama_mappers import OllamaMapper
 
 OnChunk = Callable[[str, str], None]
 IsCancelled = Callable[[], bool]
@@ -90,7 +90,7 @@ class StreamAccumulator:
             self._content.append(message.content)
             self._emit("content", message.content)
         if message.tool_calls:
-            self._tool_calls.extend(parse_tool_call(call) for call in message.tool_calls)
+            self._tool_calls.extend(OllamaMapper.parse_tool_call(call) for call in message.tool_calls)
         if chunk.done:
             self._done = True
             self._done_reason = chunk.done_reason
