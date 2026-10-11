@@ -2,7 +2,6 @@ from pathlib import Path
 
 from core.interfaces import BaseLoader
 
-
 class LoaderError(Exception):
     def __init__(self, message: str, path: Path):
         self.path = path

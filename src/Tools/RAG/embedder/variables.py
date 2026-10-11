@@ -1,0 +1,5 @@
+MODEL = "bge-m3"
+CHUNKS_PER_REQUEST = 32
+OLLAMA_URL = "http://localhost:11434"
+TIMEOUT = 120
+MAX_RETRIES  = 3

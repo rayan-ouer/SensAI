@@ -7,6 +7,7 @@ docker
 PyYAML
 pypdf
 fonttools
+numpy
 pydantic-settings
 
 ## LLM requirements
