@@ -4,7 +4,6 @@ import httpx
 import ollama
 
 from Tools.Chat.create_client import create_ollama_client
-from Tools.Chat.settings import Settings
 from core.messages import AIMessage, IMessage
 from core.tools import ITool
 from llm.client import ILLMClient
@@ -36,11 +35,7 @@ class OllamaClient(ILLMClient):
     def __init__(self, model: str, api_key: Optional[str], prompt: Optional[IMessage] = None):
         self._model = model # the model to use
         self._prompt = prompt # the prompt to use
-        self._host = "https://ollama.com"
-        if not api_key:
-            self._host = "http://localhost:11434"
-        settings = Settings(ollama_api_key=api_key, ollama_cloud_host=self._host)
-        self._llm = create_ollama_client(settings, model) # a ollama client instance
+        self._llm = create_ollama_client(model, api_key) # a ollama client instance
         self._thinking_support: dict[str, bool] = {} # a dictionary to cache the thinking support for each model
 
     def chat(

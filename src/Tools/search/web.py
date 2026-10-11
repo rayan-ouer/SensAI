@@ -20,8 +20,8 @@ class _LiteResultParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
         self.results: list[dict[str, str]] = []
-        self._capture: str = ""
-        self._href = ""
+        self._capture: str = str()
+        self._href = str()
         self._chunks: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, Optional[str]]]) -> None:

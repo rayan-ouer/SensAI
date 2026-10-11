@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SensAI agent profile",
+  "description": "One file = one agent. Name, role, tone and scope are required; prompt is optional.",
+  "type": "object",
+  "required": ["name", "role", "tone", "scope"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Name the agent introduces itself with."
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1,
+      "description": "What the agent is and what it is for."
+    },
+    "tone": {
+      "type": "string",
+      "minLength": 1,
+      "description": "How the agent speaks."
+    },
+    "scope": {
+      "type": "string",
+      "minLength": 1,
+      "description": "What the agent answers, and what it declines."
+    },
+    "prompt": {
+      "type": "string",
+      "description": "Optional file with extra detailed instructions, relative to the configs/ directory."
+    }
+  }
+}
