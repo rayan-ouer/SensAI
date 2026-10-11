@@ -1,6 +1,6 @@
 import re
 
-from core.interfaces import BaseLoader, Document
+from ..core.interfaces import BaseLoader, Document
 
 HEADING = re.compile(r"^(#{1,6})\s+(.*)$")
 

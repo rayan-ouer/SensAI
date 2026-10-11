@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from core.interfaces import BaseLoader
+from .interfaces import BaseLoader
 
 class LoaderError(Exception):
     def __init__(self, message: str, path: Path):

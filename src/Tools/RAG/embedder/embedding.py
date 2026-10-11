@@ -3,9 +3,9 @@ from time import sleep
 import requests
 import numpy as np
 
-from variables import *
-from errors import EmbeddingError
-from chunker.interfaces import Chunk
+from .variables import CHUNKS_PER_REQUEST, MAX_RETRIES, MODEL, OLLAMA_URL, TIMEOUT
+from .errors import EmbeddingError
+from ..chunker.interfaces import Chunk
 
 def _normalize_vector(matrix: np.ndarray) -> np.ndarray:
     length = np.linalg.norm(matrix, axis=1, keepdims=True)

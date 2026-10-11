@@ -1,4 +1,4 @@
-from core.interfaces import BaseLoader, Document
+from ..core.interfaces import BaseLoader, Document
 
 DELIMITERS = (",", ";", "\t", "|")
 

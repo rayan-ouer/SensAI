@@ -1,6 +1,6 @@
 from typing import Iterator
 
-from core.interfaces import BaseLoader, Document
+from ..core.interfaces import BaseLoader, Document
 
 class TextLoader(BaseLoader):
     """Text files/ Markdowns: 1 document/file"""

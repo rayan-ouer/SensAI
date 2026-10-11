@@ -5,8 +5,8 @@ from typing import Iterator
 
 from pypdf import PdfReader
 
-from core.errors import FileReaderError
-from core.interfaces import BaseLoader, Document
+from ..core.errors import FileReaderError
+from ..core.interfaces import BaseLoader, Document
 
 
 class PdfLoader(BaseLoader):

@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from core.errors import LoaderError, UnsupportedFormat
-from core.interfaces import BaseLoader, Document
-from type_loaders import markdown_loader, text_loader, pdf_loader
+from .core.errors import LoaderError, UnsupportedFormat
+from .core.interfaces import BaseLoader, Document
+from .type_loaders import markdown_loader, text_loader, pdf_loader
 
 
 class FileReader:
