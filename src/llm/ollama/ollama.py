@@ -1,9 +1,8 @@
-from typing import Callable, Optional
+from collections.abc import Callable
 
 import httpx
 import ollama
 
-from tools.chat.create_client import create_ollama_client
 from core.messages import AIMessage, IMessage
 from core.tools import ITool
 from llm.client import ILLMClient
@@ -13,8 +12,10 @@ from llm.errors import (
     LLMTimeoutError,
     LLMUnreachableError,
 )
-from .ollama_stream import StreamAccumulator, interrupted_message
+from tools.chat.create_client import create_ollama_client
+
 from .ollama_mappers import OllamaMapper
+from .ollama_stream import StreamAccumulator, interrupted_message
 
 
 def _raise_domain_error(error: BaseException):
@@ -31,25 +32,30 @@ def _raise_domain_error(error: BaseException):
         raise LLMUnreachableError(str(error)) from error
     raise error
 
+
 class OllamaClient(ILLMClient):
-    def __init__(self, model: str, api_key: Optional[str], prompt: Optional[IMessage] = None):
-        self._model = model # the model to use
-        self._prompt = prompt # the prompt to use
-        self._llm = create_ollama_client(model, api_key) # a ollama client instance
-        self._thinking_support: dict[str, bool] = {} # a dictionary to cache the thinking support for each model
+    def __init__(
+        self, model: str, api_key: str | None, prompt: IMessage | None = None
+    ):
+        self._model = model  # the model to use
+        self._prompt = prompt  # the prompt to use
+        self._llm = create_ollama_client(model, api_key)  # a ollama client instance
+        self._thinking_support: dict[
+            str, bool
+        ] = {}  # a dictionary to cache the thinking support for each model
 
     def chat(
         self,
         model: str,
         messages: list[IMessage],
         tools: list[ITool],
-        response_format: Optional[dict],
+        response_format: dict | None,
         *,
-        think: Optional[bool] = None,
+        think: bool | None = None,
         include_thinking: bool = False,
         extract_thinking_tags: bool = False,
-        on_chunk: Optional[Callable[[str, str], None]] = None,
-        is_cancelled: Optional[Callable[[], bool]] = None,
+        on_chunk: Callable[[str, str], None] | None = None,
+        is_cancelled: Callable[[], bool] | None = None,
     ) -> AIMessage:
         resolved_think = self._supports_thinking(model) if think is None else think
         accumulator = StreamAccumulator(on_chunk, is_cancelled, extract_thinking_tags)
@@ -70,7 +76,7 @@ class OllamaClient(ILLMClient):
             _raise_domain_error(error)
 
     # embed text into a vector
-    def embed(self, embed_model: Optional[str], text: str) -> list[float]:
+    def embed(self, embed_model: str | None, text: str) -> list[float]:
         try:
             response = self._llm.embed(model=embed_model or self._model, input=text)
         except Exception as error:

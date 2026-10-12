@@ -2,7 +2,6 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from html.parser import HTMLParser
-from typing import Optional
 
 from fastmcp import FastMCP
 
@@ -20,14 +19,14 @@ class _LiteResultParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
         self.results: list[dict[str, str]] = []
-        self._capture: str = str()
-        self._href = str()
+        self._capture: str = ""
+        self._href = ""
         self._chunks: list[str] = []
 
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, Optional[str]]]) -> None:
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attributes = {key: value or "" for key, value in attrs}
         classes = attributes.get("class", "").split()
-    
+
         if tag == "a" and "result-link" in classes:
             self._capture = "link"
             self._href = attributes.get("href", "")
@@ -119,4 +118,5 @@ def create_search_server() -> FastMCP:
 
 def register_search_tools(manager: ToolHandler) -> None:
     adapter = MCPAdapter(MCPClient(create_search_server()))
+    print(adapter.list_tools())
     manager.register_many(adapter.list_tools())

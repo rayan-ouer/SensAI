@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
+
 from dataclasses_json import dataclass_json
-from typing import Optional
+
+from core.types import MessageType, ToolStatus
 
 from .tools import ToolCall
-from core.types import MessageType, ToolStatus
 
 
 @dataclass_json
@@ -28,14 +29,14 @@ class HumanMessage(IMessage):
 @dataclass
 class AIMessage(IMessage):
     tool_calls: list[ToolCall] = field(default_factory=list)
-    thinking: Optional[str] = None
-    prompt_eval_count: Optional[int] = None
-    eval_count: Optional[int] = None
-    total_duration: Optional[int] = None
-    load_duration: Optional[int] = None
-    prompt_eval_duration: Optional[int] = None
-    eval_duration: Optional[int] = None
-    done_reason: Optional[str] = None
+    thinking: str | None = None
+    prompt_eval_count: int | None = None
+    eval_count: int | None = None
+    total_duration: int | None = None
+    load_duration: int | None = None
+    prompt_eval_duration: int | None = None
+    eval_duration: int | None = None
+    done_reason: str | None = None
     interrupted: bool = False
     truncated: bool = False
 

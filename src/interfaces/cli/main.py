@@ -7,28 +7,25 @@
 
 import argparse
 
-from pydantic import ValidationError
-
-from tools.chat.errors import AppError
-from tools.chat.module import fatal, error
-from tools.chat.settings import Settings
-from tools.chat.load_config import load_config
-from tools.chat.chat_loop import read_user_input
-from tools.search.web import register_search_tools
-
-from llm.ollama import OllamaClient
-from llm.errors import LLMError
 from agent.agent import Agent, AgentIterationLimitError
 from core.messages import HumanMessage, IMessage, SystemMessage
 from core.tools import ToolHandler
+from llm.errors import LLMError
+from llm.ollama import OllamaClient
+from tools.chat.chat_loop import read_user_input
+from tools.chat.load_config import load_config
+from tools.chat.module import error
+from tools.chat.settings import Settings
+from tools.search.web import register_search_tools
 
 
 def display_chunk(kind: str, text: str) -> None:
     if kind in ("thinking", "content"):
         print(text, end="", flush=True)
 
+
 def create_agent(config: dict, api_key: str | None) -> Agent:
-    prompt = SystemMessage(content="Tu es un agent de recherche, tu as acces a des tools, utilise le tool web_search si tu n'est pas sur de la reponse.")
+    prompt = SystemMessage(config["prompt"])
     llm = OllamaClient(model=config["model"], api_key=api_key, prompt=prompt)
     tools_handler = ToolHandler()
     register_search_tools(tools_handler)
@@ -43,6 +40,7 @@ def create_agent(config: dict, api_key: str | None) -> Agent:
         max_loops=config.get("max_loops", 10),
         on_chunk=display_chunk,
     )
+
 
 def agent_loop(agent: Agent):
     messages: list[IMessage] = []
@@ -60,6 +58,7 @@ def agent_loop(agent: Agent):
             continue
         print(f"Content: {reply.content}")
 
+
 def run():
     settings = Settings()
     key = settings.ollama_api_key
@@ -69,11 +68,9 @@ def run():
     agent_loop(agent)
     print("Bye bye")
 
-def main():
-    try:
-        run()
-    except (AppError, ValidationError) as e:
-        fatal(e)
 
-if __name__ == '__main__':
-    main()
+def main():
+    run()
+
+if __name__ == "__main__":
+    run()

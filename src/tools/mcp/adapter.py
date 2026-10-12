@@ -1,6 +1,7 @@
 from typing import Any
 
 from core.tools import ITool
+
 from .client import MCPClient
 
 
@@ -14,7 +15,9 @@ def _schema(spec: Any) -> dict[str, Any]:
 
 
 class MCPTool(ITool):
-    def __init__(self, client: MCPClient, name: str, description: str, args: dict[str, Any]):
+    def __init__(
+        self, client: MCPClient, name: str, description: str, args: dict[str, Any]
+    ):
         self._client = client
         self._name = name
         self._description = description

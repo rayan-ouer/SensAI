@@ -1,9 +1,11 @@
 import re
-from typing import Any, Callable, Iterable, Optional
+from collections.abc import Callable, Iterable
+from typing import Any
 
 from core.messages import AIMessage
 from core.tools import ToolCall
 from llm.errors import LLMUnreachableError
+
 from .ollama_mappers import OllamaMapper
 
 OnChunk = Callable[[str, str], None]
@@ -25,8 +27,8 @@ _METRICS = (
 
 
 def interrupted_message(
-    thinking_parts: Optional[list[str]] = None,
-    content_parts: Optional[list[str]] = None,
+    thinking_parts: list[str] | None = None,
+    content_parts: list[str] | None = None,
 ) -> AIMessage:
     return AIMessage(
         content="".join(content_parts or []),
@@ -37,11 +39,15 @@ def interrupted_message(
     )
 
 
-def extract_thinking_tags(thinking: Optional[str], content: str) -> tuple[Optional[str], str]:
+def extract_thinking_tags(
+    thinking: str | None, content: str
+) -> tuple[str | None, str]:
     matches = list(_THINKING_TAGS.finditer(content))
     if not matches:
         return thinking, content
-    extracted = "\n".join(match.group(2).strip() for match in matches if match.group(2).strip())
+    extracted = "\n".join(
+        match.group(2).strip() for match in matches if match.group(2).strip()
+    )
     cleaned = _THINKING_TAGS.sub("", content).strip()
     if thinking and extracted:
         return f"{thinking}\n{extracted}", cleaned
@@ -53,8 +59,8 @@ def extract_thinking_tags(thinking: Optional[str], content: str) -> tuple[Option
 class StreamAccumulator:
     def __init__(
         self,
-        on_chunk: Optional[OnChunk] = None,
-        is_cancelled: Optional[IsCancelled] = None,
+        on_chunk: OnChunk | None = None,
+        is_cancelled: IsCancelled | None = None,
         extract_tags: bool = False,
     ):
         self._on_chunk = on_chunk
@@ -63,8 +69,8 @@ class StreamAccumulator:
         self._thinking: list[str] = []
         self._content: list[str] = []
         self._tool_calls: list[ToolCall] = []
-        self._done_reason: Optional[str] = None
-        self._metrics: dict[str, Optional[int]] = {}
+        self._done_reason: str | None = None
+        self._metrics: dict[str, int | None] = {}
         self._done = False
 
     def consume(self, stream: Iterable[Any]) -> AIMessage:
@@ -90,7 +96,9 @@ class StreamAccumulator:
             self._content.append(message.content)
             self._emit("content", message.content)
         if message.tool_calls:
-            self._tool_calls.extend(OllamaMapper.parse_tool_call(call) for call in message.tool_calls)
+            self._tool_calls.extend(
+                OllamaMapper.parse_tool_call(call) for call in message.tool_calls
+            )
         if chunk.done:
             self._done = True
             self._done_reason = chunk.done_reason

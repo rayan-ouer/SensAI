@@ -1,15 +1,17 @@
-from typing import Optional
-
 from sqlalchemy import literal, select
 from sqlalchemy.orm import Session
 
-from .models import Conversation, Message
-from ....core.messages import AIMessage, HumanMessage, IMessage, SystemMessage
-from ....core.conversation import (
+from core.conversation import (
     ConversationNotFoundError,
     IConversation,
     MessageNotFoundError,
 )
+from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage
+from core.tools import ToolCall
+from core.types import ToolStatus
+
+from .models import Conversation, Message
+from .models import ToolCall as DbToolCall
 
 
 class DatabaseConversation(IConversation):
@@ -20,7 +22,7 @@ class DatabaseConversation(IConversation):
 
     def get_conversation_by_id_or_none(
         self, conversation_id: str
-    ) -> Optional[Conversation]:
+    ) -> Conversation | None:
         statement = select(Conversation).where(Conversation.id == conversation_id)
         result = self._db.execute(statement)
 
@@ -28,7 +30,7 @@ class DatabaseConversation(IConversation):
 
     def get_message_by_id_or_none(
         self, conversation_id: str, message_id: str
-    ) -> Optional[Message]:
+    ) -> Message | None:
         statement = select(Message).where(
             Message.id == message_id,
             Message.conversation_id == conversation_id,
@@ -37,7 +39,7 @@ class DatabaseConversation(IConversation):
         return result.scalar_one_or_none()
 
     def get_conversation_by_id(self, conversation_id: str) -> Conversation:
-        conversation: Optional[Conversation] = self.get_conversation_by_id_or_none(
+        conversation: Conversation | None = self.get_conversation_by_id_or_none(
             conversation_id
         )
         if not conversation:
@@ -45,13 +47,15 @@ class DatabaseConversation(IConversation):
         return conversation
 
     def get_message_by_id(self, conversation_id: str, message_id: str) -> Message:
-        db_message: Optional[Message] = self.get_message_by_id_or_none(conversation_id, message_id)
+        db_message: Message | None = self.get_message_by_id_or_none(
+            conversation_id, message_id
+        )
 
         if not db_message:
             raise MessageNotFoundError(message_id)
         return db_message
 
-    def get_active_message(self, conversation_id: str) -> Optional[Message]:
+    def get_active_message(self, conversation_id: str) -> Message | None:
         conversation: Conversation = self.get_conversation_by_id(conversation_id)
         return conversation.active_message
 
@@ -96,6 +100,14 @@ class DatabaseConversation(IConversation):
     def _create_db_message(self, conversation_id: str, message: IMessage) -> Message:
         return Message(
             conversation_id=conversation_id, role=message.role, content=message.content
+        )
+
+    def _create_db_tool_call(self, tool_call: ToolCall) -> DbToolCall:
+        return DbToolCall(
+            tool_call_id=tool_call.id,
+            tool_name=tool_call.name,
+            arguments=tool_call.arguments if isinstance(tool_call.arguments, dict) else {},
+            status=ToolStatus.PENDING,
         )
 
     """Business Logic"""

@@ -1,6 +1,5 @@
 import re
 import uuid
-from re import Match
 
 import docker
 from docker.types import Mount
@@ -12,6 +11,7 @@ MAX_LIFETIME = 60 * 60
 SANDBOX_VERSION = "2"
 SESSION_ID_PATTERN = re.compile(r"[a-f0-9]{12}")
 
+
 class Sandbox:
     def __init__(self, session_id: str | None = None):
         if session_id is None:
@@ -19,7 +19,9 @@ class Sandbox:
         else:
             self.session_id = session_id
         if not self._is_session_ide_valid():
-            raise ValueError("L'identifiant de session doit contenir 12 caractères hexadécimaux.")
+            raise ValueError(
+                "L'identifiant de session doit contenir 12 caractères hexadécimaux."
+            )
         self.name = f"sbox-{self.session_id}"
         self.volume = f"sbx-vol-{self.session_id}"
 
@@ -47,20 +49,25 @@ class Sandbox:
             pass
 
         client.containers.run(
-            IMAGE, ["chmod", "777", "/work"],
-            remove=True, network_mode="none",
+            IMAGE,
+            ["chmod", "777", "/work"],
+            remove=True,
+            network_mode="none",
             mounts=[Mount(target="/work", source=self.volume, no_copy=True)],
             working_dir="/work",
             read_only=True,
             cap_drop=["ALL"],
         )
         c = client.containers.run(
-            IMAGE, ["sleep", str(MAX_LIFETIME)],
-            name=self.name, detach=True,
+            IMAGE,
+            ["sleep", str(MAX_LIFETIME)],
+            name=self.name,
+            detach=True,
             mounts=[Mount(target="/work", source=self.volume, no_copy=True)],
             working_dir="/work",
             network_mode="none",
-            mem_limit="512m", memswap_limit="512m",
+            mem_limit="512m",
+            memswap_limit="512m",
             nano_cpus=1_000_000_000,
             pids_limit=128,
             user="nobody",
@@ -84,7 +91,9 @@ class Sandbox:
     def _exec(self, argv: list[str], timeout: int) -> dict:
         r = self._container().exec_run(
             ["timeout", "-s", "KILL", str(timeout), *argv],
-            demux=True, workdir="/work", user="nobody",
+            demux=True,
+            workdir="/work",
+            user="nobody",
             environment={"HOME": "/work"},
         )
         out, err = r.output

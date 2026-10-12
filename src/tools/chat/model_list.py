@@ -7,5 +7,6 @@
 
 import ollama
 
+
 def get_model_list(ollama_client_instance: ollama.Client) -> list[str]:
     return sorted(entry.model for entry in ollama_client_instance.list().models)
