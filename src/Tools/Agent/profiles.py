@@ -7,8 +7,8 @@
 
 from pathlib import Path
 
-from src.Tools.Chat.errors import ProfileError
-from src.Tools.Chat.load_config import read_yaml, read_prompt
+from Tools.Chat.errors import ProfileError
+from Tools.Chat.load_config import read_yaml, read_prompt
 
 PROFILES_KEY = ("name", "role", "tone", "scope")
 

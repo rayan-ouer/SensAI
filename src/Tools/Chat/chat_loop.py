@@ -6,15 +6,16 @@
 ##
 
 import ollama
+from typing import Optional
 
-from src.Tools.Chat.errors import ChatError
-from src.Tools.Chat.module import error, warning
-from src.Tools.Chat.send_user_prompt import send_user_prompt
-from src.Tools.Chat.commands import handle_command
-from src.Tools.Spec.spec import update_spec, save_spec, build_system_prompt
-from src.Tools.Agent.profiles import build_profile_prompt
+from Tools.Chat.errors import ChatError
+from Tools.Chat.module import error, warning
+from Tools.Chat.send_user_prompt import send_user_prompt
+from Tools.Chat.commands import handle_command
+from Tools.Spec.spec import update_spec, save_spec, build_system_prompt
+from Tools.Agent.profiles import build_profile_prompt
 
-def read_user_input() -> str | None:
+def read_user_input() -> Optional[str]:
     print("> ", end="", flush=True)
     try:
         return input()
@@ -33,7 +34,7 @@ def handle_chat_error(e: BaseException):
     else:
         error(f"{e.error}")
 
-def ask_agent(messages: list, model: str, ollama_client_instance: ollama.Client) -> str | None:
+def ask_agent(messages: list, model: str, ollama_client_instance: ollama.Client) -> Optional[str]:
     try:
         reply = send_user_prompt(messages, model, ollama_client_instance)
     except (ollama.ResponseError, ConnectionError, KeyboardInterrupt) as e:

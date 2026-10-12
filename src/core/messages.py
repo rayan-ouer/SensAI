@@ -1,16 +1,14 @@
-from enum import Enum
-
 from dataclasses import dataclass, field
 from dataclasses_json import dataclass_json
+from typing import Optional
 
 from .tools import ToolCall
-from app.core.types import MessageType, ToolStatus
+from core.types import MessageType, ToolStatus
 
 
-@dataclass
 @dataclass_json
+@dataclass
 class IMessage:
-    id: str
     content: str
 
     @property
@@ -18,6 +16,7 @@ class IMessage:
         raise NotImplementedError
 
 
+@dataclass_json
 @dataclass
 class HumanMessage(IMessage):
     @property
@@ -25,15 +24,27 @@ class HumanMessage(IMessage):
         return MessageType.HUMAN
 
 
+@dataclass_json
 @dataclass
 class AIMessage(IMessage):
     tool_calls: list[ToolCall] = field(default_factory=list)
+    thinking: Optional[str] = None
+    prompt_eval_count: Optional[int] = None
+    eval_count: Optional[int] = None
+    total_duration: Optional[int] = None
+    load_duration: Optional[int] = None
+    prompt_eval_duration: Optional[int] = None
+    eval_duration: Optional[int] = None
+    done_reason: Optional[str] = None
+    interrupted: bool = False
+    truncated: bool = False
 
     @property
     def role(self) -> MessageType:
         return MessageType.AI
 
 
+@dataclass_json
 @dataclass
 class SystemMessage(IMessage):
     @property
@@ -41,6 +52,7 @@ class SystemMessage(IMessage):
         return MessageType.SYSTEM
 
 
+@dataclass_json
 @dataclass
 class ToolMessage(IMessage):
     tool_call_id: str
