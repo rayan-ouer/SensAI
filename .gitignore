@@ -24,4 +24,5 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-WU.md
+
+workspace

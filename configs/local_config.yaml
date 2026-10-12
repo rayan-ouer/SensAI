@@ -3,6 +3,12 @@ model: "qwen2.5-coder:7b" # local model name, key required
 
 system: "prompt/system.txt" # key required
 
-spec_prompt: "prompt/wu_spec.txt" # key required
+spec_prompt: "prompt/spec.txt" # key required
+
+spec_path: "workspace/ASSISTANT.md"  # key required
+
+profiles_dir: "profiles" # key required, relative to this file's directory
+
+default_profile: "wu" # key required, name of a file in profiles_dir (without .yaml)
 
 ## OPTIONAL KEYS

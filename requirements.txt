@@ -3,8 +3,9 @@ fastapi[standard]
 sqlalchemy
 
 ## Core requirements
-docker
 PyYAML
+pypdf
+fonttools
 pydantic-settings
 
 ## LLM requirements
@@ -12,8 +13,8 @@ ollama
 dataclasses-json
 
 ## Tool requirements
-# Requires Python >= 3.10
 fastmcp
+docker
 
 ## RAG requirements
 numpy
