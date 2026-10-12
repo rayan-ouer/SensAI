@@ -10,7 +10,7 @@ import yaml
 import os
 from typing import Optional
 
-from Tools.Chat.errors import ConfigError
+from tools.chat.errors import ConfigError
 
 REQUIRED_KEYS = ("model", "system", "spec_prompt", "profiles_dir", "default_profile", "spec_path")
 PROMPT_KEYS = ("system", "spec_prompt")

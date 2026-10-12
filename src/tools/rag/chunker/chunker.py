@@ -1,5 +1,5 @@
 from .chunker_params import MAX_CHUNK_CHARS, OVERLAP, PARAGRAPH, SENTENCE
-from src.Tools.loader.core.interfaces import Document
+from src.tools.loader.core.interfaces import Document
 from .interfaces import Chunk
 
 class Chunker:

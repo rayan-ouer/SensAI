@@ -3,7 +3,7 @@ from typing import Callable, Optional
 import httpx
 import ollama
 
-from Tools.Chat.create_client import create_ollama_client
+from tools.chat.create_client import create_ollama_client
 from core.messages import AIMessage, IMessage
 from core.tools import ITool
 from llm.client import ILLMClient

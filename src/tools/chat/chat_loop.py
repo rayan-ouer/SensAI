@@ -8,12 +8,12 @@
 import ollama
 from typing import Optional
 
-from Tools.Chat.errors import ChatError
-from Tools.Chat.module import error, warning
-from Tools.Chat.send_user_prompt import send_user_prompt
-from Tools.Chat.commands import handle_command
-from Tools.Spec.spec import update_spec, save_spec, build_system_prompt
-from Tools.Agent.profiles import build_profile_prompt
+from tools.chat.errors import ChatError
+from tools.chat.module import error, warning
+from tools.chat.send_user_prompt import send_user_prompt
+from tools.chat.commands import handle_command
+from tools.spec.spec import update_spec, save_spec, build_system_prompt
+from tools.agent.profiles import build_profile_prompt
 
 def read_user_input() -> Optional[str]:
     print("> ", end="", flush=True)

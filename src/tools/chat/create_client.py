@@ -8,9 +8,9 @@
 import ollama
 from typing import Optional
 
-from Tools.Chat.module import OLLAMA_CLOUD_HOST, OLLAMA_LOCAL_HOST
-from Tools.Chat.errors import ModelNotFoundError
-from Tools.Chat.model_list import get_model_list
+from tools.chat.module import OLLAMA_CLOUD_HOST, OLLAMA_LOCAL_HOST
+from tools.chat.errors import ModelNotFoundError
+from tools.chat.model_list import get_model_list
 
 def find_local_client(local_host: str, model: str) -> ollama.Client | None:
     local = ollama.Client(host=local_host)
