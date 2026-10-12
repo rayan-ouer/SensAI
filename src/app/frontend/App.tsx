@@ -5,21 +5,21 @@
 ** App
 */
 
-import './App.css'
-import ProfileList from './components/ProfileList'
+import { lazy, Suspense } from 'react'
+
+import AuraBackground from '@/components/layout/AuraBackground'
+import PageLoader from '@/components/layout/PageLoader'
+
+const ChatPage = lazy(() => import('@/pages/ChatPage'))
 
 function App() {
-  const activeAgent = "Wu"
-  const agents = ["Wu", "Euclid"]
-
   return (
-    <main>
-      <h1>SensAI</h1>
-      <h2>Profiles</h2>
-      <ProfileList agents={agents} activeAgent={activeAgent}/>
-      <p>Active agent: {activeAgent}</p>
-      <p>Your project assistant.</p>
-    </main>
+    <>
+      <AuraBackground />
+      <Suspense fallback={<PageLoader />}>
+        <ChatPage />
+      </Suspense>
+    </>
   )
 }
 
