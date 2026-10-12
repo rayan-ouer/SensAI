@@ -9,12 +9,12 @@ import argparse
 
 from pydantic import ValidationError
 
-from Tools.Chat.errors import AppError
-from Tools.Chat.module import fatal, error
-from Tools.Chat.settings import Settings
-from Tools.Chat.load_config import load_config
-from Tools.Chat.chat_loop import read_user_input
-from Tools.search.web import register_search_tools
+from tools.chat.errors import AppError
+from tools.chat.module import fatal, error
+from tools.chat.settings import Settings
+from tools.chat.load_config import load_config
+from tools.chat.chat_loop import read_user_input
+from tools.search.web import register_search_tools
 
 from llm.ollama import OllamaClient
 from llm.errors import LLMError

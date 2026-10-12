@@ -37,7 +37,7 @@ def main():
     sbx.destroy()
 ```
 
-Run this example from the sandbox directory, or make `src/Tools/sandbox`
+Run this example from the sandbox directory, or make `src/tools/sandbox`
 available on Python's import path. `run_command()` returns a dictionary with
 `stdout`, `stderr`, `exit_code`, and `timed_out` fields, which an AI agent can
 use to interpret the result and decide what to do next.

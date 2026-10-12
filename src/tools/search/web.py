@@ -7,8 +7,8 @@ from typing import Optional
 from fastmcp import FastMCP
 
 from core.tools import ToolHandler
-from Tools.mcp.adapter import MCPAdapter
-from Tools.mcp.client import MCPClient
+from tools.mcp.adapter import MCPAdapter
+from tools.mcp.client import MCPClient
 
 _SEARCH_URL = "https://lite.duckduckgo.com/lite/"
 _USER_AGENT = "Mozilla/5.0 (compatible; SensAI/1.0)"
