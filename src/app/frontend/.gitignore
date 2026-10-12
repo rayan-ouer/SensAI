@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# The Python .gitignore at the repo root ignores every lib/ folder
+!lib/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
