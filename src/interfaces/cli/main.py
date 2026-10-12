@@ -25,7 +25,7 @@ def display_chunk(kind: str, text: str) -> None:
 
 
 def create_agent(config: dict, api_key: str | None) -> Agent:
-    prompt = SystemMessage(config["prompt"])
+    prompt = SystemMessage(config["system"])
     llm = OllamaClient(model=config["model"], api_key=api_key, prompt=prompt)
     tools_handler = ToolHandler()
     register_search_tools(tools_handler)
@@ -68,9 +68,9 @@ def run():
     agent_loop(agent)
     print("Bye bye")
 
-
 def main():
     run()
+
 
 if __name__ == "__main__":
     run()

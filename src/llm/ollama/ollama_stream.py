@@ -39,9 +39,7 @@ def interrupted_message(
     )
 
 
-def extract_thinking_tags(
-    thinking: str | None, content: str
-) -> tuple[str | None, str]:
+def extract_thinking_tags(thinking: str | None, content: str) -> tuple[str | None, str]:
     matches = list(_THINKING_TAGS.finditer(content))
     if not matches:
         return thinking, content

@@ -28,8 +28,10 @@ class Agent:
         think: bool | None = None,  # whether to think or not
         keep_thinking: bool = False,  # whether to keep thinking or not
         extract_thinking_tags: bool = False,  # whether to extract thinking tags or not
-        on_chunk: Callable[[str, str], None] | None = None,  # the function to call when a chunk is received
-        is_cancelled: Callable[[], bool] | None = None,  # the function to call to check if the agent is cancelled
+        on_chunk: Callable[[str, str], None]
+        | None = None,  # the function to call when a chunk is received
+        is_cancelled: Callable[[], bool]
+        | None = None,  # the function to call to check if the agent is cancelled
     ):
         self._name = name
         self._model = model
