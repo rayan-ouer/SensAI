@@ -7,9 +7,12 @@
 
 import argparse
 import sys
+from pathlib import Path
 import ollama
 
 from pydantic import ValidationError
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from src.Tools.Chat.module import EXIT_S, EXIT_E
 
@@ -18,6 +21,9 @@ from src.Tools.Chat.send_user_prompt import send_user_prompt
 from src.Tools.Chat.load_config import load_config
 from src.Tools.Chat.create_client import create_ollama_client
 from src.Tools.Wu.spec import load_spec, update_spec, save_spec, build_system_prompt
+from src.Tools.loader.loader import FileReader
+from src.Tools.RAG.chunker.chunker import Chunker
+from src.Tools.RAG.embedder.embedding import embed_chunks
 
 def fatal(message: object):
     print(f"Error: {message}")
@@ -109,5 +115,8 @@ def main():
     print()
     print("Bye bye")
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    fr = FileReader("/Users/rayan/Perso/Convention_Stage_rayan.ouerdane@epitech.eu_FR-tech_2_078dd284.pdf")
+    chunks = Chunker(fr.documents()).chunk()
+    embedded = embed_chunks(chunks)
+    print(embedded)
