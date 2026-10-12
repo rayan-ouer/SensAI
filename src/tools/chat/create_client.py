@@ -5,12 +5,13 @@
 ## create_client
 ##
 
-import ollama
-from typing import Optional
 
-from tools.chat.module import OLLAMA_CLOUD_HOST, OLLAMA_LOCAL_HOST
+import ollama
+
 from tools.chat.errors import ModelNotFoundError
 from tools.chat.model_list import get_model_list
+from tools.chat.module import OLLAMA_CLOUD_HOST, OLLAMA_LOCAL_HOST
+
 
 def find_local_client(local_host: str, model: str) -> ollama.Client | None:
     local = ollama.Client(host=local_host)
@@ -21,13 +22,19 @@ def find_local_client(local_host: str, model: str) -> ollama.Client | None:
         pass
     return None
 
+
 def create_cloud_client(cloud_host: str, api_key: str) -> ollama.Client:
     return ollama.Client(
-        host=cloud_host,
-        headers={"Authorization": f"Bearer {api_key}"}
+        host=cloud_host, headers={"Authorization": f"Bearer {api_key}"}
     )
 
-def create_ollama_client(model: str, api_key: str | None = None, local_host: str = OLLAMA_LOCAL_HOST, cloud_host: str = OLLAMA_CLOUD_HOST) -> ollama.Client:
+
+def create_ollama_client(
+    model: str,
+    api_key: str | None = None,
+    local_host: str = OLLAMA_LOCAL_HOST,
+    cloud_host: str = OLLAMA_CLOUD_HOST,
+) -> ollama.Client:
     local = find_local_client(local_host, model)
     if local is not None:
         return local

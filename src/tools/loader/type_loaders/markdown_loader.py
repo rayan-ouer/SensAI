@@ -4,6 +4,7 @@ from ..core.interfaces import BaseLoader, Document
 
 HEADING = re.compile(r"^(#{1,6})\s+(.*)$")
 
+
 def _split_sections(text: str) -> list[tuple[list[str], str]]:
     """Cut markdown sections into a list of tuples (section name, content)."""
     sections = []
@@ -32,6 +33,7 @@ def _split_sections(text: str) -> list[tuple[list[str], str]]:
 
 class MarkdownLoader(BaseLoader):
     """Markdown : cut on titles."""
+
     extensions = (".md", ".markdown")
 
     def _read_text_file(self) -> str:

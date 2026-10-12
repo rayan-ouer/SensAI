@@ -1,6 +1,5 @@
 import uuid
 from datetime import datetime
-from enum import Enum
 
 from sqlalchemy import (
     DateTime,
@@ -9,13 +8,15 @@ from sqlalchemy import (
     String,
     Text,
     func,
+)
+from sqlalchemy import (
     Enum as SQLEnum,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.types import MessageType, ToolStatus
-from ...db.base import Base
+from memory.base import Base
 
 
 class Conversation(Base):
@@ -44,7 +45,7 @@ class Conversation(Base):
         nullable=True,
     )
 
-    active_message: Mapped["Message" | None] = relationship(
+    active_message: Mapped["Message | None"] = relationship(
         "Message",
         foreign_keys=[active_message_id],
     )
@@ -99,7 +100,7 @@ class Message(Base):
         index=True,
     )
 
-    parent: Mapped["Message" | None] = relationship(
+    parent: Mapped["Message | None"] = relationship(
         "Message",
         back_populates="children",
         remote_side=[id],

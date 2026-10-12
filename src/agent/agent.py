@@ -1,5 +1,5 @@
 import json
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from core.messages import AIMessage, IMessage, SystemMessage, ToolMessage
 from core.tools import ToolCall, ToolExecution, ToolHandler
@@ -13,22 +13,23 @@ class AgentIterationLimitError(Exception):
         self.message = message
         super().__init__(f"Agent stopped after {max_loops} iterations")
 
+
 class Agent:
     def __init__(
         self,
-        name: str, # the name of the agent
-        model: str, # the model to use
-        tools: list[str], # the tools to use
-        role: SystemMessage, # the role of the agent
-        response_format: Optional[dict], # the response format to use
-        llm: ILLMClient, # the llm client to use
-        handler: ToolHandler, # the tool handler to use
-        max_loops: int = 10, # the maximum number of loops to run
-        think: Optional[bool] = None, # whether to think or not
-        keep_thinking: bool = False, # whether to keep thinking or not
-        extract_thinking_tags: bool = False, # whether to extract thinking tags or not
-        on_chunk: Optional[Callable[[str, str], None]] = None, # the function to call when a chunk is received
-        is_cancelled: Optional[Callable[[], bool]] = None, # the function to call to check if the agent is cancelled
+        name: str,  # the name of the agent
+        model: str,  # the model to use
+        tools: list[str],  # the tools to use
+        role: SystemMessage,  # the role of the agent
+        response_format: dict | None,  # the response format to use
+        llm: ILLMClient,  # the llm client to use
+        handler: ToolHandler,  # the tool handler to use
+        max_loops: int = 10,  # the maximum number of loops to run
+        think: bool | None = None,  # whether to think or not
+        keep_thinking: bool = False,  # whether to keep thinking or not
+        extract_thinking_tags: bool = False,  # whether to extract thinking tags or not
+        on_chunk: Callable[[str, str], None] | None = None,  # the function to call when a chunk is received
+        is_cancelled: Callable[[], bool] | None = None,  # the function to call to check if the agent is cancelled
     ):
         self._name = name
         self._model = model
@@ -51,7 +52,9 @@ class Agent:
         self._ensure_role(messages)
 
         if self._max_loops < 1:
-            raise AgentIterationLimitError(self._max_loops, AIMessage(content="", truncated=True))
+            raise AgentIterationLimitError(
+                self._max_loops, AIMessage(content="", truncated=True)
+            )
         for index in range(self._max_loops):
             response: AIMessage = self._llm.chat(
                 self._model,
@@ -77,17 +80,25 @@ class Agent:
                 return response
             for tool_call in response.tool_calls:
                 execution: ToolExecution = self.execute_tool(tool_call, self._handler)
-                messages.append(ToolMessage(
-                    content=json.dumps(execution.result, ensure_ascii=False),
-                    tool_call_id=tool_call.id,
-                    tool_name=tool_call.name,
-                    result=execution.result,
-                    status=execution.status,
-                ))
-        raise AgentIterationLimitError(self._max_loops, AIMessage(content="", truncated=True))
+                messages.append(
+                    ToolMessage(
+                        content=json.dumps(execution.result, ensure_ascii=False),
+                        tool_call_id=tool_call.id,
+                        tool_name=tool_call.name,
+                        result=execution.result,
+                        status=execution.status,
+                    )
+                )
+        raise AgentIterationLimitError(
+            self._max_loops, AIMessage(content="", truncated=True)
+        )
 
     def _ensure_role(self, messages: list[IMessage]) -> None:
-        if messages and messages[0].role == MessageType.SYSTEM and messages[0].content == self._role.content:
+        if (
+            messages
+            and messages[0].role == MessageType.SYSTEM
+            and messages[0].content == self._role.content
+        ):
             return
         messages.insert(0, self._role)
 

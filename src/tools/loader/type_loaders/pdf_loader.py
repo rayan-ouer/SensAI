@@ -1,7 +1,7 @@
 import re
 import sys
 import unicodedata
-from typing import Iterator
+from collections.abc import Iterator
 
 from pypdf import PdfReader
 

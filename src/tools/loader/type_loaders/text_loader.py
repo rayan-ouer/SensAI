@@ -1,9 +1,11 @@
-from typing import Iterator
+from collections.abc import Iterator
 
 from ..core.interfaces import BaseLoader, Document
 
+
 class TextLoader(BaseLoader):
     """Text files/ Markdowns: 1 document/file"""
+
     extensions = [".txt"]
 
     def _read_text_file(self) -> str:

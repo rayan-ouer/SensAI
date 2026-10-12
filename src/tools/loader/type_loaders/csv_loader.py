@@ -5,12 +5,13 @@ DELIMITERS = (",", ";", "\t", "|")
 
 def _format_csv_line_infos(line: list[str], categories: list[str]) -> str:
     return ", ".join(
-        f"{categories[i]}: {line[i]}"
-        for i in range(min(len(categories), len(line)))
+        f"{categories[i]}: {line[i]}" for i in range(min(len(categories), len(line)))
     )
+
 
 class CsvLoader(BaseLoader):
     """Load csv into records"""
+
     extensions = [".csv"]
 
     def _row_counts(self, lines: list[str], delim: str) -> list[int]:
@@ -39,10 +40,7 @@ class CsvLoader(BaseLoader):
             freq = {}
             for count in counts:
                 freq[count] = freq.get(count, 0) + 1
-            n_seps, n_rows = max(
-                freq.items(),
-                key=lambda kv: (kv[1], kv[0])
-            )
+            n_seps, n_rows = max(freq.items(), key=lambda kv: (kv[1], kv[0]))
             if n_seps == 0:
                 continue
             key = (n_rows / len(counts), n_seps)

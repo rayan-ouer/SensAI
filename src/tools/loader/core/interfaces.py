@@ -1,19 +1,23 @@
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterator
+
 
 @dataclass
 class Document:
     """Document is returned by the loader, no matter which file type it comes from."""
+
     text: str
     source: str
     position: int = 0
     kind: str = "long_text"
     meta: dict = field(default_factory=dict)
 
+
 class BaseLoader(ABC):
     """Interface for loader classes."""
+
     extensions: tuple[str, ...] = ()
     _registry: dict[str, type["BaseLoader"]] = {}
 

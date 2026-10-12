@@ -1,19 +1,19 @@
 from dataclasses import dataclass, field
-from typing import Optional
 
-from ...core.messages import AIMessage, HumanMessage, IMessage, SystemMessage
-from ...core.conversation import (
+from core.conversation import (
     ConversationNotFoundError,
     IConversation,
     MessageNotFoundError,
 )
+from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage
 
 
 @dataclass
 class InMemoryConversationData:
     messages: dict[str, IMessage] = field(default_factory=dict)
-    parent_ids: dict[str, Optional[str]] = field(default_factory=dict)
-    active_message_id: Optional[str] = None
+    parent_ids: dict[str, str | None] = field(default_factory=dict)
+    active_message_id: str | None = None
+
 
 class InMemoryConversation(IConversation):
     def __init__(self) -> None:
@@ -30,12 +30,12 @@ class InMemoryConversation(IConversation):
 
     def get_conversation_by_id_or_none(
         self, conversation_id: str
-    ) -> Optional[InMemoryConversationData]:
+    ) -> InMemoryConversationData | None:
         return self._conversations.get(conversation_id)
 
     def get_message_by_id_or_none(
         self, conversation_id: str, message_id: str
-    ) -> Optional[IMessage]:
+    ) -> IMessage | None:
         conversation = self.get_conversation_by_id_or_none(conversation_id)
         if not conversation:
             return None
@@ -54,7 +54,7 @@ class InMemoryConversation(IConversation):
             raise MessageNotFoundError(message_id)
         return message
 
-    def get_active_message(self, conversation_id: str) -> Optional[IMessage]:
+    def get_active_message(self, conversation_id: str) -> IMessage | None:
         conversation = self.get_conversation_by_id(conversation_id)
         if not conversation.active_message_id:
             return None
@@ -81,7 +81,7 @@ class InMemoryConversation(IConversation):
         self,
         conversation: InMemoryConversationData,
         message: IMessage,
-        parent_id: Optional[str],
+        parent_id: str | None,
     ) -> IMessage:
         if message.id in conversation.messages:
             raise ValueError(f"Message '{message.id}' already exists")

@@ -1,17 +1,22 @@
+from tools.loader.core.interfaces import Document
+
 from .chunker_params import MAX_CHUNK_CHARS, OVERLAP, PARAGRAPH, SENTENCE
-from src.tools.loader.core.interfaces import Document
 from .interfaces import Chunk
 
-class Chunker:
 
-    def __init__(self, documents: list[Document], max_chunk_chars: int = MAX_CHUNK_CHARS, overlap: int = OVERLAP):
+class Chunker:
+    def __init__(
+        self,
+        documents: list[Document],
+        max_chunk_chars: int = MAX_CHUNK_CHARS,
+        overlap: int = OVERLAP,
+    ):
         self.documents = documents
         self.max_chunk_chars = max_chunk_chars
         self.overlap = overlap
 
     def _split_paragraphs(self, text: str) -> list[str]:
         return [p.strip() for p in PARAGRAPH.split(text) if p.strip()]
-
 
     def _split_sentences(self, text: str) -> list[str]:
         return [s.strip() for s in SENTENCE.split(text) if s and s.strip()]
@@ -21,7 +26,7 @@ class Chunker:
             return ""
         tail = previous[-overlap:]
         cut = tail.find(" ")
-        return tail[cut + 1:] if cut != -1 else tail
+        return tail[cut + 1 :] if cut != -1 else tail
 
     def _group(self, units: list[str], sep: str) -> list[str]:
         out, buf = [], ""
@@ -55,10 +60,11 @@ class Chunker:
                 continue
             sentences: list[str] = []
             for s in self._split_sentences(para):
-                sentences.extend([s] if len(s) <= self.max_chunk_chars else self._hard_split(s))
+                sentences.extend(
+                    [s] if len(s) <= self.max_chunk_chars else self._hard_split(s)
+                )
             pieces.extend(self._group(sentences, " "))
         return self._group(pieces, "\n\n")
-
 
     def _chunk_docuement(self, doc: Document) -> list[Chunk]:
         text = doc.text.strip()
@@ -74,10 +80,19 @@ class Chunker:
             ]
             section = doc.meta.get("section")
             if section:
-                parts = [p if i == 0 else f"[{section}] {p}" for i, p in enumerate(parts)]
-        return [Chunk(text=p, source=doc.source, position=doc.position,
-                      chunk_index=i, meta=dict(doc.meta)) for i, p in enumerate(parts)]
-
+                parts = [
+                    p if i == 0 else f"[{section}] {p}" for i, p in enumerate(parts)
+                ]
+        return [
+            Chunk(
+                text=p,
+                source=doc.source,
+                position=doc.position,
+                chunk_index=i,
+                meta=dict(doc.meta),
+            )
+            for i, p in enumerate(parts)
+        ]
 
     def chunk(self) -> list[Chunk]:
         return [c for d in self.documents for c in self._chunk_docuement(d)]

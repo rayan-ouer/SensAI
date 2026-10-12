@@ -2,7 +2,6 @@ from pathlib import Path
 
 from .core.errors import LoaderError, UnsupportedFormat
 from .core.interfaces import BaseLoader, Document
-from .type_loaders import markdown_loader, text_loader, pdf_loader
 
 
 class FileReader:
@@ -31,7 +30,7 @@ class FileReader:
             print(e)
             return result
 
-        return  result
+        return result
 
     def read(self, sep: str = "\n\n") -> str:
         return sep.join(doc.text for doc in self.documents())
