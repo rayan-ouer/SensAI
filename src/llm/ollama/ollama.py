@@ -34,9 +34,7 @@ def _raise_domain_error(error: BaseException):
 
 
 class OllamaClient(ILLMClient):
-    def __init__(
-        self, model: str, api_key: str | None, prompt: IMessage | None = None
-    ):
+    def __init__(self, model: str, api_key: str | None, prompt: IMessage | None = None):
         self._model = model  # the model to use
         self._prompt = prompt  # the prompt to use
         self._llm = create_ollama_client(model, api_key)  # a ollama client instance

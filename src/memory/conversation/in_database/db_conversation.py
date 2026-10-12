@@ -106,7 +106,9 @@ class DatabaseConversation(IConversation):
         return DbToolCall(
             tool_call_id=tool_call.id,
             tool_name=tool_call.name,
-            arguments=tool_call.arguments if isinstance(tool_call.arguments, dict) else {},
+            arguments=tool_call.arguments
+            if isinstance(tool_call.arguments, dict)
+            else {},
             status=ToolStatus.PENDING,
         )
 
