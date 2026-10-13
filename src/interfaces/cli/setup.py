@@ -9,10 +9,10 @@ from agent.agent import Agent
 from core.messages import SystemMessage
 from core.tools import ToolHandler
 from llm.ollama import OllamaClient
-from Tools.Agent.profiles import build_profile_prompt
-from Tools.Chat.settings import Settings
-from Tools.search.web import register_search_tools
-from Tools.Spec.spec import build_system_prompt
+from tools.agent.profiles import build_profile_prompt
+from tools.chat.settings import Settings
+from tools.search.web import register_search_tools
+from tools.spec.spec import build_system_prompt
 
 def read_api_key() -> str | None:
     key = Settings().ollama_api_key

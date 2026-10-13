@@ -1,11 +1,13 @@
 import json
 import uuid
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage, ToolMessage
 from core.tools import ITool, ToolCall
 
 MessageConverter = Callable[[Any, bool], dict[str, Any]]
+
 
 class OllamaMapper:
     @staticmethod
@@ -13,7 +15,9 @@ class OllamaMapper:
         return {"role": "user", "content": message.content}
 
     @staticmethod
-    def _convert_system(message: SystemMessage, include_thinking: bool) -> dict[str, Any]:
+    def _convert_system(
+        message: SystemMessage, include_thinking: bool
+    ) -> dict[str, Any]:
         return {"role": "system", "content": message.content}
 
     @staticmethod
@@ -30,7 +34,9 @@ class OllamaMapper:
         return payload
 
     @staticmethod
-    def _convert_tool_result(message: ToolMessage, include_thinking: bool) -> dict[str, Any]:
+    def _convert_tool_result(
+        message: ToolMessage, include_thinking: bool
+    ) -> dict[str, Any]:
         return {
             "role": "tool",
             "content": json.dumps(message.result, ensure_ascii=False),
@@ -51,8 +57,13 @@ class OllamaMapper:
         return converter(message, include_thinking)
 
     @staticmethod
-    def convert_messages(messages: list[IMessage], include_thinking: bool) -> list[dict[str, Any]]:
-        return [OllamaMapper.convert_message(message, include_thinking) for message in messages]
+    def convert_messages(
+        messages: list[IMessage], include_thinking: bool
+    ) -> list[dict[str, Any]]:
+        return [
+            OllamaMapper.convert_message(message, include_thinking)
+            for message in messages
+        ]
 
     @staticmethod
     def convert_tool(tool: ITool) -> dict[str, Any]:
@@ -66,7 +77,7 @@ class OllamaMapper:
         }
 
     @staticmethod
-    def convert_tools(tools: list[ITool]) -> Optional[list[dict[str, Any]]]:
+    def convert_tools(tools: list[ITool]) -> list[dict[str, Any]] | None:
         if not tools:
             return None
         return [OllamaMapper.convert_tool(tool) for tool in tools]
@@ -74,7 +85,7 @@ class OllamaMapper:
     @staticmethod
     def _parse_arguments(raw: Any) -> dict[str, Any]:
         arguments = raw.function.arguments
-    
+
         if isinstance(arguments, str):
             if not arguments:
                 return {}
@@ -87,4 +98,8 @@ class OllamaMapper:
     @staticmethod
     def parse_tool_call(raw: Any) -> ToolCall:
         call_id = getattr(raw, "id", None) or uuid.uuid4().hex
-        return ToolCall(id=str(call_id), name=raw.function.name, arguments=OllamaMapper._parse_arguments(raw))
+        return ToolCall(
+            id=str(call_id),
+            name=raw.function.name,
+            arguments=OllamaMapper._parse_arguments(raw),
+        )

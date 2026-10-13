@@ -9,9 +9,9 @@ from agent.agent import Agent, AgentIterationLimitError
 from core.messages import AIMessage, HumanMessage
 from interfaces.cli.setup import current_role
 from llm.errors import LLMError
-from Tools.Chat.chat_loop import read_user_input, refresh_spec
-from Tools.Chat.commands import handle_command
-from Tools.Chat.module import error
+from tools.chat.chat_loop import read_user_input, refresh_spec
+from tools.chat.commands import handle_command
+from tools.chat.module import error
 
 def send_to_agent(agent: Agent, messages: list, user_input: str) -> AIMessage | None:
     start = len(messages)
