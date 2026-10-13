@@ -9,64 +9,25 @@ import argparse
 
 from pydantic import ValidationError
 
+from interfaces.cli.chat import agent_loop
+from interfaces.cli.display import ChunkDisplay
+from interfaces.cli.setup import create_agent, current_role, read_api_key
+from Tools.Agent.profiles import init_profiles
+from Tools.Chat.create_client import create_ollama_client
 from Tools.Chat.errors import AppError
-from Tools.Chat.module import fatal, error
-from Tools.Chat.settings import Settings
 from Tools.Chat.load_config import load_config
-from Tools.Chat.chat_loop import read_user_input
-from Tools.search.web import register_search_tools
-
-from llm.ollama import OllamaClient
-from llm.errors import LLMError
-from agent.agent import Agent, AgentIterationLimitError
-from core.messages import HumanMessage, IMessage, SystemMessage
-from core.tools import ToolHandler
-
-
-def display_chunk(kind: str, text: str) -> None:
-    if kind in ("thinking", "content"):
-        print(text, end="", flush=True)
-
-def create_agent(config: dict, api_key: str | None) -> Agent:
-    prompt = SystemMessage(content="Tu es un agent de recherche, tu as acces a des tools, utilise le tool web_search si tu n'est pas sur de la reponse.")
-    llm = OllamaClient(model=config["model"], api_key=api_key, prompt=prompt)
-    tools_handler = ToolHandler()
-    register_search_tools(tools_handler)
-    return Agent(
-        name="Corporate agent",
-        model=config["model"],
-        tools=[tool.name for tool in tools_handler.list_tools()],
-        role=prompt,
-        response_format=config.get("response_format"),
-        llm=llm,
-        handler=tools_handler,
-        max_loops=config.get("max_loops", 10),
-        on_chunk=display_chunk,
-    )
-
-def agent_loop(agent: Agent):
-    messages: list[IMessage] = []
-    while True:
-        user_input = read_user_input()
-        if user_input is None or user_input == "/exit":
-            break
-        if not user_input:
-            continue
-        messages.append(HumanMessage(content=user_input))
-        try:
-            reply = agent.invoke(messages)
-        except (LLMError, AgentIterationLimitError) as e:
-            error(e)
-            continue
-        print(f"Content: {reply.content}")
+from Tools.Chat.module import fatal
+from Tools.Spec.spec import load_spec
 
 def run():
-    settings = Settings()
-    key = settings.ollama_api_key
-    api_key = key.get_secret_value() if key else None
+    api_key = read_api_key()
     config = load_config(argparse.ArgumentParser())
-    agent = create_agent(config, api_key)
-    agent_loop(agent)
+    init_profiles(config)
+    spec = load_spec(config["spec_path"])
+    config["spec_client"] = create_ollama_client(config["model"], api_key)
+    config["display"] = ChunkDisplay()
+    agent = create_agent(config, api_key, current_role(config, spec))
+    agent_loop(agent, config, spec)
     print("Bye bye")
 
 def main():

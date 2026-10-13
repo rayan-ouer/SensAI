@@ -5,6 +5,8 @@
 ## commands
 ##
 
+from core.messages import SystemMessage
+
 def switch_profile(config: dict, args: list[str]):
     if len(args) != 1:
         print("Usage: /profile <name>")
@@ -15,7 +17,7 @@ def switch_profile(config: dict, args: list[str]):
         return
     config["active_profile"] = name
     note = f"The active agent has changed. From now on you are '{config["profiles"][name]["name"]}'. Earlier assistant replies were written by a different agent."
-    config["messages"].append({"role": "system", "content": note})
+    config["messages"].append(SystemMessage(content=note))
     print(f"Switched to '{name}' profile.")
 
 def print_profiles(config: dict, _args: list[str]):
