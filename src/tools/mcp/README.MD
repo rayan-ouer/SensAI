@@ -4,7 +4,7 @@ Remote MCP tools are exposed to the agent through the same `ITool` contract as l
 
 ## Tools architecture
 
-![Tools architecture](../../../images/tools/tool_architecure.png)
+![Tools architecture](../../../resources/tools/tool_architecture.png)
 
 ### ITool
 
@@ -30,7 +30,7 @@ Remote MCP tools are exposed to the agent through the same `ITool` contract as l
 
 ## MCP tool pipeline
 
-![MCP tool pipeline](../../../images/tools/mcp_tool_pipeline.png)
+![MCP tool pipeline](../../../resources/tools/mcp_pipeline.png)
 
 1. A `FastMCP` instance is the MCP server. It declares the tools (`tool-1`, `tool-2`, `tool-3`, ...) with `@mcp.tool`.
 2. `MCPClient` (`client.py`) wraps that server. Its `list_tools()` returns the tools exposed by the server, and its `call_tool()` runs one of them.

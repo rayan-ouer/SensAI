@@ -38,6 +38,5 @@ def main():
     except (AppError, ValidationError) as e:
         fatal(e)
 
-
 if __name__ == "__main__":
     main()
