@@ -14,13 +14,13 @@ from tools.chat.errors import ConfigError
 
 REQUIRED_KEYS = (
     "model",
-    "system",
+    "system_prompt",
     "spec_prompt",
     "profiles_dir",
     "default_profile",
     "spec_path",
 )
-PROMPT_KEYS = ("system", "spec_prompt")
+PROMPT_KEYS = ("system_prompt", "spec_prompt")
 
 
 def read_prompt(config_dir: str, relative_path: str) -> str:
@@ -65,16 +65,17 @@ def load_config_file(config_path: str) -> dict:
     return config
 
 
-def load_config(parser: argparse.ArgumentParser) -> dict:
+def parse_config_path(parser: argparse.ArgumentParser) -> str:
+    parser.add_argument("config", nargs="?", help="path to the yaml config file")
     parser.add_argument(
-        "-c",
-        "--config",
-        dest="config_opt",
-        type=str,
-        help="path to the yaml config file",
+        "-c", "--config", dest="config_opt", help="path to the yaml config file"
     )
     args = parser.parse_args()
     config_path = args.config_opt or args.config
     if not config_path:
         parser.error("a config file is required (-c path or positional argument)")
-    return load_config_file(config_path)
+    return config_path
+
+
+def load_config(parser: argparse.ArgumentParser) -> dict:
+    return load_config_file(parse_config_path(parser))

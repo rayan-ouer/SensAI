@@ -95,14 +95,14 @@ class Agent:
             self._max_loops, AIMessage(content="", truncated=True)
         )
 
+    def set_role(self, role: SystemMessage) -> None:
+        self._role = role
+
     def _ensure_role(self, messages: list[IMessage]) -> None:
-        if (
-            messages
-            and messages[0].role == MessageType.SYSTEM
-            and messages[0].content == self._role.content
-        ):
-            return
-        messages.insert(0, self._role)
+        if messages and messages[0].role == MessageType.SYSTEM:
+            messages[0] = self._role
+        else:
+            messages.insert(0, self._role)
 
     def _resolve_tools(self) -> list[ITool]:
         return [self._handler.get(name) for name in self._tools]

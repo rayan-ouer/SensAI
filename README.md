@@ -26,7 +26,7 @@ cd G-AIA-500-PAR-5-1-sensai-1.git
 Install the project from its root first:
 
 ```sh
-pip3 install .
+pip3 install -e .
 ```
 
 ### CLI

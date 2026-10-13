@@ -1,7 +1,7 @@
 ## REQUIRED KEYS
 model: "qwen2.5-coder:7b" # cloud or local model name, key required
 
-system: "prompt/system.txt" # key required
+system_prompt: "prompt/system.txt" # key required
 
 spec_prompt: "prompt/spec.txt" # key required
 

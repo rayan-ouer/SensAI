@@ -118,5 +118,4 @@ def create_search_server() -> FastMCP:
 
 def register_search_tools(manager: ToolHandler) -> None:
     adapter = MCPAdapter(MCPClient(create_search_server()))
-    print(adapter.list_tools())
     manager.register_many(adapter.list_tools())
