@@ -32,22 +32,6 @@ def run():
     agent_loop(agent, config, spec)
     print("Bye bye")
 
-
-def vector_store_demo():
-    from memory.vector.sqlite.sqlite_store import SQLiteStore
-    from tools.loader.loader import FileReader
-    from tools.rag.chunker.chunker import Chunker
-    from tools.rag.embedder.embedding import embed_chunks
-
-    fr = FileReader("files/convention.pdf")
-    chunks = Chunker(fr.documents()).chunk()
-    embedded = embed_chunks(chunks)
-    store = SQLiteStore("memory.db")
-    store.add(embedded)
-    results = store.search("What is the main character of the book?", 1)
-    print(results)
-
-
 def main():
     try:
         run()
