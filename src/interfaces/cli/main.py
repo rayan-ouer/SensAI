@@ -73,16 +73,6 @@ def run():
     agent_loop(agent)
     print("Bye bye")
 
-
-#def main():
-#    fr = FileReader("files/convention.pdf")
-#    chunks = Chunker(fr.documents()).chunk()
-#    embedded = embed_chunks(chunks)
-#    store = SQLiteStore("memory.db")
-#    store.add(embedded)
-#    results = store.search("What is the main character of the book?", 1)
-#    print(results)
-
 def main():
     run()
 
