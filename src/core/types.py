@@ -9,5 +9,6 @@ class MessageType(str, Enum):
 
 
 class ToolStatus(str, Enum):
+    PENDING = "pending"
     SUCCESS = "success"
     ERROR = "error"
