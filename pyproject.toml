@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "master-wu"
+version = "0.1.0"
+description = "An master-wu harness for AI agents"
+requires-python = ">=3.12"
+dynamic = ["dependencies"]
+
+[project.scripts]
+wu = "interfaces.cli.main:main"
+wu-api = "interfaces.api.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
