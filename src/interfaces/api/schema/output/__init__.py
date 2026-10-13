@@ -1,1 +1,0 @@
-"""API output schemas package."""
