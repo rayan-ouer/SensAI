@@ -65,16 +65,17 @@ def load_config_file(config_path: str) -> dict:
     return config
 
 
-def load_config(parser: argparse.ArgumentParser) -> dict:
+def parse_config_path(parser: argparse.ArgumentParser) -> str:
+    parser.add_argument("config", nargs="?", help="path to the yaml config file")
     parser.add_argument(
-        "-c",
-        "--config",
-        dest="config_opt",
-        type=str,
-        help="path to the yaml config file",
+        "-c", "--config", dest="config_opt", help="path to the yaml config file"
     )
     args = parser.parse_args()
     config_path = args.config_opt or args.config
     if not config_path:
         parser.error("a config file is required (-c path or positional argument)")
-    return load_config_file(config_path)
+    return config_path
+
+
+def load_config(parser: argparse.ArgumentParser) -> dict:
+    return load_config_file(parse_config_path(parser))
