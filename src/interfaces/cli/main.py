@@ -21,10 +21,10 @@ from tools.spec.spec import load_spec
 
 
 def run():
-    print("Starting Master Wu")
     api_key = read_api_key()
     config = load_config(argparse.ArgumentParser())
     init_profiles(config)
+    print(f"Starting {config['profiles'][config['active_profile']]['name']}")
     spec = load_spec(config["spec_path"])
     config["spec_client"] = create_ollama_client(config["model"], api_key)
     config["display"] = ChunkDisplay()
@@ -32,11 +32,13 @@ def run():
     agent_loop(agent, config, spec)
     print("Bye bye")
 
+
 def main():
     try:
         run()
     except (AppError, ValidationError) as e:
         fatal(e)
+
 
 if __name__ == "__main__":
     main()
