@@ -1,6 +1,5 @@
 """SQLite vector database."""
 
-from .models import SqliteBase
-from .vector_db import SqliteVectorDB
+from .sqlite_store import SQLiteStore
 
-__all__ = ["SqliteBase", "SqliteVectorDB"]
+__all__ = ["SQLiteStore"]

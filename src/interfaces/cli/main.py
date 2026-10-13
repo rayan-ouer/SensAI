@@ -12,10 +12,14 @@ from core.messages import HumanMessage, IMessage, SystemMessage
 from core.tools import ToolHandler
 from llm.errors import LLMError
 from llm.ollama import OllamaClient
+from memory.vector.sqlite.sqlite_store import SQLiteStore
 from tools.chat.chat_loop import read_user_input
 from tools.chat.load_config import load_config
 from tools.chat.module import error
 from tools.chat.settings import Settings
+from tools.loader.loader import FileReader
+from tools.rag.chunker.chunker import Chunker
+from tools.rag.embedder.embedding import embed_chunks
 from tools.search.web import register_search_tools
 
 
@@ -60,6 +64,7 @@ def agent_loop(agent: Agent):
 
 
 def run():
+    print("Starting Master Wu")
     settings = Settings()
     key = settings.ollama_api_key
     api_key = key.get_secret_value() if key else None
@@ -68,9 +73,15 @@ def run():
     agent_loop(agent)
     print("Bye bye")
 
-def main():
-    run()
 
+def main():
+    fr = FileReader("files/convention.pdf")
+    chunks = Chunker(fr.documents()).chunk()
+    embedded = embed_chunks(chunks)
+    store = SQLiteStore("memory.db")
+    store.add(embedded)
+    results = store.search("What is the main character of the book?", 1)
+    print(results)
 
 if __name__ == "__main__":
     run()

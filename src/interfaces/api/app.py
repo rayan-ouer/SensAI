@@ -59,9 +59,3 @@ async def root():
 
 
 app.include_router(conversation_router, prefix="/api", tags=["conversations"])
-
-
-def main() -> None:
-    import uvicorn
-
-    uvicorn.run("interfaces.api.app:app", host="127.0.0.1", port=8000)
