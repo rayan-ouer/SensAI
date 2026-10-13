@@ -15,6 +15,7 @@ wu-api = "interfaces.api.server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+namespaces = true
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
