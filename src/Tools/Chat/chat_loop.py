@@ -58,7 +58,7 @@ def refresh_spec(ollama_client_instance: ollama.Client, config: dict, spec: str,
 
 def run_turn(ollama_client_instance: ollama.Client, config: dict, messages: list, spec: str, user_input: str) -> str:
     messages.append({"role": "user", "content": user_input})
-    messages[0]["content"] = build_system_prompt(config["system"], build_profile_prompt(config["profiles"][config["active_profile"]]), spec)
+    messages[0]["content"] = build_system_prompt(config["system_prompt"], build_profile_prompt(config["profiles"][config["active_profile"]]), spec)
     reply = ask_agent(messages, config["model"], ollama_client_instance)
     if reply is None:
         return spec
@@ -66,7 +66,7 @@ def run_turn(ollama_client_instance: ollama.Client, config: dict, messages: list
     return refresh_spec(ollama_client_instance, config, spec, user_input, reply)
 
 def chat_loop(ollama_client_instance: ollama.Client, config: dict, spec: str):
-    messages = [{"role": "system", "content": config["system"]}]
+    messages = [{"role": "system", "content": config["system_prompt"]}]
     config["messages"] = messages
     while True:
         user_input = read_user_input()
