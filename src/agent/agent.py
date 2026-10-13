@@ -5,7 +5,7 @@ from core.messages import AIMessage, IMessage, SystemMessage, ToolMessage
 from core.tools import ToolCall, ToolExecution, ToolHandler
 from core.types import MessageType
 from llm.client import ILLMClient
-
+from core.tools import ITool
 
 class AgentIterationLimitError(Exception):
     def __init__(self, max_loops: int, message: AIMessage):
@@ -104,5 +104,5 @@ class Agent:
             return
         messages.insert(0, self._role)
 
-    def _resolve_tools(self) -> list:
+    def _resolve_tools(self) -> list[ITool]:
         return [self._handler.get(name) for name in self._tools]

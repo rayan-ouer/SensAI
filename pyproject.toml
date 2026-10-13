@@ -11,7 +11,7 @@ dynamic = ["dependencies"]
 
 [project.scripts]
 wu = "interfaces.cli.main:main"
-wu-api = "interfaces.api.app:main"
+wu-api = "interfaces.api.server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
