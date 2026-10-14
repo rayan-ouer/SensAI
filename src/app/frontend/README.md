@@ -14,6 +14,8 @@ npm run build
 ## Where things are
 
 The root only holds configuration (Vite, TypeScript, oxlint, shadcn) and `index.html`.
+`public/logo.svg` is the SensAI logo (copied from the repository's `assets/`), used as favicon and on the welcome screen;
+`public/avatar.svg` is the same logo without its shield, used as the assistant avatar.
 All the code is in `src/`:
 
 ```
