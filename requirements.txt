@@ -1,0 +1,22 @@
+## Backend requirements
+fastapi[standard]
+sqlalchemy
+
+## Core requirements
+PyYAML
+pypdf
+fonttools
+pydantic-settings
+
+## LLM requirements
+ollama
+dataclasses-json
+
+## Tool requirements
+fastmcp
+docker
+
+## RAG requirements
+numpy
+pgvector
+asyncpg
