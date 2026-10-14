@@ -32,7 +32,6 @@ def current_role(config: dict, spec: str) -> SystemMessage:
 def create_agent(config: dict, tools: list[ITool], llm: ILLMClient) -> Agent:
     tools_handler: ToolHandler = ToolHandler()
     tools_handler.register_many(tools)
-    print(config["system_prompt"])
     return Agent(
         name=config["profiles"][config["active_profile"]]["name"],
         model=config["model"],
