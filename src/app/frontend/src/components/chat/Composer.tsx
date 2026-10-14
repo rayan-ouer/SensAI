@@ -15,10 +15,11 @@ import { Textarea } from '@/components/ui/textarea'
 
 type ComposerProps = {
   onSend: (text: string) => void
+  onTyping?: (typing: boolean) => void
   disabled: boolean
 }
 
-function Composer({ onSend, disabled }: ComposerProps) {
+function Composer({ onSend, onTyping, disabled }: ComposerProps) {
   const [text, setText] = useState('')
   const canSend = !disabled && text.trim() !== ''
 
@@ -26,7 +27,12 @@ function Composer({ onSend, disabled }: ComposerProps) {
     if (!canSend)
       return
     onSend(text.trim())
-    setText('')
+    changeText('')
+  }
+
+  function changeText(value: string) {
+    setText(value)
+    onTyping?.(value.trim() !== '')
   }
 
   function handleSubmit(event: React.SubmitEvent) {
@@ -48,7 +54,7 @@ function Composer({ onSend, disabled }: ComposerProps) {
     >
       <Textarea
         value={text}
-        onChange={(event) => setText(event.target.value)}
+        onChange={(event) => changeText(event.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Message SensAI..."
         aria-label="Message"
