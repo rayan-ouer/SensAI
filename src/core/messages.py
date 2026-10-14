@@ -1,16 +1,19 @@
 from dataclasses import dataclass, field
+from typing import Optional
 
 from dataclasses_json import dataclass_json
 
 from core.types import MessageType, ToolStatus
 
 from .tools import ToolCall
+import uuid
 
 
 @dataclass_json
 @dataclass
 class IMessage:
     content: str
+    id: str = field(default_factory=lambda: f"msg_{uuid.uuid4()}", kw_only=True)
 
     @property
     def role(self) -> MessageType:

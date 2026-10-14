@@ -33,7 +33,6 @@ def answer_user_message(agent: Agent, config: dict, spec: str, user_input: str) 
     return refresh_spec(config["spec_client"], config, spec, user_input, reply.content)
 
 def agent_loop(agent: Agent, config: dict, spec: str):
-    config["messages"] = []
     while True:
         user_input = read_user_input()
         if user_input is None or user_input == "/exit":

@@ -21,9 +21,9 @@ class Agent:
         model: str,  # the model to use
         tools: list[str],  # the tools to use
         role: SystemMessage,  # the role of the agent
-        response_format: dict | None,  # the response format to use
         llm: ILLMClient,  # the llm client to use
         handler: ToolHandler,  # the tool handler to use
+        response_format: dict | None = None,  # the response format to use
         max_loops: int = 10,  # the maximum number of loops to run
         think: bool | None = None,  # whether to think or not
         keep_thinking: bool = False,  # whether to keep thinking or not
