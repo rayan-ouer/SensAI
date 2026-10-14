@@ -3,7 +3,7 @@
 
 import type { CSSProperties } from "react";
 
-import "@/components/dotmatrix-loader.css";
+import "@/styles/dotmatrix-loader.css";
 import { useMemo } from "react";
 import { useDotMatrixPhases, usePrefersReducedMotion, useCyclePhase } from "@/lib/dotmatrix-hooks";
 
