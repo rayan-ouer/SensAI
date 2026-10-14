@@ -5,6 +5,8 @@
 ** ChatPage
 */
 
+import { useState } from 'react'
+
 import Composer from '@/components/chat/Composer'
 import EmptyState from '@/components/chat/EmptyState'
 import MessageList from '@/components/chat/MessageList'
@@ -12,6 +14,7 @@ import { useChat } from '@/hooks/useChat'
 
 function ChatPage() {
   const { messages, status, error, send } = useChat()
+  const [typing, setTyping] = useState(false)
 
   return (
     <div className="flex h-dvh flex-col">
@@ -19,11 +22,11 @@ function ChatPage() {
         <span className="text-sm font-medium tracking-tight text-amber-50">SensAI</span>
       </header>
       <main className="flex min-h-0 flex-1 flex-col">
-        {messages.length === 0 ? <EmptyState /> : <MessageList messages={messages} status={status} />}
+        {messages.length === 0 ? <EmptyState listening={typing} /> : <MessageList messages={messages} status={status} />}
       </main>
       <footer className="mx-auto w-full max-w-2xl px-4 pb-5">
         {error && <p role="alert" className="mb-2 px-2 text-sm text-red-300">{error}</p>}
-        <Composer onSend={send} disabled={status !== 'idle'} />
+        <Composer onSend={send} onTyping={setTyping} disabled={status !== 'idle'} />
       </footer>
     </div>
   )
