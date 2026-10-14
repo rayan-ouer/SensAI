@@ -8,7 +8,6 @@
 import { useEffect, useRef } from 'react'
 
 import MessageBubble from '@/components/chat/MessageBubble'
-import ThinkingIndicator from '@/components/chat/ThinkingIndicator'
 import type { ChatStatus, Message } from '@/types/chat'
 
 type MessageListProps = {
@@ -29,7 +28,6 @@ function MessageList({ messages, status }: MessageListProps) {
         {messages.map((message) => (
           <MessageBubble key={message.id} message={message} />
         ))}
-        {status === 'thinking' && <ThinkingIndicator />}
         <div ref={bottomRef} />
       </div>
     </div>

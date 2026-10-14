@@ -5,6 +5,8 @@
 ** MessageBubble
 */
 
+import AssistantAvatar from '@/components/chat/AssistantAvatar'
+import ThinkingIndicator from '@/components/chat/ThinkingIndicator'
 import type { Message } from '@/types/chat'
 
 type MessageBubbleProps = {
@@ -21,10 +23,20 @@ function MessageBubble({ message }: MessageBubbleProps) {
       </div>
     )
   }
+  const thinking = message.content === ''
   return (
-    <p className="max-w-[90%] text-[0.95rem] leading-relaxed whitespace-pre-wrap text-amber-50/90">
-      {message.content}
-    </p>
+    <div className="flex items-start gap-3">
+      <AssistantAvatar thinking={thinking} />
+      <div className="max-w-[90%] pt-1">
+        {thinking ? (
+          <ThinkingIndicator />
+        ) : (
+          <p className="animate-in text-[0.95rem] leading-relaxed whitespace-pre-wrap text-amber-50/90 duration-500 fade-in">
+            {message.content}
+          </p>
+        )}
+      </div>
+    </div>
   )
 }
 
