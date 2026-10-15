@@ -1,8 +1,8 @@
 from collections.abc import Callable
 
 import httpx
-import ollama
 
+import ollama
 from core.messages import AIMessage, IMessage
 from core.tools import ITool
 from llm.client import ILLMClient

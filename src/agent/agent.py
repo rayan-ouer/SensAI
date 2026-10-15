@@ -2,10 +2,10 @@ import json
 from collections.abc import Callable
 
 from core.messages import AIMessage, IMessage, SystemMessage, ToolMessage
-from core.tools import ToolCall, ToolExecution, ToolHandler
+from core.tools import ITool, ToolCall, ToolExecution, ToolHandler
 from core.types import MessageType
 from llm.client import ILLMClient
-from core.tools import ITool
+
 
 class AgentIterationLimitError(Exception):
     def __init__(self, max_loops: int, message: AIMessage):

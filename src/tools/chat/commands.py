@@ -7,6 +7,7 @@
 
 from core.messages import SystemMessage
 
+
 def switch_profile(config: dict, args: list[str]):
     if len(args) != 1:
         print("Usage: /profile <name>")

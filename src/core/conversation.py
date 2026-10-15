@@ -27,7 +27,7 @@ class MessageNotFoundError(Exception):
         super().__init__(f"Message {message_id} not found.")
 
 
-class IConversation(ABC):
+class IConversationService(ABC):
     @abstractmethod
     def create_conversation(
         self,

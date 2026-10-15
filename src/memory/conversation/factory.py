@@ -1,39 +1,34 @@
 from enum import Enum
-from typing import Callable
 
+from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from core.conversation import IConversation
+from core.conversation import IConversationService
 from memory.conversation.in_database import DatabaseConversation
 from memory.conversation.in_memory import InMemoryConversation
+from memory.database import get_db_session
 
 
 class ConversationStorage(str, Enum):
     MEMORY: str = "memory"
     DATABASE: str = "database"
 
-STORAGE_MAP: dict[ConversationStorage, Callable[[], IConversation]] = {
-    ConversationStorage.MEMORY: InMemoryConversation.create_conversation,
-    ConversationStorage.DATABASE: DatabaseConversation.create_conversation,
-}
 
+class ConversationServiceFactory:
+    def __init__(self):
+        self.CONVERSATION_SERVICE_MAP = {
+            ConversationStorage.MEMORY: self.create_memory,
+            ConversationStorage.DATABASE: self.create_database,
+        }
 
-class ConversationFactory:
-    """Builds a conversation store for the requested storage backend."""
-
-    @staticmethod
-    def create(
-        storage: ConversationStorage,
-        session: Session | None = None,
-    ) -> IConversation:
-        return STORAGE_MAP[storage](conversation_id, user_id, system_prompt)
+    def create(self, storage: ConversationStorage) -> IConversationService:
+        return self.CONVERSATION_SERVICE_MAP[storage]()
 
     @staticmethod
-    def _create_memory() -> IConversation:
+    def create_memory() -> IConversationService:
         return InMemoryConversation()
 
     @staticmethod
-    def _create_database(session: Session | None) -> IConversation:
-        if session is None:
-            raise ValueError("A database session is required for database storage")
+    def create_database() -> IConversationService:
+        session: Session = Depends(get_db_session)
         return DatabaseConversation(session)

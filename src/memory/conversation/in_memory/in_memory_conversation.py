@@ -3,8 +3,8 @@ from dataclasses import dataclass, field
 
 from core.conversation import (
     ConversationNotFoundError,
-    IConversation,
-    MessageNotFoundError,   
+    IConversationService,
+    MessageNotFoundError,
 )
 from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage
 
@@ -17,7 +17,7 @@ class InMemoryConversationData:
     user_id: str | None = None
 
 
-class InMemoryConversation(IConversation):
+class InMemoryConversation(IConversationService):
     def __init__(self) -> None:
         self._conversations: dict[str, InMemoryConversationData] = {}
 
