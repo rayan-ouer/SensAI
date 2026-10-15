@@ -1,5 +1,5 @@
 ## REQUIRED KEYS
-model: "qwen2.5-coder:7b" # local model name, key required
+model: "qwen2.5:7b" # local model name, key required
 
 system_prompt: "prompt/system.txt" # key required
 
