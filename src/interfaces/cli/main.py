@@ -17,10 +17,15 @@ from llm.client import ILLMClient
 from llm.ollama import OllamaClient
 from memory.conversation.factory import ConversationServiceFactory, ConversationStorage
 from tools.agent.profiles import init_profiles
+from tools.chat.create_client import create_ollama_client
 from tools.chat.errors import AppError
 from tools.chat.load_config import load_config
 from tools.chat.module import fatal
 from tools.spec.spec import load_spec
+from core.tools import ITool
+from tools.mcp.adapter import MCPAdapter
+from tools.mcp.client import MCPClient
+from tools.search.web import create_search_server
 
 
 def init_config():
@@ -38,6 +43,7 @@ def init_spec(config: dict):
 def init_llm(config: dict):
     model: str = config["model"]
     api_key = read_api_key()
+    config["spec_client"] = create_ollama_client(model, api_key)
     return OllamaClient(model, api_key)
 
 
@@ -55,7 +61,9 @@ def run():
     spec = init_spec(config)
     conversation = init_conversation(config)
     llm: ILLMClient = init_llm(config)
-    agent = create_agent(config, [], llm)
+    mcp_tools = MCPAdapter(MCPClient(create_search_server()))
+    tools: list[ITool] = list[ITool](mcp_tools.list_tools())
+    agent = create_agent(config, tools, llm)
     agent_loop(agent, conversation, config, spec)
     print("Bye bye")
 
