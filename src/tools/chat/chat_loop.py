@@ -17,6 +17,7 @@ def read_user_input() -> str | None:
     try:
         return input()
     except (EOFError, KeyboardInterrupt):
+        print()
         return None
 
 
