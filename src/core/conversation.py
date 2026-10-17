@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from .messages import AIMessage, HumanMessage, IMessage, SystemMessage
+from .messages import AIMessage, HumanMessage, IMessage, SystemMessage, ToolMessage
 
 
 class ConversationError(Exception):
@@ -70,6 +70,10 @@ class IConversationService(ABC):
 
     @abstractmethod
     def add_ai_message(self, conversation_id: str, message: AIMessage):
+        pass
+
+    @abstractmethod
+    def add_tool_message(self, conversation_id: str, message: ToolMessage):
         pass
 
     @abstractmethod

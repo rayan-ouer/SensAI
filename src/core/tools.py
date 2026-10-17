@@ -13,6 +13,8 @@ class ToolCall:
     id: str
     name: str
     arguments: dict[str, Any]
+    status: ToolStatus = ToolStatus.PENDING
+    result: dict[str, Any] | None = None
 
 
 @dataclass

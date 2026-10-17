@@ -8,7 +8,7 @@ from core.conversation import (
     IConversationService,
     MessageNotFoundError,
 )
-from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage
+from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage, ToolMessage
 from core.tools import ToolCall
 from core.types import ToolStatus
 
@@ -125,13 +125,18 @@ class DatabaseConversation(IConversationService):
         )
 
     def _create_db_tool_call(self, tool_call: ToolCall) -> DbToolCall:
+        error = None
+        if tool_call.status == ToolStatus.ERROR and isinstance(tool_call.result, dict):
+            error = tool_call.result.get("error")
         return DbToolCall(
             tool_call_id=tool_call.id,
             tool_name=tool_call.name,
             arguments=tool_call.arguments
             if isinstance(tool_call.arguments, dict)
             else {},
-            status=ToolStatus.PENDING,
+            status=tool_call.status,
+            result=tool_call.result,
+            error=str(error) if error else None,
         )
 
     """Business Logic"""
@@ -164,6 +169,9 @@ class DatabaseConversation(IConversationService):
             self._create_db_tool_call(tool_call) for tool_call in message.tool_calls
         )
         return db_message
+
+    def add_tool_message(self, conversation_id: str, message: ToolMessage) -> Message:
+        return self.add_message(conversation_id, message)
 
     def add_human_message(self, conversation_id: str, message: HumanMessage) -> Message:
         return self.add_message(conversation_id, message)

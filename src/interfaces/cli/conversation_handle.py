@@ -1,5 +1,5 @@
 from core.conversation import IConversationService
-from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage
+from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage, ToolMessage
 
 
 class ConversationHandle:
@@ -18,6 +18,9 @@ class ConversationHandle:
 
     def add_ai_message(self, message: AIMessage) -> IMessage:
         return self._service.add_ai_message(self.id, message)
+
+    def add_tool_message(self, message: ToolMessage) -> IMessage:
+        return self._service.add_tool_message(self.id, message)
 
     def add_system_message(self, message: SystemMessage) -> IMessage:
         return self._service.add_system_message(self.id, message)

@@ -5,8 +5,8 @@
 ## chat
 ##
 
-from agent.agent import Agent, AgentIterationLimitError
-from core.messages import AIMessage, HumanMessage
+from agent.agent import Agent, AgentIterationLimitError, AgentTurn
+from core.messages import AIMessage, HumanMessage, ToolMessage
 from interfaces.cli.cli_state import CliState
 from interfaces.cli.conversation_handle import ConversationHandle
 from interfaces.cli.setup import current_role
@@ -20,16 +20,18 @@ def send_to_agent(
         agent: Agent, conversation: ConversationHandle, user_input: str
 ) -> AIMessage | None:
     human_message: HumanMessage = HumanMessage(content=user_input)
-    history = conversation.get_used_history()
-    history.append(human_message)
     try:
-        reply = agent.invoke(history)
+        turn: AgentTurn = agent.invoke(conversation.get_used_history() + [human_message])
     except (LLMError, AgentIterationLimitError) as e:
         error(e)
         return None
     conversation.add_human_message(human_message)
-    conversation.add_ai_message(reply)
-    return reply
+    for message in turn.messages:
+        if isinstance(message, AIMessage):
+            conversation.add_ai_message(message)
+        elif isinstance(message, ToolMessage):
+            conversation.add_tool_message(message)
+    return turn.reply
 
 
 def answer_user_message(agent: Agent, state: CliState, spec: str, user_input: str) -> str:

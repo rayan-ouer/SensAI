@@ -6,7 +6,7 @@ from core.conversation import (
     IConversationService,
     MessageNotFoundError,
 )
-from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage
+from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage, ToolMessage
 
 
 @dataclass
@@ -119,6 +119,9 @@ class InMemoryConversation(IConversationService):
         )
 
     def add_ai_message(self, conversation_id: str, message: AIMessage) -> IMessage:
+        return self.add_message(conversation_id, message)
+
+    def add_tool_message(self, conversation_id: str, message: ToolMessage) -> IMessage:
         return self.add_message(conversation_id, message)
 
     def add_human_message(
