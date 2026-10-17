@@ -1,8 +1,8 @@
 from collections.abc import Callable
 
 import httpx
-import ollama
 
+import ollama
 from core.messages import AIMessage, IMessage
 from core.tools import ITool
 from llm.client import ILLMClient
@@ -58,6 +58,7 @@ class OllamaClient(ILLMClient):
         resolved_think = self._supports_thinking(model) if think is None else think
         accumulator = StreamAccumulator(on_chunk, is_cancelled, extract_thinking_tags)
 
+        print(f"Converting tools: {tools=}")
         try:
             stream = self._llm.chat(
                 model=model,

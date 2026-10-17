@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from memory.conversation.factory import ConversationStorage
 from tools.chat.load_config import ConfigLoader
 from tools.chat.settings import Settings
 
@@ -17,6 +18,7 @@ VERSION_API: str = "v0.1.0"
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = Settings()
+    app.state.storage = ConversationStorage(settings.conversation_storage)
     config = ConfigLoader(settings.config_path).get_configs()
     app.state.settings = settings
     app.state.config = config

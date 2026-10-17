@@ -5,6 +5,7 @@
 ## display
 ##
 
+
 class ChunkDisplay:
     def __init__(self) -> None:
         self._last_kind = None

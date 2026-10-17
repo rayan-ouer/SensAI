@@ -2,10 +2,10 @@ import json
 from collections.abc import Callable
 
 from core.messages import AIMessage, IMessage, SystemMessage, ToolMessage
-from core.tools import ToolCall, ToolExecution, ToolHandler
+from core.tools import ITool, ToolCall, ToolExecution, ToolHandler
 from core.types import MessageType
 from llm.client import ILLMClient
-from core.tools import ITool
+
 
 class AgentIterationLimitError(Exception):
     def __init__(self, max_loops: int, message: AIMessage):
@@ -21,9 +21,9 @@ class Agent:
         model: str,  # the model to use
         tools: list[str],  # the tools to use
         role: SystemMessage,  # the role of the agent
-        response_format: dict | None,  # the response format to use
         llm: ILLMClient,  # the llm client to use
         handler: ToolHandler,  # the tool handler to use
+        response_format: dict | None = None,  # the response format to use
         max_loops: int = 10,  # the maximum number of loops to run
         think: bool | None = None,  # whether to think or not
         keep_thinking: bool = False,  # whether to keep thinking or not
@@ -48,6 +48,7 @@ class Agent:
         self._is_cancelled = is_cancelled
 
     def execute_tool(self, tool_call: ToolCall, handler: ToolHandler) -> ToolExecution:
+        print(f"Executing tool: {tool_call=}")
         return handler.execute(tool_call)
 
     def invoke(self, messages: list[IMessage]) -> AIMessage:
@@ -69,6 +70,7 @@ class Agent:
                 on_chunk=self._on_chunk,
                 is_cancelled=self._is_cancelled,
             )
+            print(f"Response: {response=}")
             if response.interrupted:
                 response.tool_calls = []
                 messages.append(response)
