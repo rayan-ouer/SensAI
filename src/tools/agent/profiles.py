@@ -7,8 +7,10 @@
 
 from pathlib import Path
 
+from tools.chat.config_data import ConfigData
 from tools.chat.errors import ProfileError
 from tools.chat.load_config import read_prompt, read_yaml
+
 
 PROFILES_KEY = ("name", "role", "tone", "scope")
 
@@ -44,15 +46,14 @@ def load_profiles(config_dir: str, profiles_dir: str) -> dict[str, dict]:
     return profiles
 
 
-def init_profiles(config: dict):
-    profiles = load_profiles(config["config_dir"], config["profiles_dir"])
-    if config["default_profile"] not in profiles:
+def init_profiles(config: ConfigData) -> dict[str, dict]:
+    profiles = load_profiles(config.config_dir, config.profiles_dir)
+    if config.default_profile not in profiles:
         raise ProfileError(
-            f"default profile '{config['default_profile']}' not found",
-            config["profiles_dir"],
+            f"default profile '{config.default_profile}' not found",
+            config.profiles_dir,
         )
-    config["profiles"] = profiles
-    config["active_profile"] = config["default_profile"]
+    return profiles
 
 
 def build_profile_prompt(profile: dict) -> str:
