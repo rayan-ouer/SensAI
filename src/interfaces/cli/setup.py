@@ -35,7 +35,7 @@ def create_agent(session: Session, api_key: str | None, role: SystemMessage) -> 
     tools_handler = ToolHandler()
     register_search_tools(tools_handler)
     return Agent(
-        name=session.current_profile()["name"],
+        name=session.current_profile().name,
         model=session.config.model,
         tools=[tool.name for tool in tools_handler.list_tools()],
         role=role,

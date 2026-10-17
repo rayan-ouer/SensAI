@@ -21,7 +21,7 @@ def run():
     api_key = read_api_key()
     config = ConfigLoader(args.config).get_configs()
     session = create_session(config, api_key)
-    print(f"Starting {session.current_profile()['name']}")
+    print(f"Starting {session.current_profile().name}")
     spec = load_spec(session.config.spec_path)
     agent = create_agent(session, api_key, current_role(session, spec))
     agent_loop(agent, session, spec)
