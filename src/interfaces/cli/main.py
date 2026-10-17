@@ -5,10 +5,9 @@
 ## main
 ##
 
-import argparse
-
 from pydantic import ValidationError
 
+from interfaces.cli.args import handle_args
 from interfaces.cli.chat import agent_loop
 from interfaces.cli.conversation_handle import ConversationHandle
 from interfaces.cli.display import ChunkDisplay
@@ -17,34 +16,15 @@ from llm.client import ILLMClient
 from llm.ollama import OllamaClient
 from memory.conversation.factory import ConversationServiceFactory, ConversationStorage
 from tools.agent.profiles import init_profiles
-from tools.chat.create_client import create_ollama_client
+from interfaces.cli.setup import create_agent, create_cli_state, current_role, read_api_key
 from tools.chat.errors import AppError
-from tools.chat.load_config import load_config
+from tools.chat.load_config import ConfigLoader
 from tools.chat.module import fatal
 from tools.spec.spec import load_spec
 from core.tools import ITool
 from tools.mcp.adapter import MCPAdapter
 from tools.mcp.client import MCPClient
 from tools.search.web import create_search_server
-
-
-def init_config():
-    config = load_config(argparse.ArgumentParser())
-    init_profiles(config)
-    print(f"Starting {config['profiles'][config['active_profile']]['name']}")
-    config["display"] = ChunkDisplay()
-    return config
-
-
-def init_spec(config: dict):
-    return load_spec(config["spec_path"])
-
-
-def init_llm(config: dict):
-    model: str = config["model"]
-    api_key = read_api_key()
-    config["spec_client"] = create_ollama_client(model, api_key)
-    return OllamaClient(model, api_key)
 
 
 def init_conversation(config: dict) -> ConversationHandle:
@@ -57,14 +37,17 @@ def init_conversation(config: dict) -> ConversationHandle:
 
 
 def run():
-    config = init_config()
-    spec = init_spec(config)
+    args = handle_args()
+    api_key = read_api_key()
+    config = ConfigLoader(args.config).get_configs()
+    state = create_cli_state(config, api_key)
     conversation = init_conversation(config)
-    llm: ILLMClient = init_llm(config)
     mcp_tools = MCPAdapter(MCPClient(create_search_server()))
     tools: list[ITool] = list[ITool](mcp_tools.list_tools())
-    agent = create_agent(config, tools, llm)
-    agent_loop(agent, conversation, config, spec)
+    print(f"Starting {state.current_profile().name}")
+    spec = load_spec(state.config.spec_path)
+    agent = create_agent(state, tools, current_role(state, spec))
+    agent_loop(agent, conversation, state, spec)
     print("Bye bye")
 
 
