@@ -50,7 +50,7 @@ class ConfigLoader:
         self.config_path = config_path
         self.config_dir = os.path.dirname(os.path.abspath(config_path))
 
-    def validate_config(self, config: dict):
+    def _validate_config(self, config: dict):
         if not isinstance(config, dict):
             raise ConfigError("invalid config format", self.config_path)
         missing = [key for key in REQUIRED_KEYS if not config.get(key)]
@@ -59,7 +59,7 @@ class ConfigLoader:
 
     def get_configs(self) -> ConfigData:
         config = read_yaml(self.config_path)
-        self.validate_config(config)
+        self._validate_config(config)
         names = {field.name for field in fields(ConfigData)}
         values = {key: value for key, value in config.items() if key in names}
         for key in PROMPT_KEYS:
