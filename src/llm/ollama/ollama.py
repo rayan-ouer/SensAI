@@ -74,6 +74,7 @@ class OllamaClient(ILLMClient):
                 stream=True,
                 think=resolved_think,
                 format=response_format,
+                options=self._options,
             )
             return accumulator.consume(stream)
         except KeyboardInterrupt:
