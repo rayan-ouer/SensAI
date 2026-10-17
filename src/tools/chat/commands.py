@@ -6,27 +6,27 @@
 ##
 
 from core.messages import SystemMessage
-from interfaces.cli.session_data import Session
+from interfaces.cli.cli_state import CliState
 
 
-def switch_profile(session: Session, args: list[str]):
+def switch_profile(state: CliState, args: list[str]):
     if len(args) != 1:
         print("Usage: /profile <name>")
         return
     name = args[0]
-    if name not in session.profiles:
+    if name not in state.profiles:
         print(f"Unknown profile: '{name}'. Type /profiles to see available ones.")
         return
-    session.active_profile = name
-    note = f"The active agent has changed. From now on you are '{session.current_profile().name}'. Earlier assistant replies were written by a different agent."
-    session.messages.append(SystemMessage(content=note))
+    state.active_profile = name
+    note = f"The active agent has changed. From now on you are '{state.current_profile().name}'. Earlier assistant replies were written by a different agent."
+    state.messages.append(SystemMessage(content=note))
     print(f"Switched to '{name}' profile.")
 
 
-def print_profiles(session: Session, _args: list[str]):
-    for key, profile in session.profiles.items():
+def print_profiles(state: CliState, _args: list[str]):
+    for key, profile in state.profiles.items():
         profile_name = profile.name
-        marker = "-> " if key == session.active_profile else "   "
+        marker = "-> " if key == state.active_profile else "   "
         print(f"{marker}{key:<12}{profile_name}")
 
 
@@ -36,10 +36,10 @@ COMMANDS = {
 }
 
 
-def handle_command(session: Session, user_input: str):
+def handle_command(state: CliState, user_input: str):
     args = user_input.split()
     handler = COMMANDS.get(args[0])
     if handler is None:
         print("Unknown command.")
         return
-    handler(session, args[1:])
+    handler(state, args[1:])

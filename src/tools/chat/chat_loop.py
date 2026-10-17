@@ -5,8 +5,8 @@
 ## chat_loop
 ##
 
-import ollama
-
+from llm.client import ILLMClient
+from llm.errors import LLMError
 from tools.chat.config_data import ConfigData
 from tools.chat.module import warning
 from tools.spec.spec import save_spec, update_spec
@@ -22,7 +22,7 @@ def read_user_input() -> str | None:
 
 
 def refresh_spec(
-    ollama_client_instance: ollama.Client,
+    llm_client_instance: ILLMClient,
     config: ConfigData,
     spec: str,
     user_input: str,
@@ -30,7 +30,7 @@ def refresh_spec(
 ) -> str:
     try:
         new_spec = update_spec(
-            ollama_client_instance,
+            llm_client_instance,
             config.model,
             config.spec_prompt,
             spec,
@@ -40,7 +40,7 @@ def refresh_spec(
         )
         save_spec(config.spec_path, new_spec)
         return new_spec
-    except (ollama.ResponseError, ConnectionError, OSError) as e:
+    except (LLMError, OSError) as e:
         warning(f"{config.spec_path} not updated: {e}")
     except KeyboardInterrupt:
         print()
