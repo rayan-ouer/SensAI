@@ -5,9 +5,7 @@
 ## load_config
 ##
 
-import argparse
 import os
-
 import yaml
 
 from tools.chat.errors import ConfigError
@@ -20,8 +18,8 @@ REQUIRED_KEYS = (
     "default_profile",
     "spec_path",
 )
-PROMPT_KEYS = ("system_prompt", "spec_prompt")
 
+PROMPT_KEYS = ("system_prompt", "spec_prompt")
 
 def read_prompt(config_dir: str, relative_path: str) -> str:
     full_path = os.path.join(config_dir, relative_path)
@@ -63,19 +61,3 @@ def load_config_file(config_path: str) -> dict:
     config["config_dir"] = config_dir
     load_prompts(config_dir, config)
     return config
-
-
-def parse_config_path(parser: argparse.ArgumentParser) -> str:
-    parser.add_argument("config", nargs="?", help="path to the yaml config file")
-    parser.add_argument(
-        "-c", "--config", dest="config_opt", help="path to the yaml config file"
-    )
-    args = parser.parse_args()
-    config_path = args.config_opt or args.config
-    if not config_path:
-        parser.error("a config file is required (-c path or positional argument)")
-    return config_path
-
-
-def load_config(parser: argparse.ArgumentParser) -> dict:
-    return load_config_file(parse_config_path(parser))
