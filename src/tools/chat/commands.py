@@ -19,7 +19,7 @@ def switch_profile(state: CliState, args: list[str]):
         return
     state.active_profile = name
     note = f"The active agent has changed. From now on you are '{state.current_profile().name}'. Earlier assistant replies were written by a different agent."
-    state.messages.append(SystemMessage(content=note))
+    state.conversation.add_system_message(SystemMessage(content=note))
     print(f"Switched to '{name}' profile.")
 
 
