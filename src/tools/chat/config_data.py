@@ -5,7 +5,7 @@
 ## config_data
 ##
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -20,3 +20,4 @@ class ConfigData:
     spec_think: bool | None = None
     response_format: dict | None = None
     max_loops: int = 10
+    llm_settings: dict = field(default_factory=dict)
