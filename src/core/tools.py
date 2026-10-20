@@ -30,6 +30,12 @@ class ToolNotFoundError(Exception):
         super().__init__(f"Tool '{tool_name}' is not registered.")
 
 
+@dataclass()
+class ToolDependencies:
+    """Dependencies and context for tools."""
+
+    conversation_id: str | None = None
+
 class ITool(ABC):
     @property
     @abstractmethod

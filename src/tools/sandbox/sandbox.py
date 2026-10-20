@@ -7,8 +7,7 @@ from fastmcp import FastMCP
 from docker.types import Mount
 
 
-from core.tools import ITool, ToolHandler
-from tools.context import ToolContext
+from core.tools import ITool, ToolHandler, ToolDependencies
 from tools.mcp.adapter import MCPAdapter
 from tools.mcp.client import MCPClient
 
@@ -23,13 +22,9 @@ SESSION_ID_PATTERN = re.compile(r"[a-f0-9]{12}")
 class Sandbox:
     def __init__(self, session_id: str | None = None):
         if session_id is None:
-            self.session_id = uuid.uuid4().hex[:12]
+            self.session_id = str(uuid.uuid4())
         else:
             self.session_id = session_id
-        if not self._is_session_ide_valid():
-            raise ValueError(
-                "L'identifiant de session doit contenir 12 caractères hexadécimaux."
-            )
         self.name = f"sbox-{self.session_id}"
         self.volume = f"sbx-vol-{self.session_id}"
 
@@ -140,10 +135,10 @@ def create_sandbox_server(session_id: str | None = None) -> FastMCP:
 
     return mcp
 
-def create_sandbox_tools(context: ToolContext) -> list[ITool]:
-    server = create_sandbox_server(context.sandbox_session_id)
+def create_sandbox_tools(dependencies: ToolDependencies) -> list[ITool]:
+    server = create_sandbox_server(dependencies.conversation_id)
     return MCPAdapter(MCPClient(server)).list_tools()
 
 
-def register_sandbox_tools(manager: ToolHandler, context: ToolContext):
+def register_sandbox_tools(manager: ToolHandler, context: ToolDependencies):
     manager.register_many(create_sandbox_tools(context))

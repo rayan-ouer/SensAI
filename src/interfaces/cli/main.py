@@ -19,7 +19,7 @@ from interfaces.cli.setup import (
 from tools.chat.errors import AppError
 from tools.chat.load_config import ConfigLoader
 from tools.chat.module import fatal
-from tools.context import ToolContext
+from core.tools import ToolDependencies
 from tools.spec.spec import load_spec
 
 
@@ -30,7 +30,7 @@ def run():
     state = create_cli_state(config, api_key)
     print(f"Starting {state.current_profile().name}")
     spec = load_spec(state.config.spec_path)
-    tools = create_tools(ToolContext())
+    tools = create_tools(ToolDependencies(conversation_id=state.conversation.id))
     agent = create_agent(state, tools, current_role(state, spec))
     agent_loop(agent, state, spec)
 
