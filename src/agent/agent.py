@@ -55,7 +55,6 @@ class Agent:
         self._is_cancelled = is_cancelled
 
     def execute_tool(self, tool_call: ToolCall, handler: ToolHandler) -> ToolExecution:
-        # print(f"Executing tool: {tool_call=}")
         return handler.execute(tool_call)
 
     def _record(
@@ -87,7 +86,6 @@ class Agent:
                 on_chunk=self._on_chunk,
                 is_cancelled=self._is_cancelled,
             )
-            # print(f"Response: {response=}")
             if response.interrupted:
                 response.tool_calls = []
                 self._record(context, produced, response)
