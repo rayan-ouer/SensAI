@@ -14,13 +14,12 @@ from tools.chat.errors import ConfigError
 
 REQUIRED_KEYS = (
     "model",
-    "system_prompt",
     "spec_prompt",
     "profiles_dir",
     "default_profile",
     "spec_path",
 )
-PROMPT_KEYS = ("system_prompt", "spec_prompt")
+PROMPT_KEYS = ("spec_prompt",)
 
 
 def read_prompt(config_dir: str, relative_path: str) -> str:
