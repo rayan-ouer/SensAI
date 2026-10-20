@@ -47,8 +47,10 @@ class Agent:
         self._on_chunk = on_chunk
         self._is_cancelled = is_cancelled
 
-    def execute_tool(self, tool_call: ToolCall, handler: ToolHandler) -> ToolExecution:
-        return handler.execute(tool_call)
+    def execute_tool(
+        self, tool_call: ToolCall, handler: ToolHandler | None = None
+    ) -> ToolExecution:
+        return (handler or self._handler).execute(tool_call)
 
     def invoke(self, messages: list[IMessage]) -> AIMessage:
         self._ensure_role(messages)
