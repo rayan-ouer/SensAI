@@ -1,8 +1,16 @@
 import re
+import json
 import uuid
 
 import docker
+from fastmcp import FastMCP
 from docker.types import Mount
+
+
+from core.tools import ITool, ToolHandler
+from tools.context import ToolContext
+from tools.mcp.adapter import MCPAdapter
+from tools.mcp.client import MCPClient
 
 client = docker.from_env()
 IMAGE = "python:3.12-slim"
@@ -119,3 +127,23 @@ class Sandbox:
             client.volumes.get(self.volume).remove()
         except docker.errors.NotFound:
             pass
+
+
+def create_sandbox_server(session_id: str | None = None) -> FastMCP:
+    mcp = FastMCP("sensai-sandbox")
+    sandbox = Sandbox(session_id)
+
+    @mcp.tool
+    def execute_command(command: str) -> str:
+        """Execute a command in a sandbox"""
+        return json.dumps(sandbox.run_command(command))
+
+    return mcp
+
+def create_sandbox_tools(context: ToolContext) -> list[ITool]:
+    server = create_sandbox_server(context.sandbox_session_id)
+    return MCPAdapter(MCPClient(server)).list_tools()
+
+
+def register_sandbox_tools(manager: ToolHandler, context: ToolContext):
+    manager.register_many(create_sandbox_tools(context))

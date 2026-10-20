@@ -16,9 +16,9 @@ from memory.conversation.factory import ConversationServiceFactory, Conversation
 from tools.agent.profiles import build_profile_prompt, init_profiles
 from tools.chat.config_data import ConfigData
 from tools.chat.settings import Settings
-from tools.mcp.adapter import MCPAdapter
-from tools.mcp.client import MCPClient
-from tools.search.web import create_search_server
+from tools.context import ToolContext
+from tools.sandbox.sandbox import create_sandbox_tools
+from tools.search.web import create_search_tools
 from tools.spec.spec import build_system_prompt
 
 
@@ -70,7 +70,8 @@ def create_cli_state(config: ConfigData, api_key: str | None) -> CliState:
     )
 
 
-def create_tools() -> list[ITool]:
-    mcp_tools = MCPAdapter(MCPClient(create_search_server()))
-    tools: list[ITool] = list[ITool](mcp_tools.list_tools())
+def create_tools(context: ToolContext) -> list[ITool]:
+    tools: list[ITool] = []
+    tools.extend(create_search_tools())
+    tools.extend(create_sandbox_tools(context))
     return tools
