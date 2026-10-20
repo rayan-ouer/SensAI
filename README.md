@@ -47,6 +47,27 @@ wu-api
 
 The API is then available at <http://127.0.0.1:8084>.
 
+## Agent
+
+### Agent access
+
+By default, the agent have access to '.' as read and write (pwd confirmed by the user).
+If you want to modify accesses, you should use the file `configs/file_access.yaml` and select the folders
+and the permissions you are willing to give to it.
+
+### Example
+
+The file_access config file is a yaml file. Here is an example how to use it:
+
+```yaml
+permissions:
+  ".": read
+  "src": read_write
+  "private": read
+```
+
+For further informations, read the readme of the tool in `src/tools/file_access`
+
 ## License
 
 This project is licensed under the **MIT License**.
