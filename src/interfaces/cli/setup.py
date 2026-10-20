@@ -10,9 +10,8 @@ from core.messages import SystemMessage
 from core.tools import ToolHandler
 from llm.ollama import OllamaClient
 from tools.agent.profiles import build_profile_prompt
-from tools.file_access.file_access import get_file_access_context
 from tools.chat.settings import Settings
-from tools.chat.prompts import SYSTEM_PROMPT
+from tools.chat.prompts import SYSTEM_PROMPT, get_file_access_context
 from tools.file_access.file_access import register_file_access_tools
 from tools.search.web import register_search_tools
 from tools.spec.spec import build_system_prompt
