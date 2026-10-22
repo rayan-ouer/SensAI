@@ -33,13 +33,15 @@ def send_to_agent(
             conversation.add_tool_message(message)
     return turn.reply
 
-def answer_user_message(agent: Agent, state: CliState, spec: str, user_input: str) -> str:
+def answer_user_message(
+        agent: Agent, state: CliState, spec: str, user_input: str
+) -> tuple[str, str] | None:
     agent.set_role(current_role(state, spec))
     state.display.reset()
     state.human_answers.clear()
     reply = send_to_agent(agent, state.conversation, user_input)
     if reply is None:
-        return spec
+        return None
     print()
     spec_user_input = user_input
     if state.human_answers:
@@ -47,17 +49,20 @@ def answer_user_message(agent: Agent, state: CliState, spec: str, user_input: st
             f"- {answer['question']} {answer['answer']}"
             for answer in state.human_answers
         )
-    return refresh_spec(
-        state.llm, state.config, spec, spec_user_input, reply.content
-    )
+    return spec_user_input, reply.content
 
 
 def agent_loop(agent: Agent, state: CliState, spec: str):
+    pending_spec_update: tuple[str, str] | None = None
     while True:
         user_input = read_user_input()
+        if pending_spec_update is not None:
+            spec_input, reply = pending_spec_update
+            spec = refresh_spec(state.llm, state.config, spec, spec_input, reply)
+            pending_spec_update = None
         if user_input is None or user_input == "/exit":
             break
         if user_input.startswith("/"):
             handle_command(state, user_input)
         elif user_input:
-            spec = answer_user_message(agent, state, spec, user_input)
+            pending_spec_update = answer_user_message(agent, state, spec, user_input)
