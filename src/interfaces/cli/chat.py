@@ -26,11 +26,20 @@ def send_to_agent(agent: Agent, messages: list, user_input: str) -> AIMessage | 
 def answer_user_message(agent: Agent, config: dict, spec: str, user_input: str) -> str:
     agent.set_role(current_role(config, spec))
     config["display"].reset()
+    human_answers: list[dict[str, str]] = config.get("human_answers", [])
+    human_answers.clear()
     reply = send_to_agent(agent, config["messages"], user_input)
     if reply is None:
         return spec
     print()
-    return refresh_spec(config["spec_client"], config, spec, user_input, reply.content)
+    spec_user_input = user_input
+    if human_answers:
+        spec_user_input += "\n\nUser's answers to clarification questions:\n" + "\n".join(
+            f"- {answer['question']} {answer['answer']}" for answer in human_answers
+        )
+    return refresh_spec(
+        config["spec_client"], config, spec, spec_user_input, reply.content
+    )
 
 def agent_loop(agent: Agent, config: dict, spec: str):
     config["messages"] = []
