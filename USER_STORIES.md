@@ -3,7 +3,7 @@
 ## Agent profiles
 
 As a student working on several subjects, I want to switch the assistant to a
-specialised tutor without restarting, so that I keep my conversation while
+specialized tutor without restarting, so that I keep my conversation while
 getting answers in the right domain.
 
 Acceptance criteria:
@@ -21,11 +21,11 @@ Acceptance criteria:
 - A file added to `configs/profiles/` with `name`, `role`, `tone` and `scope`
   appears in `/profiles` at the next start.
 - The profile named by `default_profile` in the configuration file is the one
-  active at start, and the start message shows its name.
+  active at start and the start message shows its name.
 - An optional `prompt` key points to a text file whose instructions are added to
-  the tutor's behaviour.
-- A profile file with a missing key stops the program with an error naming the
-  missing key and the file, and exit code 84.
+  the tutor's behavior.
+- A profile file with a missing key stops the program with exit code 84 and an
+  error naming the missing key and the file.
 
 ## Living project specification
 
