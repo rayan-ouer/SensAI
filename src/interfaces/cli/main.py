@@ -5,35 +5,40 @@
 ## main
 ##
 
-import argparse
-
 from pydantic import ValidationError
 
+from interfaces.cli.args import handle_args
 from interfaces.cli.chat import agent_loop
-from interfaces.cli.display import ChunkDisplay
-from interfaces.cli.setup import create_agent, current_role, read_api_key
-from tools.agent.profiles import init_profiles
-from tools.chat.create_client import create_ollama_client
+from interfaces.cli.setup import (
+    create_agent,
+    create_cli_state,
+    create_tools,
+    current_role,
+    read_api_key,
+)
 from tools.chat.errors import AppError
-from tools.chat.load_config import load_config
+from tools.chat.load_config import ConfigLoader
 from tools.chat.module import fatal
 from tools.file_access.file_access import create_workspace
+from core.tools import ToolDependencies
 from tools.spec.spec import load_spec
 
 
 def run():
+    args = handle_args()
     api_key = read_api_key()
-    config = load_config(argparse.ArgumentParser())
-    init_profiles(config)
-    config["file_access_workspace"] = create_workspace(config)
-    print(f"Starting {config['profiles'][config['active_profile']]['name']}")
-    spec = load_spec(config["spec_path"])
-    config["spec_client"] = create_ollama_client(config["model"], api_key,
-        provider=config.get("ollama_provider", "auto"))
-    config["display"] = ChunkDisplay()
-    agent = create_agent(config, api_key, current_role(config, spec))
-    agent_loop(agent, config, spec)
-    print("Bye bye")
+    config = ConfigLoader(args.config).get_configs()
+    workspace = create_workspace(config)
+    state = create_cli_state(config, api_key, workspace)
+    print(f"Starting {state.current_profile().name}")
+    spec = load_spec(state.config.spec_path)
+    tools = create_tools(
+        ToolDependencies(conversation_id=state.conversation.id),
+        state.workspace,
+        state.human_answers,
+    )
+    agent = create_agent(state, tools, current_role(state, spec))
+    agent_loop(agent, state, spec)
 
 
 def main():

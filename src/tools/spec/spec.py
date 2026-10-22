@@ -7,7 +7,9 @@
 
 from pathlib import Path
 
-import ollama
+from core.messages import HumanMessage, SystemMessage
+from llm.client import ILLMClient
+
 
 SPEC_TAGS = ("<current_document>", "</current_document>")
 
@@ -53,26 +55,26 @@ def strip_code_fences(text: str) -> str:
 
 
 def update_spec(
-    ollama_client_instance: ollama.Client,
+    llm_client_instance: ILLMClient,
     model: str,
     spec_prompt: str,
     spec: str,
     user_input: str,
     reply: str,
-    think: str,
+    spec_think: bool | None,
 ) -> str:
     spec_messages = [
-        {"role": "system", "content": spec_prompt},
-        {"role": "user", "content": build_update_message(spec, user_input, reply)},
+        SystemMessage(content=spec_prompt),
+        HumanMessage(content=build_update_message(spec, user_input, reply)),
     ]
-    res = ollama_client_instance.chat(
+    res = llm_client_instance.chat(
         model=model,
         messages=spec_messages,
-        stream=False,
-        options={"temperature": 0},
-        think=think,
+        tools=[],
+        response_format=None,
+        think=spec_think,
     )
-    new_spec = strip_code_fences(strip_tags(res.message.content))
+    new_spec = strip_code_fences(strip_tags(res.content))
     if not new_spec.startswith("#"):
         return spec
     return new_spec

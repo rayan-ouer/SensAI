@@ -1,6 +1,7 @@
 ## REQUIRED KEYS
 model: "nemotron-3-nano:30b" # cloud model name, key required
 ollama_provider: cloud # use the cloud endpoint even if this model is installed locally
+think: true # keep model reasoning enabled for chat replies
 
 spec_prompt: "prompt/spec.txt" # key required
 
@@ -14,4 +15,7 @@ file_access_config: "file_access.yaml" # optional permissions file, relative to 
 
 ## OPTIONAL KEYS
 
-spec_think: false # optional: false disable model reasoning for spec updates (faster, less careful)
+spec_think: true # keep model reasoning enabled for spec updates too
+
+llm_settings: # optional: model options passed to the LLM client (temperature, top_p...)
+  temperature: 0

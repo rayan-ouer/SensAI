@@ -5,12 +5,15 @@
 ## load_config
 ##
 
-import argparse
 import os
+from dataclasses import fields
 
 import yaml
 
+from tools.chat.config_data import ConfigData
 from tools.chat.errors import ConfigError
+from tools.chat.prompts import SYSTEM_PROMPT
+
 
 REQUIRED_KEYS = (
     "model",
@@ -41,40 +44,25 @@ def read_yaml(path: str) -> dict:
         raise ConfigError("failed to parse config file", e)
 
 
-def validate_config(config: dict, required_keys: tuple[str, str, str], path: str):
-    if not isinstance(config, dict):
-        raise ConfigError("invalid config format", path)
-    missing = [key for key in required_keys if not config.get(key)]
-    if missing:
-        raise ConfigError(f"missing config keys: {', '.join(missing)}", path)
+class ConfigLoader:
+    def __init__(self, config_path: str):
+        self.config_path = config_path
+        self.config_dir = os.path.dirname(os.path.abspath(config_path))
 
+    def _validate_config(self, config: dict):
+        if not isinstance(config, dict):
+            raise ConfigError("invalid config format", self.config_path)
+        missing = [key for key in REQUIRED_KEYS if not config.get(key)]
+        if missing:
+            raise ConfigError(f"missing config keys: {', '.join(missing)}", self.config_path)
 
-def load_prompts(config_dir: str, config: dict):
-    for key in PROMPT_KEYS:
-        content = read_prompt(config_dir, config[key])
-        config[key] = content
-
-
-def load_config_file(config_path: str) -> dict:
-    config = read_yaml(config_path)
-    validate_config(config, REQUIRED_KEYS, config_path)
-    config_dir = os.path.dirname(os.path.abspath(config_path))
-    config["config_dir"] = config_dir
-    load_prompts(config_dir, config)
-    return config
-
-
-def parse_config_path(parser: argparse.ArgumentParser) -> str:
-    parser.add_argument("config", nargs="?", help="path to the yaml config file")
-    parser.add_argument(
-        "-c", "--config", dest="config_opt", help="path to the yaml config file"
-    )
-    args = parser.parse_args()
-    config_path = args.config_opt or args.config
-    if not config_path:
-        parser.error("a config file is required (-c path or positional argument)")
-    return config_path
-
-
-def load_config(parser: argparse.ArgumentParser) -> dict:
-    return load_config_file(parse_config_path(parser))
+    def get_configs(self) -> ConfigData:
+        config = read_yaml(self.config_path)
+        self._validate_config(config)
+        names = {field.name for field in fields(ConfigData)}
+        values = {key: value for key, value in config.items() if key in names}
+        for key in PROMPT_KEYS:
+            values[key] = read_prompt(self.config_dir, config[key])
+        values["system_prompt"] = SYSTEM_PROMPT
+        values["config_dir"] = self.config_dir
+        return ConfigData(**values)
