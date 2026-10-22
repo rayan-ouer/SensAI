@@ -28,11 +28,6 @@ class Sandbox:
         self.name = f"sbox-{self.session_id}"
         self.volume = f"sbx-vol-{self.session_id}"
 
-    def _is_session_ide_valid(self) -> bool:
-        if SESSION_ID_PATTERN.fullmatch(self.session_id):
-            return True
-        return False
-
     def _container(self):
         try:
             c = client.containers.get(self.name)
