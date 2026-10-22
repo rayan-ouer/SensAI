@@ -1,10 +1,17 @@
 import json
 from collections.abc import Callable
+from dataclasses import dataclass
 
 from core.messages import AIMessage, IMessage, SystemMessage, ToolMessage
 from core.tools import ITool, ToolCall, ToolExecution, ToolHandler
 from core.types import MessageType
 from llm.client import ILLMClient
+
+
+@dataclass
+class AgentTurn:
+    messages: list[IMessage]
+    reply: AIMessage
 
 
 class AgentIterationLimitError(Exception):
@@ -48,12 +55,21 @@ class Agent:
         self._is_cancelled = is_cancelled
 
     def execute_tool(self, tool_call: ToolCall, handler: ToolHandler) -> ToolExecution:
-        # print(f"Executing tool: {tool_call=}")
         return handler.execute(tool_call)
 
-    def invoke(self, messages: list[IMessage]) -> AIMessage:
-        self._ensure_role(messages)
+    def _record(
+        self,
+        context: list[IMessage],
+        produced: list[IMessage],
+        message: IMessage,
+    ) -> None:
+        context.append(message)
+        produced.append(message)
 
+    def invoke(self, messages: list[IMessage]) -> AgentTurn:
+        context = list(messages)
+        produced: list[IMessage] = []
+        self._ensure_role(context)
         if self._max_loops < 1:
             raise AgentIterationLimitError(
                 self._max_loops, AIMessage(content="", truncated=True)
@@ -61,7 +77,7 @@ class Agent:
         for index in range(self._max_loops):
             response: AIMessage = self._llm.chat(
                 self._model,
-                messages,
+                context,
                 self._resolve_tools(),
                 self._response_format,
                 think=self._think,
@@ -70,28 +86,31 @@ class Agent:
                 on_chunk=self._on_chunk,
                 is_cancelled=self._is_cancelled,
             )
-            # print(f"Response: {response=}")
             if response.interrupted:
                 response.tool_calls = []
-                messages.append(response)
-                return response
+                self._record(context, produced, response)
+                return AgentTurn(messages=produced, reply=response)
             if response.tool_calls and index == self._max_loops - 1:
                 response.truncated = True
-                messages.append(response)
+                self._record(context, produced, response)
                 raise AgentIterationLimitError(self._max_loops, response)
-            messages.append(response)
+            self._record(context, produced, response)
             if not response.tool_calls:
-                return response
+                return AgentTurn(messages=produced, reply=response)
             for tool_call in response.tool_calls:
                 execution: ToolExecution = self.execute_tool(tool_call, self._handler)
-                messages.append(
+                tool_call.status = execution.status
+                tool_call.result = execution.result
+                self._record(
+                    context,
+                    produced,
                     ToolMessage(
                         content=json.dumps(execution.result, ensure_ascii=False),
                         tool_call_id=tool_call.id,
                         tool_name=tool_call.name,
                         result=execution.result,
                         status=execution.status,
-                    )
+                    ),
                 )
         raise AgentIterationLimitError(
             self._max_loops, AIMessage(content="", truncated=True)
