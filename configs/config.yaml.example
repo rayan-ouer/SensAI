@@ -1,14 +1,38 @@
+## SensAI configuration example
+## Copy this file and run: wu -c path/to/your_config.yaml
+## Paths are relative to this file's directory, except spec_path (relative to where you run wu).
+
 ## REQUIRED KEYS
-model: "qwen2.5-coder:7b" # cloud or local model name, key required
 
-system_prompt: "prompt/system.txt" # key required
+# string: model name, local (see `ollama list`) or Ollama Cloud (needs OLLAMA_API_KEY in .env)
+model: "qwen2.5-coder:7b"
 
-spec_prompt: "prompt/spec.txt" # key required
+# string: path to the general system prompt, a text file
+system_prompt: "prompt/system.txt"
 
-spec_path: "workspace/ASSISTANT.md"  # key required
+# string: path to the prompt of the note-keeper that updates the specification, a text file
+spec_prompt: "prompt/spec.txt"
 
-profiles_dir: "profiles" # key required, relative to this file's directory
+# string: path of the living specification, a Markdown file created if missing
+spec_path: "workspace/ASSISTANT.md"
 
-default_profile: "wu" # key required, name of a file in profiles_dir (without .yaml)
+# string: directory containing the agent profiles (*.yaml files)
+profiles_dir: "profiles"
+
+# string: profile active at start, a file name in profiles_dir without .yaml
+default_profile: "wu"
 
 ## OPTIONAL KEYS
+
+# bool: model reasoning during spec updates, false is faster but less careful (default: model's choice)
+spec_think: false
+
+# int: maximum number of agent steps (model calls and tool calls) for one message (default: 10)
+max_loops: 10
+
+# dict: options passed to the model (default: {})
+# temperature (float, 0 = always the same answer), top_k (int), top_p (float), num_ctx (int), seed (int)
+llm_settings: {temperature: 0.2, top_k: 50}
+
+# dict: JSON schema the replies must follow (default: free text)
+# response_format: {type: object, properties: {answer: {type: string}}, required: [answer]}

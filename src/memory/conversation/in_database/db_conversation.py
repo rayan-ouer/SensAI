@@ -1,9 +1,11 @@
+import uuid
+
 from sqlalchemy import literal, select
 from sqlalchemy.orm import Session
 
 from core.conversation import (
     ConversationNotFoundError,
-    IConversation,
+    IConversationService,
     MessageNotFoundError,
 )
 from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage
@@ -14,9 +16,29 @@ from .models import Conversation, Message
 from .models import ToolCall as DbToolCall
 
 
-class DatabaseConversation(IConversation):
+class DatabaseConversation(IConversationService):
     def __init__(self, session: Session) -> None:
         self._db: Session = session
+
+    def create_conversation(
+        self,
+        user_id: str,
+        system_prompt: str | None = None,
+    ) -> str:
+        if not user_id:
+            raise ValueError("user_id is required to create a database conversation")
+
+        conversation = Conversation(
+            id=uuid.uuid4(),
+            user_id=user_id,
+        )
+        self._db.add(conversation)
+        self._db.flush()
+
+        created_id: str = str(conversation.id)
+        if system_prompt:
+            self.add_system_message(created_id, SystemMessage(content=system_prompt))
+        return created_id
 
     """Getters"""
 
