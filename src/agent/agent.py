@@ -30,6 +30,7 @@ class Agent:
         role: SystemMessage,  # the role of the agent
         llm: ILLMClient,  # the llm client to use
         handler: ToolHandler,  # the tool handler to use
+        description: str = str(),  # what this agent does (exposed when used as a tool)
         response_format: dict | None = None,  # the response format to use
         max_loops: int = 10,  # the maximum number of loops to run
         think: bool | None = None,  # whether to think or not
@@ -41,6 +42,7 @@ class Agent:
         | None = None,  # the function to call to check if the agent is cancelled
     ):
         self._name = name
+        self._description = description
         self._model = model
         self._tools = tools
         self._role = role
@@ -53,6 +55,14 @@ class Agent:
         self._extract_thinking_tags = extract_thinking_tags
         self._on_chunk = on_chunk
         self._is_cancelled = is_cancelled
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def description(self) -> str:
+        return self._description
 
     def execute_tool(self, tool_call: ToolCall, handler: ToolHandler) -> ToolExecution:
         return handler.execute(tool_call)

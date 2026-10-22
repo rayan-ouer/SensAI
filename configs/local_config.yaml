@@ -13,6 +13,8 @@ default_profile: "wu" # key required, name of a file in profiles_dir (without .y
 
 ## OPTIONAL KEYS
 
+# agents_path: "agents/agent.yaml" # optional: multi-agent graph relative to this file's directory
+
 spec_think: false # optional: false disable model reasoning for spec updates (faster, less careful)
 
 llm_settings: # optional: model options passed to the LLM client (temperature, top_p...)

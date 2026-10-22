@@ -1,0 +1,20 @@
+entry: profile_agent
+
+agents:
+  - name: review_agent
+    description: Review the conversation and provide a summary of the user's information.
+    role: You are a helpful assistant that reads the conversation and provides a summary of the user's information.
+    model: gpt-4o
+    tools: [execute_command]
+    agents: []
+    response_format: {}
+    max_loops: 10
+
+  - name: profile_agent
+    description: Search information about anything.
+    role: You are a helpful assistant that searches the internet for information about anything.
+    model: gpt-4o
+    tools: [search_web]
+    agents: [review_agent]
+    response_format: {}
+    max_loops: 10

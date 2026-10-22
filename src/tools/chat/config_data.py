@@ -17,6 +17,7 @@ class ConfigData:
     profiles_dir: str
     default_profile: str
     config_dir: str
+    agents_path: str = "agents/agent.yaml"
     spec_think: bool | None = None
     response_format: dict | None = None
     max_loops: int = 10
