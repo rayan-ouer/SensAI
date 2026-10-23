@@ -23,7 +23,9 @@ class AgentsLoader:
         return stripped
 
     @staticmethod
-    def _as_string_list(value: list[str], field_name: str, agent_name: str) -> list[str]:
+    def _as_string_list(
+        value: list[str], field_name: str, agent_name: str
+    ) -> list[str]:
         items: list[str] = []
 
         for item in value:
@@ -57,7 +59,9 @@ class AgentsLoader:
         response_format: dict | None = raw.get("response_format", None)
         max_loops = raw.get("max_loops", 10)
         if max_loops < 1:
-            raise AgentConfigError(f"agent '{name}': 'max_loops' must be a positive integer")
+            raise AgentConfigError(
+                f"agent '{name}': 'max_loops' must be a positive integer"
+            )
         return AgentDefinition(
             name=name,
             description=description,

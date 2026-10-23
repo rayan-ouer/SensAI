@@ -43,9 +43,7 @@ def _validate_tools(
 ) -> None:
     for tool_name in agent.tools:
         if tool_name not in tool_set:
-            raise AgentConfigError(
-                f"agent '{agent.name}': unknown tool '{tool_name}'"
-            )
+            raise AgentConfigError(f"agent '{agent.name}': unknown tool '{tool_name}'")
         if tool_name in agents:
             raise AgentConfigError(
                 f"agent '{agent.name}': '{tool_name}' is both a tool and an agent name; "
