@@ -13,7 +13,6 @@ import yaml
 from tools.chat.config_data import ConfigData
 from tools.chat.errors import ConfigError
 
-
 REQUIRED_KEYS = (
     "model",
     "system_prompt",
@@ -55,7 +54,9 @@ class ConfigLoader:
             raise ConfigError("invalid config format", self.config_path)
         missing = [key for key in REQUIRED_KEYS if not config.get(key)]
         if missing:
-            raise ConfigError(f"missing config keys: {', '.join(missing)}", self.config_path)
+            raise ConfigError(
+                f"missing config keys: {', '.join(missing)}", self.config_path
+            )
 
     def get_configs(self) -> ConfigData:
         config = read_yaml(self.config_path)

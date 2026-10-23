@@ -10,7 +10,6 @@ from pathlib import Path
 from core.messages import HumanMessage, SystemMessage
 from llm.client import ILLMClient
 
-
 SPEC_TAGS = ("<current_document>", "</current_document>")
 
 

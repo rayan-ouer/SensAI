@@ -4,7 +4,7 @@ from .agent import Agent, AgentIterationLimitError, AgentTurn
 from .definition import AgentDefinition, AgentsConfig
 from .errors import AgentConfigError
 from .factory import AgentFactory
-from .load import default_agents_config, load_agents_config
+from .load import AgentsLoader
 
 __all__ = [
     "Agent",
@@ -14,6 +14,5 @@ __all__ = [
     "AgentIterationLimitError",
     "AgentTurn",
     "AgentsConfig",
-    "default_agents_config",
-    "load_agents_config",
+    "AgentsLoader",
 ]

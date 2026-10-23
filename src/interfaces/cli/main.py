@@ -7,6 +7,7 @@
 
 from pydantic import ValidationError
 
+from core.tools import ToolDependencies
 from interfaces.cli.args import handle_args
 from interfaces.cli.chat import agent_loop
 from interfaces.cli.setup import (
@@ -19,7 +20,6 @@ from interfaces.cli.setup import (
 from tools.chat.errors import AppError
 from tools.chat.load_config import ConfigLoader
 from tools.chat.module import fatal
-from core.tools import ToolDependencies
 from tools.spec.spec import load_spec
 
 

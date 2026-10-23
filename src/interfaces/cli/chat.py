@@ -17,11 +17,13 @@ from tools.chat.module import error
 
 
 def send_to_agent(
-        agent: Agent, conversation: ConversationHandle, user_input: str
+    agent: Agent, conversation: ConversationHandle, user_input: str
 ) -> AIMessage | None:
     human_message: HumanMessage = HumanMessage(content=user_input)
     try:
-        turn: AgentTurn = agent.invoke(conversation.get_used_history() + [human_message])
+        turn: AgentTurn = agent.invoke(
+            conversation.get_used_history() + [human_message]
+        )
     except (LLMError, AgentIterationLimitError) as e:
         error(e)
         return None
@@ -34,7 +36,9 @@ def send_to_agent(
     return turn.reply
 
 
-def answer_user_message(agent: Agent, state: CliState, spec: str, user_input: str) -> str:
+def answer_user_message(
+    agent: Agent, state: CliState, spec: str, user_input: str
+) -> str:
     agent.set_role(current_role(state, spec))
     state.display.reset()
     reply = send_to_agent(agent, state.conversation, user_input)

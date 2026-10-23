@@ -9,13 +9,12 @@ from collections import defaultdict
 from collections.abc import Collection
 
 from agent.definition import AgentDefinition, AgentsConfig
+from agent.errors import AgentConfigError
 
 
-def _detect_cycles(agents: dict[str, AgentDefinition]) -> list[str]:
-    """Return cycle descriptions using DFS (white/gray/black)."""
+def _detect_cycles(agents: dict[str, AgentDefinition]) -> None:
     white, gray, black = 0, 1, 2
     state = {name: white for name in agents}
-    errors: list[str] = []
 
     def visit(name: str, stack: list[str]) -> None:
         state[name] = gray
@@ -26,7 +25,7 @@ def _detect_cycles(agents: dict[str, AgentDefinition]) -> list[str]:
             if state[child] == gray:
                 cycle_start = stack.index(child)
                 cycle = stack[cycle_start:] + [child]
-                errors.append(f"cycle detected: {' -> '.join(cycle)}")
+                raise AgentConfigError(f"cycle detected: {' -> '.join(cycle)}")
             elif state[child] == white:
                 visit(child, stack)
         stack.pop()
@@ -35,14 +34,47 @@ def _detect_cycles(agents: dict[str, AgentDefinition]) -> list[str]:
     for name in agents:
         if state[name] == white:
             visit(name, [])
-    return errors
+
+
+def _validate_tools(
+    agent: AgentDefinition,
+    tool_set: set[str],
+    agents: dict[str, AgentDefinition],
+) -> None:
+    for tool_name in agent.tools:
+        if tool_name not in tool_set:
+            raise AgentConfigError(
+                f"agent '{agent.name}': unknown tool '{tool_name}'"
+            )
+        if tool_name in agents:
+            raise AgentConfigError(
+                f"agent '{agent.name}': '{tool_name}' is both a tool and an agent name; "
+                "put child agents under 'agents', not 'tools'"
+            )
+
+
+def _validate_children(
+    agent: AgentDefinition,
+    agents: dict[str, AgentDefinition],
+) -> None:
+    for child_name in agent.agents:
+        if child_name not in agents:
+            raise AgentConfigError(
+                f"agent '{agent.name}': unknown child agent '{child_name}'"
+            )
+
+
+def _validate_shared_names(agent: AgentDefinition) -> None:
+    for name in sorted(set(agent.tools) & set(agent.agents)):
+        raise AgentConfigError(
+            f"agent '{agent.name}': '{name}' listed in both 'tools' and 'agents'"
+        )
 
 
 def validate_agents_config(
     config: AgentsConfig,
     available_tools: Collection[str],
-) -> list[str]:
-    errors: list[str] = []
+) -> None:
     tool_set = set(available_tools)
     agents = config.by_name()
 
@@ -51,33 +83,16 @@ def validate_agents_config(
         seen[agent.name] += 1
     for name, count in seen.items():
         if count > 1:
-            errors.append(f"duplicate agent name '{name}' ({count} definitions)")
-
-    if config.entry not in agents:
-        errors.append(f"entry agent '{config.entry}' is not defined")
-
-    for agent in config.agents:
-        for tool_name in agent.tools:
-            if tool_name not in tool_set:
-                errors.append(
-                    f"agent '{agent.name}': unknown tool '{tool_name}'"
-                )
-            if tool_name in agents:
-                errors.append(
-                    f"agent '{agent.name}': '{tool_name}' is both a tool and an agent name; "
-                    "put child agents under 'agents', not 'tools'"
-                )
-
-        for child_name in agent.agents:
-            if child_name not in agents:
-                errors.append(
-                    f"agent '{agent.name}': unknown child agent '{child_name}'"
-                )
-
-        for name in sorted(set(agent.tools) & set(agent.agents)):
-            errors.append(
-                f"agent '{agent.name}': '{name}' listed in both 'tools' and 'agents'"
+            raise AgentConfigError(
+                f"duplicate agent name '{name}' ({count} definitions)"
             )
 
-    errors.extend(_detect_cycles(agents))
-    return errors
+    if config.entry not in agents:
+        raise AgentConfigError(f"entry agent '{config.entry}' is not defined")
+
+    for agent in config.agents:
+        _validate_tools(agent, tool_set, agents)
+        _validate_children(agent, agents)
+        _validate_shared_names(agent)
+
+    _detect_cycles(agents)

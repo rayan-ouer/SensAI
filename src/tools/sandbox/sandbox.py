@@ -1,13 +1,12 @@
-import re
 import json
+import re
 import uuid
 
 import docker
-from fastmcp import FastMCP
 from docker.types import Mount
+from fastmcp import FastMCP
 
-
-from core.tools import ITool, ToolHandler, ToolDependencies
+from core.tools import ITool, ToolDependencies, ToolHandler
 from tools.mcp.adapter import MCPAdapter
 from tools.mcp.client import MCPClient
 
@@ -27,11 +26,6 @@ class Sandbox:
             self.session_id = session_id
         self.name = f"sbox-{self.session_id}"
         self.volume = f"sbx-vol-{self.session_id}"
-
-    def _is_session_ide_valid(self) -> bool:
-        if SESSION_ID_PATTERN.fullmatch(self.session_id):
-            return True
-        return False
 
     def _container(self):
         try:
@@ -134,6 +128,7 @@ def create_sandbox_server(session_id: str | None = None) -> FastMCP:
         return json.dumps(sandbox.run_command(command))
 
     return mcp
+
 
 def create_sandbox_tools(dependencies: ToolDependencies) -> list[ITool]:
     server = create_sandbox_server(dependencies.conversation_id)

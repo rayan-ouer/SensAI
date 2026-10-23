@@ -13,15 +13,12 @@ from tools.chat.config_data import ConfigData
 from tools.chat.errors import ProfileError
 from tools.chat.load_config import read_prompt, read_yaml
 
-
 PROFILES_KEY = ("name", "role", "tone", "scope")
 
 
 def validate_profile(
-    file_path: Path,
-    config: dict,
-    required_keys: tuple[str, str, str]
-    ):
+    file_path: Path, config: dict, required_keys: tuple[str, str, str]
+):
     if not isinstance(config, dict):
         raise ProfileError("invalid profile format", file_path)
     missing = [key for key in required_keys if not config.get(key)]

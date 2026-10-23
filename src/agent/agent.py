@@ -30,7 +30,7 @@ class Agent:
         role: SystemMessage,  # the role of the agent
         llm: ILLMClient,  # the llm client to use
         handler: ToolHandler,  # the tool handler to use
-        description: str = str(),  # what this agent does (exposed when used as a tool)
+        description: str = "",  # what this agent does (exposed when used as a tool)
         response_format: dict | None = None,  # the response format to use
         max_loops: int = 10,  # the maximum number of loops to run
         think: bool | None = None,  # whether to think or not

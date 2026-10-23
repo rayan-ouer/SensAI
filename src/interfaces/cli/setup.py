@@ -9,7 +9,7 @@ from pathlib import Path
 
 from agent.agent import Agent
 from agent.factory import AgentFactory
-from agent.load import default_agents_config, load_agents_config
+from agent.load import AgentsLoader
 from core.messages import SystemMessage
 from core.tools import ITool, ToolDependencies, ToolHandler
 from interfaces.cli.cli_state import CliState
@@ -32,7 +32,9 @@ def read_api_key() -> str | None:
 
 def current_role(state: CliState, spec: str) -> SystemMessage:
     profile = state.current_profile()
-    text = build_system_prompt(state.config.system_prompt, build_profile_prompt(profile), spec)
+    text = build_system_prompt(
+        state.config.system_prompt, build_profile_prompt(profile), spec
+    )
     return SystemMessage(content=text)
 
 
@@ -40,9 +42,9 @@ def create_agent(state: CliState, tools: list[ITool], role: SystemMessage) -> Ag
     registry = ToolHandler()
     registry.register_many(tools)
     agents_path = Path(state.config.config_dir, state.config.agents_path)
-    agents_config = load_agents_config(agents_path)
+    agents_config = AgentsLoader.load(agents_path)
     if agents_config is None:
-        agents_config = default_agents_config(
+        agents_config = AgentsLoader.default(
             model=state.config.model,
             role=role.content,
             tool_names=[tool.name for tool in registry.list_tools()],

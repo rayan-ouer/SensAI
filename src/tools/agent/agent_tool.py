@@ -44,12 +44,12 @@ class AgentTool(ITool):
 
     def run(self, arguments: dict[str, Any]) -> str:
         task: str = arguments.get("task")
-        
+
         try:
             turn: AgentTurn = self._agent.invoke([HumanMessage(content=task.strip())])
         except AgentIterationLimitError as error:
-            content = error.message.content if error.message else str()
+            content = error.message.content if error.message else ""
             if content:
                 return content
             raise
-        return turn.reply.content or str()
+        return turn.reply.content or ""

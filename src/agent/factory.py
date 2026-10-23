@@ -9,13 +9,13 @@ from collections import defaultdict, deque
 from collections.abc import Callable
 
 from agent.agent import Agent
-from tools.agent.agent_tool import AgentTool
 from agent.definition import AgentDefinition, AgentsConfig
 from agent.errors import AgentConfigError
 from agent.validate import validate_agents_config
 from core.messages import SystemMessage
-from core.tools import ITool, ToolHandler
+from core.tools import ToolHandler
 from llm.client import ILLMClient
+from tools.agent.agent_tool import AgentTool
 
 
 class AgentFactory:
@@ -33,12 +33,10 @@ class AgentFactory:
         keep_thinking: bool = False,
         extract_thinking_tags: bool = False,
     ) -> Agent:
-        errors = validate_agents_config(
+        validate_agents_config(
             config,
             [tool.name for tool in self._tools.list_tools()],
         )
-        if errors:
-            raise AgentConfigError(errors)
 
         order = self._build_order(config)
         built: dict[str, Agent] = {}
@@ -56,7 +54,6 @@ class AgentFactory:
                 keep_thinking=keep_thinking,
                 extract_thinking_tags=extract_thinking_tags,
             )
-
         return built[config.entry]
 
     def _build_agent(
@@ -102,15 +99,14 @@ class AgentFactory:
     @staticmethod
     def _build_order(config: AgentsConfig) -> list[str]:
         """Topological order: children before parents."""
-        agents = config.by_name()
-        indegree = {name: 0 for name in agents}
+        agents: dict[str, AgentDefinition] = config.by_name()
+        indegree: dict[str, int] = {name: 0 for name in agents}
         dependents: dict[str, list[str]] = defaultdict(list)
 
         for name, definition in agents.items():
             for child in definition.agents:
                 if child not in agents:
                     continue
-                # edge child -> parent (child must be built first)
                 dependents[child].append(name)
                 indegree[name] += 1
 
@@ -125,9 +121,8 @@ class AgentFactory:
                     queue.append(parent)
 
         if len(order) != len(agents):
-            # Cycles are reported by validate; keep a clear fallback.
             missing = sorted(set(agents) - set(order))
             raise AgentConfigError(
-                [f"cannot order agents due to cycle involving: {', '.join(missing)}"]
+                f"cannot order agents due to cycle involving: {', '.join(missing)}"
             )
         return order

@@ -8,7 +8,7 @@
 from dataclasses import dataclass, field
 
 
-@dataclass(frozen=True)
+@dataclass()
 class AgentDefinition:
     name: str
     description: str
@@ -20,7 +20,7 @@ class AgentDefinition:
     max_loops: int = 10
 
 
-@dataclass(frozen=True)
+@dataclass()
 class AgentsConfig:
     entry: str
     agents: list[AgentDefinition]

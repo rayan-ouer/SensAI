@@ -36,6 +36,7 @@ class ToolDependencies:
 
     conversation_id: str | None = None
 
+
 class ITool(ABC):
     @property
     @abstractmethod

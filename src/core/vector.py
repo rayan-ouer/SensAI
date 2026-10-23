@@ -8,7 +8,7 @@ class VectorDocument:
         content: str,
         embedding: list[float],
         source: str,
-        meta: dict = None,
+        meta: dict | None = None,
     ):
         self.id = id
         self.content = content
