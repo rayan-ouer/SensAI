@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## conversation
+##
+
 from abc import ABC, abstractmethod
 
 from .messages import AIMessage, HumanMessage, IMessage, SystemMessage, ToolMessage

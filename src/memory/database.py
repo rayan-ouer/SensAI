@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## database
+##
+
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker

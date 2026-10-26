@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## db_conversation
+##
+
 import uuid
 
 from sqlalchemy import literal, select

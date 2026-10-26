@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## errors
+##
+
 class LLMError(Exception):
     """Base error for a model request."""
 

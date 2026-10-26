@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## conversation_handle
+##
+
 from core.conversation import IConversationService
 from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage, ToolMessage
 
