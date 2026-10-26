@@ -1,12 +1,14 @@
+import uuid
+
 from sqlalchemy import literal, select
 from sqlalchemy.orm import Session
 
 from core.conversation import (
     ConversationNotFoundError,
-    IConversation,
+    IConversationService,
     MessageNotFoundError,
 )
-from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage
+from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage, ToolMessage
 from core.tools import ToolCall
 from core.types import ToolStatus
 
@@ -14,9 +16,29 @@ from .models import Conversation, Message
 from .models import ToolCall as DbToolCall
 
 
-class DatabaseConversation(IConversation):
+class DatabaseConversation(IConversationService):
     def __init__(self, session: Session) -> None:
         self._db: Session = session
+
+    def create_conversation(
+        self,
+        user_id: str,
+        system_prompt: str | None = None,
+    ) -> str:
+        if not user_id:
+            raise ValueError("user_id is required to create a database conversation")
+
+        conversation = Conversation(
+            id=uuid.uuid4(),
+            user_id=user_id,
+        )
+        self._db.add(conversation)
+        self._db.flush()
+
+        created_id: str = str(conversation.id)
+        if system_prompt:
+            self.add_system_message(created_id, SystemMessage(content=system_prompt))
+        return created_id
 
     """Getters"""
 
@@ -103,13 +125,18 @@ class DatabaseConversation(IConversation):
         )
 
     def _create_db_tool_call(self, tool_call: ToolCall) -> DbToolCall:
+        error = None
+        if tool_call.status == ToolStatus.ERROR and isinstance(tool_call.result, dict):
+            error = tool_call.result.get("error")
         return DbToolCall(
             tool_call_id=tool_call.id,
             tool_name=tool_call.name,
             arguments=tool_call.arguments
             if isinstance(tool_call.arguments, dict)
             else {},
-            status=ToolStatus.PENDING,
+            status=tool_call.status,
+            result=tool_call.result,
+            error=str(error) if error else None,
         )
 
     """Business Logic"""
@@ -142,6 +169,9 @@ class DatabaseConversation(IConversation):
             self._create_db_tool_call(tool_call) for tool_call in message.tool_calls
         )
         return db_message
+
+    def add_tool_message(self, conversation_id: str, message: ToolMessage) -> Message:
+        return self.add_message(conversation_id, message)
 
     def add_human_message(self, conversation_id: str, message: HumanMessage) -> Message:
         return self.add_message(conversation_id, message)

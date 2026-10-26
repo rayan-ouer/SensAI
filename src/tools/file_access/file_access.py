@@ -1,13 +1,22 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## file_access
+##
+
 from pathlib import Path
 
 from fastmcp import FastMCP
 
-from core.tools import ToolHandler
+from core.tools import ITool
+from tools.chat.config_data import ConfigData
 from tools.chat.errors import ConfigError
 from tools.mcp.adapter import MCPAdapter
 from tools.mcp.client import MCPClient
 
 from .workspace import WorkspaceSession
+
 
 def create_file_access_server(workspace: WorkspaceSession) -> FastMCP:
     mcp = FastMCP("sensai-file-access")
@@ -49,14 +58,13 @@ def create_file_access_server(workspace: WorkspaceSession) -> FastMCP:
         cancelled. The path must have a matching workspace permission.
         """
         return workspace.write_in_file(path, content)
+
     return mcp
 
 
-def create_workspace(config: dict) -> WorkspaceSession:
+def create_workspace(config: ConfigData) -> WorkspaceSession:
     root = Path.cwd()
-    permissions_path = Path(
-        config["config_dir"], config.get("file_access_config", "file_access.yaml")
-    )
+    permissions_path = Path(config.config_dir, config.file_access_config)
     try:
         workspace = WorkspaceSession(root, permissions_path)
     except OSError as error:
@@ -67,8 +75,9 @@ def create_workspace(config: dict) -> WorkspaceSession:
     return workspace
 
 
-def register_file_access_tools(
-    manager: ToolHandler, workspace: WorkspaceSession
-) -> None:
-    adapter = MCPAdapter(MCPClient(create_file_access_server(workspace)))
-    manager.register_many(adapter.list_tools())
+def create_file_access_tools(workspace: WorkspaceSession) -> list[ITool]:
+    return MCPAdapter(MCPClient(create_file_access_server(workspace))).list_tools()
+
+
+def build_workspace_context(workspace: WorkspaceSession) -> str:
+    return f"\n## Workspace context\n{workspace.initial_context()}\n"

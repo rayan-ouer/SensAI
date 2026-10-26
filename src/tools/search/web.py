@@ -5,7 +5,7 @@ from html.parser import HTMLParser
 
 from fastmcp import FastMCP
 
-from core.tools import ToolHandler
+from core.tools import ITool, ToolHandler
 from tools.mcp.adapter import MCPAdapter
 from tools.mcp.client import MCPClient
 
@@ -116,6 +116,9 @@ def create_search_server() -> FastMCP:
     return mcp
 
 
+def create_search_tools() -> list[ITool]:
+    return MCPAdapter(MCPClient(create_search_server())).list_tools()
+
+
 def register_search_tools(manager: ToolHandler) -> None:
-    adapter = MCPAdapter(MCPClient(create_search_server()))
-    manager.register_many(adapter.list_tools())
+    manager.register_many(create_search_tools())
