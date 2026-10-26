@@ -11,6 +11,6 @@ default_profile: "wu" # key required, name of a file in profiles_dir (without .y
 
 file_access_config: "file_access.yaml" # optional permissions file, relative to configs/
 ollama_provider: auto # optional: auto, local, or cloud
-think: true # optional: enable the Thinking status before chat replies
+think: true # optional: enable model reasoning for chat replies
 
 ## OPTIONAL KEYS
