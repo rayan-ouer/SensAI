@@ -47,5 +47,6 @@ def create_agent(config: dict, api_key: str | None, role: SystemMessage) -> Agen
         llm=llm,
         handler=tools_handler,
         max_loops=config.get("max_loops", 10),
+        think=config.get("think", True),
         on_chunk=config["display"],
     )

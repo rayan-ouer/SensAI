@@ -5,7 +5,7 @@ from fastmcp import FastMCP
 from core.tools import ToolHandler
 from tools.mcp.adapter import MCPAdapter
 from tools.mcp.client import MCPClient
-from utils import normalize_inputs, display_menu, prompt_for_answer
+from tools.human_in_the_loop.utils import normalize_inputs, display_menu, prompt_for_answer
 
 AnswerCallback = Callable[[str, str], None]
 InputFunction = Callable[[str], str]

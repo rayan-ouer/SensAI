@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import yaml
 
@@ -11,10 +11,16 @@ _NO = {"n", "no"}
 
 
 class WorkspaceSession:
-    def __init__(self, root: Path, permissions_path: Path):
+    def __init__(
+        self,
+        root: Path,
+        permissions_path: Path,
+        input_function: Callable[[str], str] = input,
+    ):
         self.root = root.resolve(strict=True)
         if not self.root.is_dir():
             raise ValueError(f"Workspace is not a directory: {self.root}")
+        self._input = input_function
         self.permissions_path = permissions_path
         self.permissions = self._load_permissions(permissions_path)
         self._require_permission(self.root)
@@ -68,7 +74,9 @@ class WorkspaceSession:
 
         while True:
             try:
-                answer = input(f"Detected Workspace: {self.root}. Is it correct ? [Y/n] ").strip().lower()
+                answer = self._input(
+                    f"Detected Workspace: {self.root}. Is it correct ? [Y/n] "
+                ).strip().lower()
             except (EOFError, KeyboardInterrupt) as error:
                 raise RuntimeError("Workspace confirmation was interrupted") from error
             if answer in _YES or not answer:
@@ -79,7 +87,7 @@ class WorkspaceSession:
             print("The answer must be yes or no.")
 
         try:
-            path_text = input(
+            path_text = self._input(
                 "Select your workspace path please : "
             ).strip()
         except (EOFError, KeyboardInterrupt) as error:
@@ -106,7 +114,9 @@ class WorkspaceSession:
                 pass
             print(f"Invalid path : {path_text}")
             try:
-                path_text = input("Select your workspace path please : ").strip()
+                path_text = self._input(
+                    "Select your workspace path please : "
+                ).strip()
             except (EOFError, KeyboardInterrupt) as error:
                 raise RuntimeError("Workspace path entry was interrupted") from error
         raise ValueError("A valid workspace path was not provided")
@@ -165,14 +175,31 @@ class WorkspaceSession:
             created_file.write(content)
         return f"Created {file_path}"
 
+    def _confirm_file_write(self, file_path: Path) -> bool:
+        relative_path = file_path.relative_to(self.root)
+        while True:
+            try:
+                answer = self._input(
+                    f"Allow Wu to write to {relative_path}? [y/N] "
+                ).strip().lower()
+            except (EOFError, KeyboardInterrupt) as error:
+                raise RuntimeError("File write confirmation was interrupted") from error
+            if answer in _YES:
+                return True
+            if answer in _NO or not answer:
+                return False
+            print("Please answer yes or no.")
+
     def write_in_file(self, path: str, content: str) -> str:
         file_path = self._resolve_path(path)
-        self._require_permission(file_path, write=True)
+        self._require_permission(file_path)
         if not file_path.parent.is_dir():
             raise FileNotFoundError(
                 f"Parent directory does not exist: {file_path.parent}"
             )
         if file_path.is_dir():
             raise IsADirectoryError(str(file_path))
+        if not self._confirm_file_write(file_path):
+            return f"Write cancelled by user for {file_path.relative_to(self.root)}"
         file_path.write_text(content, encoding="utf-8")
         return f"Wrote {file_path}"

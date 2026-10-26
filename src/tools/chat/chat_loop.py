@@ -5,16 +5,25 @@
 ## chat_loop
 ##
 
-
+import io
+import sys
 import ollama
 
 from tools.chat.module import warning
 from tools.spec.spec import save_spec, update_spec
 
+_stdin_configured = False
+
 
 def read_user_input() -> str | None:
+    global _stdin_configured
+
     print("> ", end="", flush=True)
     try:
+        if not _stdin_configured:
+            if isinstance(sys.stdin, io.TextIOWrapper):
+                sys.stdin.reconfigure(errors="replace")
+            _stdin_configured = True
         return input()
     except (EOFError, KeyboardInterrupt):
         print()

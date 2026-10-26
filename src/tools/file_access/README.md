@@ -12,7 +12,8 @@ The file tools are exposed through the existing FastMCP client and adapter:
 - `read_file(path)` reads a file.
 - `create_file(path, content)` creates a new file and never overwrites one.
 - `write_in_file(path, content)` writes the complete content to a file, replacing
-  its previous content if it exists. It creates the file if it does not exist.
+  its previous content if it exists. It always asks the user to approve the
+  write with `Y` or `N`, whether creating or replacing a file.
 
 Access is restricted to the confirmed workspace and the permissions file
 referenced by the CLI config (`file_access_config`, relative to the config
@@ -27,9 +28,11 @@ permissions:
 ```
 
 Supported values are `read` and `read_write`. Any path without an applicable
-rule is denied. Both `create_file` and `write_in_file` require `read_write`;
-`create_file` refuses to replace existing files, while `write_in_file`
-intentionally replaces their full contents. The default `configs/file_access.yaml`
-grants read access to the launch directory and read/write access to `src`; adjust
-it to your project. The agent receives only registered tools and must not run
-shell commands or arbitrary functions.
+rule is denied. `create_file` requires `read_write` and refuses to replace
+existing files. `write_in_file` requires a matching workspace permission and
+asks the user for confirmation on every call; approval allows that write only,
+including for paths configured as `read`. It intentionally replaces the full
+contents of an existing file. The default `configs/file_access.yaml` grants read
+access to the launch directory and read/write access to `src`; adjust it to your
+project. The agent receives only registered tools and must not run shell
+commands or arbitrary functions.

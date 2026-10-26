@@ -39,10 +39,14 @@ def create_file_access_server(workspace: WorkspaceSession) -> FastMCP:
 
     @mcp.tool
     def write_in_file(path: str, content: str) -> str:
-        """Replace a file's entire UTF-8 text content, creating it if absent.
+        """Write complete UTF-8 content after explicit user approval.
 
         path: File path relative to the workspace root.
-        content: Complete new content. Existing content is overwritten.
+        content: Complete new content.
+
+        The user is prompted for Y/N confirmation for every write, including
+        creating a new file or overwriting an existing one. A declined write is
+        cancelled. The path must have a matching workspace permission.
         """
         return workspace.write_in_file(path, content)
     return mcp
