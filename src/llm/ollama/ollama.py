@@ -1,8 +1,8 @@
 from collections.abc import Callable
 
 import httpx
-
 import ollama
+
 from core.messages import AIMessage, IMessage
 from core.tools import ITool
 from llm.client import ILLMClient
@@ -34,23 +34,12 @@ def _raise_domain_error(error: BaseException):
 
 
 class OllamaClient(ILLMClient):
-    def __init__(
-        self,
-        model: str,
-        api_key: str | None,
-        prompt: IMessage | None = None,
-        options: dict | None = None,
-        provider: str = "auto",
-    ):
+    def __init__(self, model: str, api_key: str | None, prompt: IMessage | None = None,
+        provider: str = "auto"):
         self._model = model  # the model to use
         self._prompt = prompt  # the prompt to use
-        self._llm = create_ollama_client(
-            model, api_key, provider=provider
-        )  # a ollama client instance
-        self._thinking_support: dict[
-            str, bool
-        ] = {}  # a dictionary to cache the thinking support for each model
-        self._options = options
+        self._llm = create_ollama_client(model, api_key, provider=provider)  # a ollama client instance
+        self._thinking_support: dict[str, bool] = {}  # a dictionary to cache the thinking support for each model
 
     def chat(
         self,
@@ -76,7 +65,6 @@ class OllamaClient(ILLMClient):
                 stream=True,
                 think=resolved_think,
                 format=response_format,
-                options=self._options,
             )
             return accumulator.consume(stream)
         except KeyboardInterrupt:

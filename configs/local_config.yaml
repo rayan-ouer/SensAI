@@ -1,5 +1,5 @@
 ## REQUIRED KEYS
-model: "qwen2.5:7b" # local model name, key required
+model: "nemotron-3-nano:30b" # local model name, key required
 
 spec_prompt: "prompt/spec.txt" # key required
 
@@ -10,12 +10,5 @@ profiles_dir: "profiles" # key required, relative to this file's directory
 default_profile: "wu" # key required, name of a file in profiles_dir (without .yaml)
 
 file_access_config: "file_access.yaml" # optional permissions file, relative to configs/
-ollama_provider: local
-think: true
 
 ## OPTIONAL KEYS
-
-spec_think: true # keep model reasoning enabled for spec updates too
-
-llm_settings: # optional: model options passed to the LLM client (temperature, top_p...)
-  temperature: 0

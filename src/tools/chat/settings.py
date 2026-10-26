@@ -20,5 +20,3 @@ class Settings(BaseSettings):
     ollama_cloud_host: str = OLLAMA_CLOUD_HOST
     ollama_local_host: str = OLLAMA_LOCAL_HOST
     config_path: str = Field(default="configs/local_config.yaml")
-    conversation_storage: str = Field(default="memory")
-    database_url: str | None = Field(default=None)

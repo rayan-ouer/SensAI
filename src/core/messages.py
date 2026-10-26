@@ -1,4 +1,3 @@
-import uuid
 from dataclasses import dataclass, field
 
 from dataclasses_json import dataclass_json
@@ -12,7 +11,6 @@ from .tools import ToolCall
 @dataclass
 class IMessage:
     content: str
-    id: str = field(default_factory=lambda: f"msg_{uuid.uuid4()}", kw_only=True)
 
     @property
     def role(self) -> MessageType:

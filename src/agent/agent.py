@@ -1,18 +1,11 @@
 import json
 from collections.abc import Callable
-from dataclasses import dataclass
 
 from core.messages import AIMessage, IMessage, SystemMessage, ToolMessage
-from core.tools import ITool, ToolCall, ToolExecution, ToolHandler
+from core.tools import ToolCall, ToolExecution, ToolHandler
 from core.types import MessageType
 from llm.client import ILLMClient
-
-
-@dataclass
-class AgentTurn:
-    messages: list[IMessage]
-    reply: AIMessage
-
+from core.tools import ITool
 
 class AgentIterationLimitError(Exception):
     def __init__(self, max_loops: int, message: AIMessage):
@@ -28,9 +21,9 @@ class Agent:
         model: str,  # the model to use
         tools: list[str],  # the tools to use
         role: SystemMessage,  # the role of the agent
+        response_format: dict | None,  # the response format to use
         llm: ILLMClient,  # the llm client to use
         handler: ToolHandler,  # the tool handler to use
-        response_format: dict | None = None,  # the response format to use
         max_loops: int = 10,  # the maximum number of loops to run
         think: bool | None = None,  # whether to think or not
         keep_thinking: bool = False,  # whether to keep thinking or not
@@ -59,19 +52,9 @@ class Agent:
     ) -> ToolExecution:
         return (handler or self._handler).execute(tool_call)
 
-    def _record(
-        self,
-        context: list[IMessage],
-        produced: list[IMessage],
-        message: IMessage,
-    ) -> None:
-        context.append(message)
-        produced.append(message)
+    def invoke(self, messages: list[IMessage]) -> AIMessage:
+        self._ensure_role(messages)
 
-    def invoke(self, messages: list[IMessage]) -> AgentTurn:
-        context = list(messages)
-        produced: list[IMessage] = []
-        self._ensure_role(context)
         if self._max_loops < 1:
             raise AgentIterationLimitError(
                 self._max_loops, AIMessage(content="", truncated=True)
@@ -79,7 +62,7 @@ class Agent:
         for index in range(self._max_loops):
             response: AIMessage = self._llm.chat(
                 self._model,
-                context,
+                messages,
                 self._resolve_tools(),
                 self._response_format,
                 think=self._think,
@@ -90,29 +73,25 @@ class Agent:
             )
             if response.interrupted:
                 response.tool_calls = []
-                self._record(context, produced, response)
-                return AgentTurn(messages=produced, reply=response)
+                messages.append(response)
+                return response
             if response.tool_calls and index == self._max_loops - 1:
                 response.truncated = True
-                self._record(context, produced, response)
+                messages.append(response)
                 raise AgentIterationLimitError(self._max_loops, response)
-            self._record(context, produced, response)
+            messages.append(response)
             if not response.tool_calls:
-                return AgentTurn(messages=produced, reply=response)
+                return response
             for tool_call in response.tool_calls:
                 execution: ToolExecution = self.execute_tool(tool_call, self._handler)
-                tool_call.status = execution.status
-                tool_call.result = execution.result
-                self._record(
-                    context,
-                    produced,
+                messages.append(
                     ToolMessage(
                         content=json.dumps(execution.result, ensure_ascii=False),
                         tool_call_id=tool_call.id,
                         tool_name=tool_call.name,
                         result=execution.result,
                         status=execution.status,
-                    ),
+                    )
                 )
         raise AgentIterationLimitError(
             self._max_loops, AIMessage(content="", truncated=True)

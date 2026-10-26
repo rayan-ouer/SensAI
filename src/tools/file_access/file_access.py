@@ -4,7 +4,6 @@ from fastmcp import FastMCP
 
 from core.tools import ToolHandler
 from tools.chat.errors import ConfigError
-from tools.chat.config_data import ConfigData
 from tools.mcp.adapter import MCPAdapter
 from tools.mcp.client import MCPClient
 
@@ -49,10 +48,10 @@ def create_file_access_server(workspace: WorkspaceSession) -> FastMCP:
     return mcp
 
 
-def create_workspace(config: ConfigData) -> WorkspaceSession:
+def create_workspace(config: dict) -> WorkspaceSession:
     root = Path.cwd()
     permissions_path = Path(
-        config.config_dir, config.file_access_config
+        config["config_dir"], config.get("file_access_config", "file_access.yaml")
     )
     try:
         workspace = WorkspaceSession(root, permissions_path)

@@ -1,10 +1,10 @@
-from memory.vector.interface import EMBEDDING_DIMENSION
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from memory.base import Base
+from memory.vector.interface import EMBEDDING_DIMENSION
 
 
 class VectorRecord(Base):
