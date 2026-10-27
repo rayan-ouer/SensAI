@@ -5,13 +5,41 @@
 ## spec
 ##
 
+import json
 from pathlib import Path
 
 from core.messages import HumanMessage, SystemMessage
 from llm.client import ILLMClient
 
 
-SPEC_TAGS = ("<current_document>", "</current_document>")
+SPEC_TITLE = "# Project specification"
+SPEC_SECTIONS = (
+    "Overview",
+    "Goals",
+    "Functional requirements",
+    "Non-functional requirements",
+    "Constraints",
+    "Decisions",
+    "Open questions",
+)
+EMPTY_SECTION = "_Nothing yet._"
+EDIT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "edits": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "section": {"type": "string", "enum": list(SPEC_SECTIONS)},
+                    "content": {"type": "string"},
+                },
+                "required": ["section", "content"],
+            },
+        },
+    },
+    "required": ["edits"],
+}
 
 
 def load_spec(path: str) -> str:
@@ -35,23 +63,45 @@ def build_update_message(spec: str, user_input: str, reply: str) -> str:
 {reply}
 </assistant_reply>
 
-Return the updated document
+Return the edits of the sections that change, as JSON
 """
 
 
-def strip_tags(text: str) -> str:
-    for tag in SPEC_TAGS:
-        text = text.replace(tag, "")
-    return text
+def parse_spec(spec: str) -> dict[str, str]:
+    sections = {name: EMPTY_SECTION for name in SPEC_SECTIONS}
+    for block in spec.split("\n## ")[1:]:
+        name, _, content = block.partition("\n")
+        if name.strip() in sections:
+            sections[name.strip()] = content.strip() or EMPTY_SECTION
+    return sections
 
 
-def strip_code_fences(text: str) -> str:
-    text = text.strip()
-    if text.startswith("```"):
-        text = text.partition("\n")[2]
-    if text.endswith("```"):
-        text = text.removesuffix("```")
-    return text.strip()
+def render_spec(sections: dict[str, str]) -> str:
+    blocks = [SPEC_TITLE] + [f"## {name}\n{sections[name]}" for name in SPEC_SECTIONS]
+    return "\n\n".join(blocks) + "\n"
+
+
+def is_valid_edit(edit: object) -> bool:
+    if not isinstance(edit, dict):
+        return False
+    return edit.get("section") in SPEC_SECTIONS and isinstance(edit.get("content"), str)
+
+
+def read_edits(text: str) -> list[dict]:
+    try:
+        edits = json.loads(text).get("edits", [])
+    except (json.JSONDecodeError, AttributeError):
+        return []
+    if not isinstance(edits, list):
+        return []
+    return [edit for edit in edits if is_valid_edit(edit)]
+
+
+def apply_edits(spec: str, edits: list[dict]) -> str:
+    sections = parse_spec(spec)
+    for edit in edits:
+        sections[edit["section"]] = edit["content"].strip() or EMPTY_SECTION
+    return render_spec(sections)
 
 
 def update_spec(
@@ -71,13 +121,10 @@ def update_spec(
         model=model,
         messages=spec_messages,
         tools=[],
-        response_format=None,
+        response_format=EDIT_SCHEMA,
         think=spec_think,
     )
-    new_spec = strip_code_fences(strip_tags(res.content))
-    if not new_spec.startswith("#"):
-        return spec
-    return new_spec
+    return apply_edits(spec, read_edits(res.content))
 
 
 def save_spec(path: str, content: str) -> None:

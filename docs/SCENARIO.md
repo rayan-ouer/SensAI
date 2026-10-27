@@ -1,14 +1,14 @@
 # Usage scenario
 
-Léa is a second-year computer science student. She starts a small project on her own laptop: a command-line todo list app in Python. She works on it over several evenings and wants a mentor that guides her without writing the project for her.
+Eon is a second-year computer science student. They start a small project on their own laptop: a command-line todo list app in Python. They work on it over several evenings and want a mentor that guides them without writing the project for them.
 
-She runs SensAI with a local model so her notes stay on her machine:
+They run SensAI with a local model so their notes stay on their machine:
 
 ```sh
 wu -c configs/local_config.yaml
 ```
 
-Each step below gives the prompt she types and the expected behavior. Model answers vary from one run to another, so the expected answer is an example and the criteria are what must hold.
+Each step below gives the prompt they type and the expected behavior. Model answers vary from one run to another, so the expected answer is an example and the criteria are what must hold.
 
 ## 1. Describe the project
 
@@ -21,10 +21,10 @@ I want to build a todo list app in Python for the command line.
 **Expected**
 
 - Wu answers in at most 3 short sentences and asks at most one question.
-- He guides her instead of giving the full code.
+- He guides Eon instead of giving the full code.
 - `workspace/ASSISTANT.md` now contains an overview ("a command-line todo list app written in Python") and the decisions "Python" and "command line".
 
-Example answer: *"A fine first project. Start with what a task must hold: a title and a done flag. Will you keep the tasks in memory or in a file?"*
+Example answer: _"A fine first project. Start with what a task must hold: a title and a done flag. Will you keep the tasks in memory or in a file?"_
 
 ## 2. Make a decision
 
@@ -64,7 +64,7 @@ Can you give me a chocolate cake recipe?
 
 **Expected**
 
-- Euclid declines in one sentence and invites her to ask a math question.
+- Euclid declines in one sentence and invites Eon to ask a math question.
 
 ## 5. Ask about something recent
 
@@ -91,4 +91,4 @@ What is my project about?
 **Expected**
 
 - Wu answers from `ASSISTANT.md`: a command-line todo list app in Python with tasks stored in a JSON file.
-- Léa does not have to explain her project again.
+- Eon does not have to explain their project again.
