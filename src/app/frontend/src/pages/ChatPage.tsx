@@ -5,29 +5,51 @@
 ** ChatPage
 */
 
+// Icon from Lucide: https://lucide.dev/
+
 import { useState } from 'react'
+import { FileText } from 'lucide-react'
 
 import Composer from '@/components/chat/Composer'
 import EmptyState from '@/components/chat/EmptyState'
 import MessageList from '@/components/chat/MessageList'
+import SpecPanel from '@/components/spec/SpecPanel'
 import { useChat } from '@/hooks/useChat'
+import { useSpec } from '@/hooks/useSpec'
+
+const WIDE_SCREEN = '(min-width: 1024px)'
 
 function ChatPage() {
-  const { messages, status, error, send } = useChat()
+  const spec = useSpec()
+  const { messages, status, error, send } = useChat(spec)
   const [typing, setTyping] = useState(false)
+  const [specOpen, setSpecOpen] = useState(() => window.matchMedia(WIDE_SCREEN).matches)
 
   return (
-    <div className="flex h-dvh flex-col">
-      <header className="mx-auto w-full max-w-2xl px-4 py-4">
-        <span className="text-sm font-medium tracking-tight text-amber-50">SensAI</span>
-      </header>
-      <main className="flex min-h-0 flex-1 flex-col">
-        {messages.length === 0 ? <EmptyState listening={typing} /> : <MessageList messages={messages} status={status} />}
-      </main>
-      <footer className="mx-auto w-full max-w-2xl px-4 pb-5">
-        {error && <p role="alert" className="mb-2 px-2 text-sm text-red-300">{error}</p>}
-        <Composer onSend={send} onTyping={setTyping} disabled={status !== 'idle'} />
-      </footer>
+    <div className="flex h-dvh">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="mx-auto flex w-full max-w-2xl items-center justify-between px-4 py-4">
+          <span className="text-sm font-medium tracking-tight text-amber-50">SensAI</span>
+          {!specOpen && (
+            <button
+              type="button"
+              onClick={() => setSpecOpen(true)}
+              className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-amber-100/60 hover:bg-white/10 hover:text-amber-50"
+            >
+              <FileText className="size-3.5" />
+              Specification
+            </button>
+          )}
+        </header>
+        <main className="flex min-h-0 flex-1 flex-col">
+          {messages.length === 0 ? <EmptyState listening={typing} /> : <MessageList messages={messages} status={status} />}
+        </main>
+        <footer className="mx-auto w-full max-w-2xl px-4 pb-5">
+          {error && <p role="alert" className="mb-2 px-2 text-sm text-red-300">{error}</p>}
+          <Composer onSend={send} onTyping={setTyping} disabled={status !== 'idle'} />
+        </footer>
+      </div>
+      {specOpen && <SpecPanel spec={spec.spec} updating={spec.updating} onClose={() => setSpecOpen(false)} />}
     </div>
   )
 }

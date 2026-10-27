@@ -19,4 +19,5 @@ export type ChatStatus = 'idle' | 'thinking' | 'streaming'
 export type StreamEvent =
   | { type: 'thinking' | 'content'; text: string }
   | { type: 'done' }
+  | { type: 'spec'; text: string }
   | { type: 'error'; message: string }

@@ -36,6 +36,16 @@ async function post(path: string, payload: object): Promise<Response> {
   }
 }
 
+export async function fetchSpec(): Promise<string> {
+  const response = await fetch(`${API_URL}/spec`).catch(() => {
+    throw new Error(UNREACHABLE)
+  })
+  if (!response.ok)
+    throw await failure(response)
+  const body: { content: string } = await response.json()
+  return body.content
+}
+
 export async function createConversation(): Promise<string> {
   const response = await post('/conversations/', { user_id: USER_ID })
   if (!response.ok)

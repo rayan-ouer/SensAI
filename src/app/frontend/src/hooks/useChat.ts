@@ -8,7 +8,10 @@
 import { useRef, useState } from 'react'
 
 import { ConversationNotFoundError, createConversation, streamReply } from '@/services/chatApi'
+import type { SpecState } from '@/hooks/useSpec'
 import type { ChatStatus, Message } from '@/types/chat'
+
+type SpecUpdates = Pick<SpecState, 'startUpdate' | 'receive' | 'stopUpdate'>
 
 function appendToMessage(messages: Message[], id: string, field: 'content' | 'thinking', chunk: string): Message[] {
   return messages.map((message) =>
@@ -16,11 +19,12 @@ function appendToMessage(messages: Message[], id: string, field: 'content' | 'th
   )
 }
 
-export function useChat() {
+export function useChat(spec: SpecUpdates) {
   const [messages, setMessages] = useState<Message[]>([])
   const [status, setStatus] = useState<ChatStatus>('idle')
   const [error, setError] = useState<string | null>(null)
   const conversationId = useRef<string | null>(null)
+  const activeReply = useRef<string | null>(null)
 
   async function currentConversation(): Promise<string> {
     conversationId.current ??= await createConversation()
@@ -37,6 +41,12 @@ export function useChat() {
         setStatus('streaming')
         setMessages((current) => appendToMessage(current, replyId, 'content', event.text))
       }
+      if (event.type === 'done') {
+        setStatus('idle')
+        spec.startUpdate()
+      }
+      if (event.type === 'spec')
+        spec.receive(event.text)
     }
   }
 
@@ -61,6 +71,7 @@ export function useChat() {
     const userMessage: Message = { id: crypto.randomUUID(), role: 'user', content: text }
     const reply: Message = { id: crypto.randomUUID(), role: 'assistant', content: '' }
 
+    activeReply.current = reply.id
     setMessages((current) => [...current, userMessage, reply])
     setError(null)
     setStatus('thinking')
@@ -70,7 +81,10 @@ export function useChat() {
       setError(e instanceof Error ? e.message : 'The assistant could not reply.')
     } finally {
       dropEmptyReply(reply.id)
-      setStatus('idle')
+      if (activeReply.current === reply.id) {
+        setStatus('idle')
+        spec.stopUpdate()
+      }
     }
   }
 
