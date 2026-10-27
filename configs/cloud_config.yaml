@@ -13,6 +13,8 @@ default_profile: "wu" # key required, name of a file in profiles_dir (without .y
 
 ## OPTIONAL KEYS
 
+ollama_provider: cloud # optional: always use Ollama Cloud, even if the model is installed locally
+
 spec_think: false # optional: false disable model reasoning for spec updates (faster, less careful)
 
 llm_settings: # optional: model options passed to the LLM client (temperature, top_p...)
