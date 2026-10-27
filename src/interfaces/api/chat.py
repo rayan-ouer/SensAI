@@ -31,8 +31,12 @@ def build_role(state: State, profile: ProfileData) -> SystemMessage:
     )
 
 
-def create_agent(state: State, on_chunk: Callable[[str, str], None]) -> Agent:
-    profile = state.profiles[state.config.default_profile]
+def create_agent(
+    state: State,
+    on_chunk: Callable[[str, str], None],
+    profile_key: str | None,
+) -> Agent:
+    profile = state.profiles[profile_key or state.config.default_profile]
     return Agent(
         name=profile.name,
         model=state.config.model,
