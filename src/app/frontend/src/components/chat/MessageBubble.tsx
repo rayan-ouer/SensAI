@@ -6,6 +6,7 @@
 */
 
 import AssistantAvatar from '@/components/chat/AssistantAvatar'
+import Reasoning from '@/components/chat/Reasoning'
 import ThinkingIndicator from '@/components/chat/ThinkingIndicator'
 import type { Message } from '@/types/chat'
 
@@ -24,12 +25,14 @@ function MessageBubble({ message }: MessageBubbleProps) {
     )
   }
   const thinking = message.content === ''
+  const reasoning = message.thinking ?? ''
   return (
     <div className="flex items-start gap-3">
       <AssistantAvatar thinking={thinking} />
       <div className="max-w-[90%] pt-1">
+        {reasoning !== '' && <Reasoning text={reasoning} active={thinking} />}
         {thinking ? (
-          <ThinkingIndicator />
+          reasoning === '' && <ThinkingIndicator />
         ) : (
           <p className="animate-in text-[0.95rem] leading-relaxed whitespace-pre-wrap text-amber-50/90 duration-500 fade-in">
             {message.content}

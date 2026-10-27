@@ -11,6 +11,7 @@ export type Message = {
   id: string
   role: Role
   content: string
+  thinking?: string
 }
 
 export type ChatStatus = 'idle' | 'thinking' | 'streaming'

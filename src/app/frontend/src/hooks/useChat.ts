@@ -10,9 +10,9 @@ import { useRef, useState } from 'react'
 import { ConversationNotFoundError, createConversation, streamReply } from '@/services/chatApi'
 import type { ChatStatus, Message } from '@/types/chat'
 
-function appendToMessage(messages: Message[], id: string, chunk: string): Message[] {
+function appendToMessage(messages: Message[], id: string, field: 'content' | 'thinking', chunk: string): Message[] {
   return messages.map((message) =>
-    message.id === id ? { ...message, content: message.content + chunk } : message
+    message.id === id ? { ...message, [field]: (message[field] ?? '') + chunk } : message
   )
 }
 
@@ -31,9 +31,11 @@ export function useChat() {
     for await (const event of streamReply(await currentConversation(), text)) {
       if (event.type === 'error')
         throw new Error(event.message)
+      if (event.type === 'thinking')
+        setMessages((current) => appendToMessage(current, replyId, 'thinking', event.text))
       if (event.type === 'content') {
         setStatus('streaming')
-        setMessages((current) => appendToMessage(current, replyId, event.text))
+        setMessages((current) => appendToMessage(current, replyId, 'content', event.text))
       }
     }
   }
