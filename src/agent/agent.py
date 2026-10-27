@@ -64,6 +64,10 @@ class Agent:
     def description(self) -> str:
         return self._description
 
+    @property
+    def tool_names(self) -> list[str]:
+        return list(self._tools)
+
     def execute_tool(self, tool_call: ToolCall, handler: ToolHandler) -> ToolExecution:
         return handler.execute(tool_call)
 
