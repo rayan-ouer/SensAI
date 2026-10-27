@@ -1,10 +1,3 @@
-##
-## EPITECH PROJECT, 2026
-## SensAI
-## File description:
-## validate
-##
-
 from collections import defaultdict
 from collections.abc import Collection
 

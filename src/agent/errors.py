@@ -1,10 +1,3 @@
-##
-## EPITECH PROJECT, 2026
-## SensAI
-## File description:
-## errors
-##
-
 from pathlib import Path
 
 from tools.chat.errors import AppError

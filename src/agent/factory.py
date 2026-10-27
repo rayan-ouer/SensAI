@@ -1,10 +1,3 @@
-##
-## EPITECH PROJECT, 2026
-## SensAI
-## File description:
-## factory
-##
-
 from collections.abc import Callable
 
 from agent.agent import Agent

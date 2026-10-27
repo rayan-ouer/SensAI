@@ -1,10 +1,3 @@
-##
-## EPITECH PROJECT, 2026
-## SensAI
-## File description:
-## agent_tool
-##
-
 from typing import Any
 
 from agent.agent import Agent, AgentIterationLimitError, AgentTurn
@@ -24,7 +17,10 @@ class AgentTool(ITool):
 
     @property
     def description(self) -> str:
-        return self._agent.description
+        names = ", ".join(self._agent.tool_names)
+        if names == str():
+            return self._agent.description
+        return f"{self._agent.description} It can call: {names}."
 
     @property
     def args(self) -> dict[str, Any]:
@@ -48,8 +44,8 @@ class AgentTool(ITool):
         try:
             turn: AgentTurn = self._agent.invoke([HumanMessage(content=task.strip())])
         except AgentIterationLimitError as error:
-            content = error.message.content if error.message else ""
-            if content:
+            content = error.message.content if error.message else str()
+            if content != str():
                 return content
             raise
-        return turn.reply.content or ""
+        return turn.reply.content

@@ -1,10 +1,3 @@
-##
-## EPITECH PROJECT, 2026
-## SensAI
-## File description:
-## load
-##
-
 from pathlib import Path
 from typing import Any
 

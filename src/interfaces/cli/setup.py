@@ -37,8 +37,11 @@ def read_api_key() -> str | None:
 
 
 def current_role(state: CliState, spec: str) -> SystemMessage:
-    profile = state.current_profile()
-    text = build_system_prompt(state.config.system_prompt, build_profile_prompt(profile), spec)
+    if state.uses_agents_file:
+        identity = state.entry_role
+    else:
+        identity = build_profile_prompt(state.current_profile())
+    text = build_system_prompt(state.config.system_prompt, identity, spec)
     text += build_workspace_context(state.workspace)
     return SystemMessage(content=text)
 
@@ -48,7 +51,11 @@ def create_agent(state: CliState, tools: list[ITool], role: SystemMessage) -> Ag
     registry.register_many(tools)
     agents_path = Path(state.config.config_dir, state.config.agents_path)
     agents_config = AgentsLoader.load(agents_path)
-    if agents_config is None:
+    if agents_config is not None:
+        state.uses_agents_file = True
+        entry = agents_config.by_name().get(agents_config.entry)
+        state.entry_role = entry.role if entry is not None else ""
+    else:
         agents_config = AgentsLoader.default(
             model=state.config.model,
             role=role.content,
@@ -62,7 +69,6 @@ def create_agent(state: CliState, tools: list[ITool], role: SystemMessage) -> Ag
         agents_config,
         on_chunk=state.display,
     )
-    agent.set_role(role)
     return agent
 
 

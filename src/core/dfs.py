@@ -20,7 +20,6 @@ def visit(
             on_back_edge(path[start:] + [neighbor])
         elif neighbor not in visited:
             visit(graph, visited, in_path, path, order, neighbor, on_back_edge)
-
     path.pop()
     in_path.remove(node)
     order.append(node)
@@ -29,7 +28,6 @@ def dfs(
     graph: dict[str, list[str]],
     on_back_edge: Callable[[list[str]], None],
 ) -> list[str]:
-    """Depth-first search. Returns nodes in post-order (children before parents)."""
     visited: set[str] = set()
     in_path: set[str] = set()
     path: list[str] = []

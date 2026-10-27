@@ -14,4 +14,4 @@ class ProfileData:
     role: str
     tone: str
     scope: str
-    prompt: str = ""
+    prompt: str = str()
