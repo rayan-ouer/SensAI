@@ -9,7 +9,7 @@ from core.messages import SystemMessage
 from interfaces.cli.cli_state import CliState
 
 
-def switch_profile(state: CliState, args: list[str]):
+def switch_profile(state: CliState, args: list[str]) -> None:
     if len(args) != 1:
         print("Usage: /profile <name>")
         return
@@ -23,7 +23,7 @@ def switch_profile(state: CliState, args: list[str]):
     print(f"Switched to '{name}' profile.")
 
 
-def print_profiles(state: CliState, _args: list[str]):
+def print_profiles(state: CliState, _args: list[str]) -> None:
     for key, profile in state.profiles.items():
         profile_name = profile.name
         marker = "-> " if key == state.active_profile else "   "
@@ -36,7 +36,7 @@ COMMANDS = {
 }
 
 
-def handle_command(state: CliState, user_input: str):
+def handle_command(state: CliState, user_input: str) -> None:
     args = user_input.split()
     handler = COMMANDS.get(args[0])
     if handler is None:

@@ -44,7 +44,7 @@ def answer_user_message(agent: Agent, state: CliState, spec: str, user_input: st
     return refresh_spec(state.llm, state.config, spec, user_input, reply.content)
 
 
-def agent_loop(agent: Agent, state: CliState, spec: str):
+def agent_loop(agent: Agent, state: CliState, spec: str) -> None:
     while True:
         user_input = read_user_input()
         if user_input is None or user_input == "/exit":

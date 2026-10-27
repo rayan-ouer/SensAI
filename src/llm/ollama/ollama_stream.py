@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## ollama_stream
+##
+
 import re
 from collections.abc import Callable, Iterable
 from typing import Any

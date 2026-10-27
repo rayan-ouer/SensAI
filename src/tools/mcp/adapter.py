@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## adapter
+##
+
 from typing import Any
 
 from core.tools import ITool
