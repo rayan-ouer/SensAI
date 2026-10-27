@@ -23,6 +23,7 @@ The CLI takes it with `wu -c configs/local_config.yaml`. The API reads the one s
 | `model` | yes | string | model name, local (`ollama list`) or on Ollama Cloud |
 | `system_prompt` | yes | path | general rules shared by every profile |
 | `spec_prompt` | yes | path | instructions of the note-keeper that updates the specification |
+| `question_prompt` | yes | path | what the clarification tool tells the agent once the web interface shows its question |
 | `spec_path` | yes | path | the living specification, created if missing |
 | `profiles_dir` | yes | path | folder of the agent profiles |
 | `default_profile` | yes | string | profile active at start, a file name of `profiles_dir` without `.yaml` |
@@ -70,6 +71,7 @@ at the next start.
 | File | Used by |
 |---|---|
 | `prompt/system.txt` | every profile: honesty, brevity, scope, language and the rules of each tool |
+| `prompt/question.txt` | the clarification tool in the web interface: the question is shown, the agent ends its turn |
 | `prompt/spec.txt` | the note-keeper: sections of the specification, what it may record and the JSON edits it returns |
 | `prompt/wu.txt`, `prompt/math_tutor.txt`, `prompt/sensei.txt`, `prompt/code_reviewer.txt`, `prompt/product_coach.txt` | the detailed persona of each profile |
 

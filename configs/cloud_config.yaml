@@ -4,6 +4,7 @@ model: "nemotron-3-nano:30b" # cloud model name, key required
 system_prompt: "prompt/system.txt" # key required
 
 spec_prompt: "prompt/spec.txt" # key required
+question_prompt: "prompt/question.txt" # key required
 
 spec_path: "workspace/ASSISTANT.md"  # key required
 
