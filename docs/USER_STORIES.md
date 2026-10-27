@@ -1,6 +1,171 @@
 # User stories
 
-## Agent profiles
+## Local and cloud models (B1)
+
+As a student working on confidential material, I want the assistant to run on a
+model installed on my computer, so that nothing I write leaves it.
+
+Acceptance criteria:
+- With a locally installed model named in the configuration file, the assistant
+  answers without any API key.
+- Changing the `model` key and restarting changes the model used, with no code
+  change.
+- A model that exists neither locally nor in the cloud stops the program with
+  `<model>: not found neither locally nor in the cloud` and exit code 84.
+
+As a student with a modest laptop, I want to use a model hosted on Ollama Cloud,
+so that I get good answers without downloading or running the model myself.
+
+Acceptance criteria:
+- With `OLLAMA_API_KEY` set in `.env` and a cloud model in the configuration
+  file, the assistant answers although the model is not installed locally.
+- When a model exists both locally and in the cloud, the local one is used.
+- The API key is never printed, including in error messages.
+- An invalid configuration path stops the program with
+  `config file not found: <path>` and exit code 84.
+
+## Living project specification (M4, T5)
+
+As a student who works on a project over several days, I want the assistant to
+remember what the project is, so that I do not have to explain it again at each
+session.
+
+Acceptance criteria:
+- After I describe my project, the file set by `spec_path`
+  (`workspace/ASSISTANT.md` by default) contains an overview of it.
+- After a restart, asking "what is my project?" gives an answer consistent with
+  that file.
+- If the file does not exist at start, the assistant starts normally and creates
+  it after the first exchange.
+
+As a student in a team, I want the specification to be updated after each
+exchange, so that I always have a current document to show my teammates.
+
+Acceptance criteria:
+- A requirement stated in the conversation appears in the file after the answer,
+  under the matching section.
+- The file always starts with a Markdown title and never contains internal tags
+  or code fences around the whole document.
+- A greeting, an off-topic question or a question about the assistant itself
+  does not add requirements to the file.
+- The note-keeper returns JSON edits that follow a fixed schema and only the
+  sections it names are rewritten, the others stay exactly as they were.
+- If the update fails or is interrupted, a warning is printed, the previous file
+  is kept and the session continues.
+
+## MCP tool integration (T1)
+
+As a developer, I want the agent to use tools exposed by an MCP server, so that I
+can reuse existing tools instead of rewriting them for SensAI.
+
+Acceptance criteria:
+- Tools declared on a FastMCP server are listed by the MCP adapter with their
+  name, description and arguments.
+- Once registered, the agent can call them like any local tool.
+- The web search tool is delivered this way, through the `sensai-search`
+  server.
+
+As a developer, I want to add a tool by writing a single documented function, so
+that giving the agent a new ability takes minutes.
+
+Acceptance criteria:
+- A function decorated with `@mcp.tool` becomes available to the agent at the
+  next start, with its docstring as description.
+- A call to an unknown tool returns an error result to the agent instead of
+  stopping the program.
+- An exception raised inside a tool is returned to the agent as an error result.
+
+## Code sandbox (T2)
+
+As a student learning to program, I want the assistant to run my code in an
+isolated container, so that a mistake cannot damage my files.
+
+Acceptance criteria:
+- When I ask to run or test a script, the agent calls the `execute_command`
+  tool and answers from its real output.
+- The command runs in a Docker container, in `/work`, separate from the project
+  directory on the host.
+- The result given to the agent contains `stdout`, `stderr`, `exit_code` and
+  `timed_out`.
+- A command running longer than 20 seconds is stopped and reported as timed out.
+
+As a student working on an exercise in several steps, I want files created in
+one command to be there for the next, so that the assistant can build and then
+test my program.
+
+Acceptance criteria:
+- A file created by one command is visible to the next command of the same
+  conversation.
+- Each conversation has its own sandbox volume.
+- A failing command is reported to the agent with its exit code and error
+  output, so it can fix the script and try again.
+
+## Tool-using agent and web search (T3, A1)
+
+As a student, I want the assistant to look up the web when a question needs
+recent information, so that its answer is not limited to what the model learnt.
+
+Acceptance criteria:
+- For a question about a recent event, the agent calls the `search_web` tool
+  before answering.
+- The tool returns a numbered list of results with title, URL and snippet,
+  limited to 10 results.
+- For a question it can answer on its own, such as a greeting, the agent answers
+  without calling a tool.
+
+As a student, I want the session to survive a failed search or a tool loop, so
+that one bad request does not make me lose my conversation.
+
+Acceptance criteria:
+- When the search fails (no network), the agent receives the error as the tool
+  result and still gives an answer.
+- When the agent chains tool calls beyond the limit (`max_loops`, 10 by
+  default), an error is printed and the turn is removed from the history.
+- After either failure, the prompt comes back and the next message is answered
+  normally.
+
+## Workspace files (T4)
+
+As a student, I want the assistant to read the files of my project, so that its
+advice is based on my real code.
+
+Acceptance criteria:
+- At the first file operation, I confirm the working directory or choose
+  another one.
+- `list` and `read_file` work on the paths allowed by `configs/file_access.yaml`.
+- A path outside the working directory or without a rule is refused with an
+  error the agent can explain.
+
+## Document knowledge base (R1)
+
+As a student, I want to give my course documents to the assistant, so that its
+answers rely on my teacher's material rather than on general knowledge.
+
+Acceptance criteria:
+- PDF, Markdown, CSV and plain text files can be loaded.
+- A loaded document is split into chunks and each chunk is embedded.
+- An unsupported file type gives a clear error and does not stop the session.
+
+As a student revising for an exam, I want the assistant to retrieve the passages
+related to my question, so that I do not have to search a long document myself.
+
+Acceptance criteria:
+- A question returns the stored chunks closest to it.
+- The number of chunks returned is limited to a configurable maximum.
+- The answer is built from the retrieved passages.
+
+## Approval before changing a file (A3)
+
+As a student, I want to approve every change to my files, so that the
+assistant never overwrites my work without my consent.
+
+Acceptance criteria:
+- Every `write_in_file` call asks me `[y/N]` before writing and a refusal
+  leaves the file unchanged.
+- `create_file` needs a `read_write` permission and never replaces an existing
+  file.
+
+## Agent profiles (A5)
 
 As a student working on several subjects, I want to switch the assistant to a
 specialized tutor without restarting, so that I keep my conversation while
@@ -33,131 +198,23 @@ Acceptance criteria:
 - A profile file with a missing key stops the program with exit code 84 and an
   error naming the missing key and the file.
 
-## Living project specification
+## Web interface (X1)
 
-As a student who works on a project over several days, I want the assistant to
-remember what the project is, so that I do not have to explain it again at each
-session.
-
-Acceptance criteria:
-- After I describe my project, the file set by `spec_path`
-  (`workspace/ASSISTANT.md` by default) contains an overview of it.
-- After a restart, asking "what is my project?" gives an answer consistent with
-  that file.
-- If the file does not exist at start, the assistant starts normally and creates
-  it after the first exchange.
-
-As a student in a team, I want the specification to be updated after each
-exchange, so that I always have a current document to show my teammates.
+As a student who prefers a browser to a terminal, I want to chat with SensAI in
+a web page, so that I can follow the answer and the specification side by side.
 
 Acceptance criteria:
-- A requirement stated in the conversation appears in the file after the answer,
-  under the matching section.
-- The file always starts with a Markdown title and never contains internal tags
-  or code fences around the whole document.
-- A greeting, an off-topic question or a question about the assistant itself
-  does not add requirements to the file.
-- The note-keeper returns JSON edits that follow a fixed schema and only the
-  sections it names are rewritten, the others stay exactly as they were.
-- If the update fails or is interrupted, a warning is printed, the previous file
-  is kept and the session continues.
+- The reply is displayed while it is generated and the model reasoning can be
+  unfolded above it.
+- A side panel shows the specification and refreshes after each reply, while I
+  can already type the next message.
+- I can switch between the profiles (Wu, Euclid, Sensei, Ada, Mira) from the
+  header and the next reply comes from the chosen profile.
+- After a page reload, the conversation is displayed again and "New
+  conversation" starts an empty one.
+- If the API is not running, a readable error is shown instead of a blank page.
 
-## Local and cloud models
-
-As a student working on confidential material, I want the assistant to run on a
-model installed on my computer, so that nothing I write leaves it.
-
-Acceptance criteria:
-- With a locally installed model named in the configuration file, the assistant
-  answers without any API key.
-- Changing the `model` key and restarting changes the model used, with no code
-  change.
-- A model that exists neither locally nor in the cloud stops the program with
-  `<model>: not found neither locally nor in the cloud` and exit code 84.
-
-As a student with a modest laptop, I want to use a model hosted on Ollama Cloud,
-so that I get good answers without downloading or running the model myself.
-
-Acceptance criteria:
-- With `OLLAMA_API_KEY` set in `.env` and a cloud model in the configuration
-  file, the assistant answers although the model is not installed locally.
-- When a model exists both locally and in the cloud, the local one is used.
-- The API key is never printed, including in error messages.
-- An invalid configuration path stops the program with
-  `config file not found: <path>` and exit code 84.
-
-## Tool-using agent and web search
-
-As a student, I want the assistant to look up the web when a question needs
-recent information, so that its answer is not limited to what the model learnt.
-
-Acceptance criteria:
-- For a question about a recent event, the agent calls the `search_web` tool
-  before answering.
-- The tool returns a numbered list of results with title, URL and snippet,
-  limited to 10 results.
-- For a question it can answer on its own, such as a greeting, the agent answers
-  without calling a tool.
-
-As a student, I want the session to survive a failed search or a tool loop, so
-that one bad request does not make me lose my conversation.
-
-Acceptance criteria:
-- When the search fails (no network), the agent receives the error as the tool
-  result and still gives an answer.
-- When the agent chains tool calls beyond the limit (`max_loops`, 10 by
-  default), an error is printed and the turn is removed from the history.
-- After either failure, the prompt comes back and the next message is answered
-  normally.
-
-## MCP tool integration
-
-As a developer, I want the agent to use tools exposed by an MCP server, so that I
-can reuse existing tools instead of rewriting them for SensAI.
-
-Acceptance criteria:
-- Tools declared on a FastMCP server are listed by the MCP adapter with their
-  name, description and arguments.
-- Once registered, the agent can call them like any local tool.
-- The web search tool is delivered this way, through the `sensai-search`
-  server.
-
-As a developer, I want to add a tool by writing a single documented function, so
-that giving the agent a new ability takes minutes.
-
-Acceptance criteria:
-- A function decorated with `@mcp.tool` becomes available to the agent at the
-  next start, with its docstring as description.
-- A call to an unknown tool returns an error result to the agent instead of
-  stopping the program.
-- An exception raised inside a tool is returned to the agent as an error result.
-
-## Code sandbox
-
-As a student learning to program, I want the assistant to run my code in an
-isolated container, so that a mistake cannot damage my files.
-
-Acceptance criteria:
-- When I ask to run or test a script, the agent calls the `execute_command`
-  tool and answers from its real output.
-- The command runs in a Docker container, in `/work`, separate from the project
-  directory on the host.
-- The result given to the agent contains `stdout`, `stderr`, `exit_code` and
-  `timed_out`.
-- A command running longer than 20 seconds is stopped and reported as timed out.
-
-As a student working on an exercise in several steps, I want files created in
-one command to be there for the next, so that the assistant can build and then
-test my program.
-
-Acceptance criteria:
-- A file created by one command is visible to the next command of the same
-  conversation.
-- Each conversation has its own sandbox volume.
-- A failing command is reported to the agent with its exit code and error
-  output, so it can fix the script and try again.
-
-## Clarification questions
+## Clarification questions (X4)
 
 As a student describing a project, I want the assistant to ask me when a choice
 is missing instead of guessing, so that it builds what I actually want.
@@ -188,42 +245,7 @@ Acceptance criteria:
 - I can still type another answer in the message field instead.
 - The buttons are disabled once I have answered or while the agent replies.
 
-## Workspace files
-
-As a student, I want the assistant to read the files of my project, so that its
-advice is based on my real code.
-
-Acceptance criteria:
-- At the first file operation, I confirm the working directory or choose
-  another one.
-- `list` and `read_file` work on the paths allowed by `configs/file_access.yaml`.
-- A path outside the working directory or without a rule is refused with an
-  error the agent can explain.
-
-As a student, I want to approve every change to my files, so that the
-assistant never overwrites my work without my consent.
-
-Acceptance criteria:
-- Every `write_in_file` call asks me `[y/N]` before writing and a refusal
-  leaves the file unchanged.
-- `create_file` needs a `read_write` permission and never replaces an existing
-  file.
-
-## Web interface and HTTP API
-
-As a student who prefers a browser to a terminal, I want to chat with SensAI in
-a web page, so that I can follow the answer and the specification side by side.
-
-Acceptance criteria:
-- The reply is displayed while it is generated and the model reasoning can be
-  unfolded above it.
-- A side panel shows the specification and refreshes after each reply, while I
-  can already type the next message.
-- I can switch between the profiles (Wu, Euclid, Sensei, Ada, Mira) from the
-  header and the next reply comes from the chosen profile.
-- After a page reload, the conversation is displayed again and "New
-  conversation" starts an empty one.
-- If the API is not running, a readable error is shown instead of a blank page.
+## HTTP API
 
 As a developer, I want to use SensAI through an HTTP API, so that I can build
 other interfaces on the same agent.
@@ -236,21 +258,3 @@ Acceptance criteria:
 - `GET /api/conversations/{id}/messages`, `GET /api/spec` and `GET /api/profiles`
   return the history, the specification and the profiles.
 - An unknown conversation returns 404 and an unknown profile returns 400.
-
-## Document knowledge base (RAG)
-
-As a student, I want to give my course documents to the assistant, so that its
-answers rely on my teacher's material rather than on general knowledge.
-
-Acceptance criteria:
-- PDF, Markdown, CSV and plain text files can be loaded.
-- A loaded document is split into chunks and each chunk is embedded.
-- An unsupported file type gives a clear error and does not stop the session.
-
-As a student revising for an exam, I want the assistant to retrieve the passages
-related to my question, so that I do not have to search a long document myself.
-
-Acceptance criteria:
-- A question returns the stored chunks closest to it.
-- The number of chunks returned is limited to a configurable maximum.
-- The answer is built from the retrieved passages.
