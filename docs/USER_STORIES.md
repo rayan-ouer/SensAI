@@ -125,15 +125,17 @@ Acceptance criteria:
 
 ## Code sandbox
 
-As a student learning to program, I want the assistant to run commands in an
+As a student learning to program, I want the assistant to run my code in an
 isolated container, so that a mistake cannot damage my files.
 
 Acceptance criteria:
-- A command runs in a Docker container, in `/work`, separate from the project
+- When I ask to run or test a script, the agent calls the `execute_command`
+  tool and answers from its real output.
+- The command runs in a Docker container, in `/work`, separate from the project
   directory on the host.
-- The result contains `stdout`, `stderr`, `exit_code` and `timed_out`.
-- A command running longer than the timeout (20 seconds by default) is stopped
-  and reported as timed out.
+- The result given to the agent contains `stdout`, `stderr`, `exit_code` and
+  `timed_out`.
+- A command running longer than 20 seconds is stopped and reported as timed out.
 
 As a student working on an exercise in several steps, I want files created in
 one command to be there for the next, so that the assistant can build and then
@@ -141,9 +143,80 @@ test my program.
 
 Acceptance criteria:
 - A file created by one command is visible to the next command of the same
-  session.
-- Putting the session to sleep removes the container but keeps the files.
-- Destroying the session removes the container and its files.
+  conversation.
+- Each conversation has its own sandbox volume.
+- A failing command is reported to the agent with its exit code and error
+  output, so it can fix the script and try again.
+
+## Clarification questions (human in the loop)
+
+As a student describing a project, I want the assistant to ask me when a choice
+is missing instead of guessing, so that it builds what I actually want.
+
+Acceptance criteria:
+- When a missing choice blocks the request, the agent calls `human_in_the_loop`
+  and a numbered menu of options is shown.
+- The menu always ends with an "Other free-form answer" choice.
+- An invalid number is asked again and the selected answer is sent back to the
+  agent.
+- The agent does not ask about details already given in the conversation or in
+  the specification.
+
+As a student, I want my answers to these questions to be kept in the
+specification, so that I do not have to give them again later.
+
+Acceptance criteria:
+- After the turn, the specification contains the choice I selected.
+- A question asked with fewer than two options is refused as a tool error and
+  the session continues.
+
+## Workspace files
+
+As a student, I want the assistant to read the files of my project, so that its
+advice is based on my real code.
+
+Acceptance criteria:
+- At the first file operation, I confirm the working directory or choose
+  another one.
+- `list` and `read_file` work on the paths allowed by `configs/file_access.yaml`.
+- A path outside the working directory or without a rule is refused with an
+  error the agent can explain.
+
+As a student, I want to approve every change to my files, so that the
+assistant never overwrites my work without my consent.
+
+Acceptance criteria:
+- Every `write_in_file` call asks me `[y/N]` before writing and a refusal
+  leaves the file unchanged.
+- `create_file` needs a `read_write` permission and never replaces an existing
+  file.
+
+## Web interface and HTTP API
+
+As a student who prefers a browser to a terminal, I want to chat with SensAI in
+a web page, so that I can follow the answer and the specification side by side.
+
+Acceptance criteria:
+- The reply is displayed while it is generated and the model reasoning can be
+  unfolded above it.
+- A side panel shows the specification and refreshes after each reply, while I
+  can already type the next message.
+- I can switch between Wu and Euclid from the header and the next reply comes
+  from the chosen profile.
+- After a page reload, the conversation is displayed again and "New
+  conversation" starts an empty one.
+- If the API is not running, a readable error is shown instead of a blank page.
+
+As a developer, I want to use SensAI through an HTTP API, so that I can build
+other interfaces on the same agent.
+
+Acceptance criteria:
+- `POST /api/conversations/` returns a conversation id.
+- `POST /api/conversations/{id}/messages` streams one JSON event per line:
+  `thinking` and `content` chunks, then `done`, then `spec` (or `error`).
+- `GET /api/conversations/{id}/messages`, `GET /api/spec` and `GET /api/profiles`
+  return the history, the specification and the profiles.
+- An unknown conversation returns 404 and an unknown profile returns 400.
 
 ## Document knowledge base (RAG)
 

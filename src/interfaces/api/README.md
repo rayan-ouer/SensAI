@@ -1,0 +1,60 @@
+# HTTP API
+
+Start it from the root of the repository with `wu-api`: it listens on <http://127.0.0.1:8084> and the generated
+documentation is on <http://127.0.0.1:8084/docs>. It loads the config set by `CONFIG_PATH` in `.env`.
+
+```
+interfaces/api/
+  app.py          application, startup and routers
+  setup.py        profiles, LLM client and tools loaded once at startup
+  chat.py         agent creation and the turn run in a thread
+  dependencies.py the conversation service injected in the routes
+  routes/         one file per resource, endpoints only
+  schemas/input/  request bodies
+  schemas/output/ response bodies and stream events
+  utils/          helpers used by the routes
+```
+
+## Endpoints
+
+| Method | Path | Body | Response |
+|---|---|---|---|
+| `POST` | `/api/conversations/` | `{"user_id": "..."}` | `{"id": "..."}` |
+| `POST` | `/api/conversations/{id}/messages` | `{"content": "...", "profile": "math_tutor"}` | stream of events, see below |
+| `GET` | `/api/conversations/{id}/messages` | | `{"messages": [{"role": "user", "content": "..."}, ...]}` |
+| `GET` | `/api/profiles` | | `{"profiles": [{"key", "name", "role"}, ...], "default": "wu"}` |
+| `GET` | `/api/spec` | | `{"content": "# Project specification..."}` |
+| `GET` | `/health` | | `{"status": "ok"}` |
+
+`profile` is optional, the default profile answers without it. An unknown conversation returns 404 and an unknown
+profile returns 400.
+
+## The message stream
+
+`POST /api/conversations/{id}/messages` answers with one JSON object per line (`application/x-ndjson`):
+
+```
+{"type":"thinking","text":"The user asks..."}
+{"type":"content","text":"Pleasure"}
+{"type":"content","text":" to meet you."}
+{"type":"done"}
+{"type":"spec","text":"# Project specification\n..."}
+```
+
+| Event | Meaning |
+|---|---|
+| `thinking` | a piece of the model reasoning, only with models that reason |
+| `content` | a piece of the reply |
+| `done` | the reply is complete and saved in the conversation, the client can send the next message |
+| `spec` | the specification updated from this exchange, the last event of the stream |
+| `error` | the model failed, the message is not saved, the last event of the stream |
+
+The agent runs in a thread and pushes its chunks in a queue that the response reads. The exchange is saved only when
+the agent succeeds, so a failed request leaves the conversation unchanged.
+
+## Limits
+
+- Conversations are kept in memory: they are lost when the API restarts. The web interface then starts a new one.
+- The agent of the API only has the web search tool: the clarification questions and the file tools read the
+  terminal and the sandbox is not connected yet.
+- The specification is a single file shared by every conversation and by the CLI.

@@ -18,3 +18,12 @@ agents:
     agents: [review_agent]
     response_format: {}
     max_loops: 10
+
+  - name: test_agent
+    description: Test the agent
+    role: Test the agent
+    model: gemma4:31b-cloud
+    tools: []
+    agents: [profile_agent, review_agent]
+    response_format: {}
+    max_loops: 10

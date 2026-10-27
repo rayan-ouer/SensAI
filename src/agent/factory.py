@@ -35,7 +35,7 @@ class AgentFactory:
     ) -> Agent:
         validate_agents_config(
             config,
-            [tool.name for tool in self._tools.list_tools()],
+            set([tool.name for tool in self._tools.list_tools()]),
         )
 
         order = self._build_order(config)

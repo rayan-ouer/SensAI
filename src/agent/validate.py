@@ -10,31 +10,11 @@ from collections.abc import Collection
 
 from agent.definition import AgentDefinition, AgentsConfig
 from agent.errors import AgentConfigError
+from core.dfs import dfs
 
 
-def _detect_cycles(agents: dict[str, AgentDefinition]) -> None:
-    white, gray, black = 0, 1, 2
-    state = {name: white for name in agents}
-
-    def visit(name: str, stack: list[str]) -> None:
-        state[name] = gray
-        stack.append(name)
-        for child in agents[name].agents:
-            if child not in agents:
-                continue
-            if state[child] == gray:
-                cycle_start = stack.index(child)
-                cycle = stack[cycle_start:] + [child]
-                raise AgentConfigError(f"cycle detected: {' -> '.join(cycle)}")
-            elif state[child] == white:
-                visit(child, stack)
-        stack.pop()
-        state[name] = black
-
-    for name in agents:
-        if state[name] == white:
-            visit(name, [])
-
+def _reject_cycle(cycle: list[str]) -> None:
+    raise AgentConfigError(f"cycle detected: {' -> '.join(cycle)}")
 
 def _validate_tools(
     agent: AgentDefinition,
@@ -69,28 +49,30 @@ def _validate_shared_names(agent: AgentDefinition) -> None:
         )
 
 
+def _validate_duplicates(agents: dict[str, AgentDefinition]) -> None:
+    seen: dict[str, int] = {}
+
+    for agent in agents.values():
+        seen[agent.name] = seen.get(agent.name, 0) + 1
+        if seen[agent.name] > 1:
+            raise AgentConfigError(
+                f"duplicate agent name '{agent.name}' ({seen[agent.name]} definitions)"
+            )
+
 def validate_agents_config(
     config: AgentsConfig,
-    available_tools: Collection[str],
+    available_tools: set[str],
 ) -> None:
-    tool_set = set(available_tools)
-    agents = config.by_name()
-
-    seen: dict[str, int] = defaultdict(int)
-    for agent in config.agents:
-        seen[agent.name] += 1
-    for name, count in seen.items():
-        if count > 1:
-            raise AgentConfigError(
-                f"duplicate agent name '{name}' ({count} definitions)"
-            )
+    agents: dict[str, AgentDefinition] = config.by_name()
 
     if config.entry not in agents:
         raise AgentConfigError(f"entry agent '{config.entry}' is not defined")
-
+    _validate_duplicates(agents)
     for agent in config.agents:
-        _validate_tools(agent, tool_set, agents)
+        _validate_tools(agent, available_tools, agents)
         _validate_children(agent, agents)
         _validate_shared_names(agent)
-
-    _detect_cycles(agents)
+    dfs(
+        {name: agent.agents for name, agent in agents.items()},
+        on_back_edge=_reject_cycle,
+    )

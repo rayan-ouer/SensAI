@@ -14,3 +14,4 @@ class CreateConversationRequest(BaseModel):
 
 class MessageRequest(BaseModel):
     content: str
+    profile: str | None = None

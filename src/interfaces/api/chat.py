@@ -17,6 +17,7 @@ from interfaces.api.schemas.output.conversation import StreamEvent
 from llm.errors import LLMError
 from tools.agent.profile_data import ProfileData
 from tools.agent.profiles import build_profile_prompt
+from tools.chat.chat_loop import refresh_spec
 from tools.spec.spec import build_system_prompt, load_spec
 
 
@@ -30,8 +31,12 @@ def build_role(state: State, profile: ProfileData) -> SystemMessage:
     )
 
 
-def create_agent(state: State, on_chunk: Callable[[str, str], None]) -> Agent:
-    profile = state.profiles[state.config.default_profile]
+def create_agent(
+    state: State,
+    on_chunk: Callable[[str, str], None],
+    profile_key: str | None,
+) -> Agent:
+    profile = state.profiles[profile_key or state.config.default_profile]
     return Agent(
         name=profile.name,
         model=state.config.model,
@@ -53,12 +58,24 @@ def save_turn(service: IConversationService, conversation_id: str, turn: AgentTu
             service.add_tool_message(conversation_id, message)
 
 
+def send_spec_update(
+    content: str,
+    events: Queue,
+    state: State,
+    turn: AgentTurn,
+) -> None:
+    spec = load_spec(state.config.spec_path)
+    new_spec = refresh_spec(state.llm, state.config, spec, content, turn.reply.content)
+    events.put(StreamEvent(type="spec", text=new_spec))
+
+
 def run_turn(
     agent: Agent,
     service: IConversationService,
     conversation_id: str,
     content: str,
     events: Queue,
+    state: State,
 ) -> None:
     human = HumanMessage(content=content)
     try:
@@ -69,11 +86,12 @@ def run_turn(
     service.add_human_message(conversation_id, human)
     save_turn(service, conversation_id, turn)
     events.put(StreamEvent(type="done"))
+    send_spec_update(content, events, state, turn)
 
 
 def stream_events(events: Queue) -> Iterator[str]:
     while True:
         event: StreamEvent = events.get()
         yield event.model_dump_json(exclude_none=True) + "\n"
-        if event.type == "error" or event.type == "done":
+        if event.type == "error" or event.type == "spec":
             return
