@@ -7,6 +7,7 @@
 
 import asyncio
 import logging
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -25,7 +26,7 @@ VERSION_API: str = "v0.1.0"
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = Settings()
     app.state.conversations = ConversationServiceFactory().create(
         ConversationStorage(settings.conversation_storage)
@@ -58,17 +59,17 @@ app.add_middleware(
 
 
 @app.get("/health", tags=["health"])
-async def health_check():
+async def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
 
 @app.get("/version", tags=["version"])
-async def version():
+async def version() -> dict[str, str]:
     return {"version": VERSION_API}
 
 
 @app.get("/", tags=["root"])
-async def root():
+async def root() -> dict[str, str]:
     return {"message": "Sensai API is running"}
 
 

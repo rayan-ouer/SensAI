@@ -10,11 +10,12 @@ from threading import Thread
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
 
 from core.conversation import ConversationNotFoundError
 from interfaces.api.chat import create_agent, run_turn, stream_events
 from interfaces.api.dependencies import ConversationDep
+from interfaces.api.schemas.input.conversation import CreateConversationRequest, MessageRequest
+from interfaces.api.schemas.output.conversation import CreateConversationResponse, StreamEvent
 
 conversation_router = APIRouter(
     prefix="/conversations",
@@ -22,25 +23,17 @@ conversation_router = APIRouter(
 )
 
 
-class CreateConversationRequest(BaseModel):
-    user_id: str
-
-
-@conversation_router.post("/")
+@conversation_router.post("/", response_model=CreateConversationResponse)
 def create_conversation(
     body: CreateConversationRequest,
     request: Request,
     store: ConversationDep,
-):
+) -> CreateConversationResponse:
     conversation_id = store.create_conversation(
         user_id=body.user_id,
         system_prompt=request.app.state.config.system_prompt,
     )
-    return {"id": conversation_id}
-
-
-class MessageRequest(BaseModel):
-    content: str
+    return CreateConversationResponse(id=conversation_id)
 
 
 @conversation_router.post("/{conversation_id}/messages")
@@ -49,7 +42,7 @@ def send_message(
     body: MessageRequest,
     request: Request,
     store: ConversationDep,
-):
+) -> StreamingResponse:
     try:
         store.get_conversation_by_id(conversation_id)
     except ConversationNotFoundError:
@@ -57,7 +50,7 @@ def send_message(
     events: Queue = Queue()
     agent = create_agent(
         request.app.state,
-        lambda kind, text: events.put({"type": kind, "text": text}),
+        lambda kind, text: events.put(StreamEvent(type=kind, text=text)),
     )
     Thread(
         target=run_turn,

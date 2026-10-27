@@ -5,7 +5,7 @@
 ## chat
 ##
 
-import json
+from collections.abc import Callable, Iterator
 from queue import Queue
 
 from fastapi.datastructures import State
@@ -13,6 +13,7 @@ from fastapi.datastructures import State
 from agent.agent import Agent, AgentIterationLimitError, AgentTurn
 from core.conversation import IConversationService
 from core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
+from interfaces.api.schemas.output.conversation import StreamEvent
 from llm.errors import LLMError
 from tools.agent.profile_data import ProfileData
 from tools.agent.profiles import build_profile_prompt
@@ -29,7 +30,7 @@ def build_role(state: State, profile: ProfileData) -> SystemMessage:
     )
 
 
-def create_agent(state: State, on_chunk) -> Agent:
+def create_agent(state: State, on_chunk: Callable[[str, str], None]) -> Agent:
     profile = state.profiles[state.config.default_profile]
     return Agent(
         name=profile.name,
@@ -44,7 +45,7 @@ def create_agent(state: State, on_chunk) -> Agent:
     )
 
 
-def save_turn(service: IConversationService, conversation_id: str, turn: AgentTurn):
+def save_turn(service: IConversationService, conversation_id: str, turn: AgentTurn) -> None:
     for message in turn.messages:
         if isinstance(message, AIMessage):
             service.add_ai_message(conversation_id, message)
@@ -58,21 +59,21 @@ def run_turn(
     conversation_id: str,
     content: str,
     events: Queue,
-):
+) -> None:
     human = HumanMessage(content=content)
     try:
         turn = agent.invoke(service.get_used_history(conversation_id) + [human])
     except (LLMError, AgentIterationLimitError) as e:
-        events.put({"type": "error", "message": str(e)})
+        events.put(StreamEvent(type="error", message=str(e)))
         return
     service.add_human_message(conversation_id, human)
     save_turn(service, conversation_id, turn)
-    events.put({"type": "done"})
+    events.put(StreamEvent(type="done"))
 
 
-def stream_events(events: Queue):
+def stream_events(events: Queue) -> Iterator[str]:
     while True:
-        event = events.get()
-        yield json.dumps(event) + "\n"
-        if event["type"] == "error" or event["type"] == "done":
+        event: StreamEvent = events.get()
+        yield event.model_dump_json(exclude_none=True) + "\n"
+        if event.type == "error" or event.type == "done":
             return

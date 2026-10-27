@@ -15,7 +15,7 @@ from tools.chat.settings import Settings
 from tools.search.web import create_search_tools
 
 
-def init_agent_resources(state: State, settings: Settings, config: ConfigData):
+def init_agent_resources(state: State, settings: Settings, config: ConfigData) -> None:
     state.profiles = init_profiles(config)
     state.llm = OllamaClient(
         config.model,
