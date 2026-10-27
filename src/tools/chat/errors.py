@@ -26,7 +26,7 @@ class ProfileError(AppError):
         self.message = message
         self.profile_path = profile_path
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.message}: {self.profile_path}"
 
 
@@ -35,7 +35,7 @@ class ModelNotFoundError(AppError):
         self.model = model
         self.detail = detail
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.model}: {self.detail}"
 
 

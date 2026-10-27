@@ -8,7 +8,7 @@
 import argparse
 
 
-def handle_args():
+def handle_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="SensAI command-line assistant")
     parser.add_argument(
         "-c",
