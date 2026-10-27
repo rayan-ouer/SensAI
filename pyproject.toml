@@ -7,6 +7,12 @@ name = "master-wu"
 version = "0.1.0"
 description = "An master-wu harness for AI agents"
 requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "Armand Lecomte", email = "armand.lecomte@epitech.eu" },
+    { name = "Rayan Ouerdane", email = "rayan.ouerdane@epitech.eu" },
+    { name = "Sacha Lemée", email = "sacha.lemee@epitech.eu" },
+]
 dynamic = ["dependencies"]
 
 [project.scripts]
