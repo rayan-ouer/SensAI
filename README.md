@@ -53,7 +53,7 @@ wu -c configs/cloud_config.yaml   # Ollama Cloud
 ```
 
 ```
-Starting Wu
+Starting Wu with prompts v2
 > I want to build a todo list app in Python
 Answer:
 A fine project. Start small: what should a task contain?

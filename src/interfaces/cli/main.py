@@ -27,7 +27,7 @@ def run() -> None:
     api_key = read_api_key()
     config = ConfigLoader(args.config).get_configs()
     state = create_cli_state(config, api_key)
-    print(f"Starting {state.current_profile().name}")
+    print(f"Starting {state.current_profile().name} with prompts {state.config.prompt_version}")
     spec = load_spec(state.config.spec_path)
     tools = create_tools(state)
     agent = create_agent(state, tools, current_role(state, spec))

@@ -165,6 +165,21 @@ Acceptance criteria:
 - `create_file` needs a `read_write` permission and never replaces an existing
   file.
 
+## Prompt versioning (A4)
+
+As a developer tuning the assistant, I want each version of the global prompts
+kept with its date and changes, so that I can go back to a previous one when a
+change makes the answers worse.
+
+Acceptance criteria:
+- Each folder of `configs/prompt/versions/` holds `system.txt`, `spec.txt`,
+  `question.txt` and a `version.yaml` with its date and what changed.
+- `prompt_version` in the configuration file selects the folder and writing
+  the previous version there rolls back, with no code change.
+- An unknown version stops the program with `prompt version not found: <path>`
+  and exit code 84.
+- The CLI start message and `GET /version` show the version in use.
+
 ## Agent profiles (A5)
 
 As a student working on several subjects, I want to switch the assistant to a

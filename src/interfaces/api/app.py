@@ -67,7 +67,7 @@ async def health_check() -> dict[str, str]:
 
 @app.get("/version", tags=["version"])
 async def version() -> dict[str, str]:
-    return {"version": VERSION_API}
+    return {"version": VERSION_API, "prompt_version": app.state.config.prompt_version}
 
 
 @app.get("/", tags=["root"])
