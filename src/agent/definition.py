@@ -1,10 +1,3 @@
-##
-## EPITECH PROJECT, 2026
-## SensAI
-## File description:
-## definition
-##
-
 from dataclasses import dataclass, field
 
 
