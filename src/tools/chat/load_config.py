@@ -10,7 +10,7 @@ from dataclasses import fields
 
 import yaml
 
-from tools.chat.config_data import ConfigData
+from tools.chat.config_data import PROMPT_VERSION_DIR, ConfigData
 from tools.chat.errors import ConfigError
 
 
@@ -19,6 +19,7 @@ REQUIRED_KEYS = (
     "system_prompt",
     "spec_prompt",
     "question_prompt",
+    "prompt_version",
     "profiles_dir",
     "default_profile",
     "spec_path",
@@ -62,12 +63,19 @@ class ConfigLoader:
         if config.get("ollama_provider", "auto") not in OLLAMA_PROVIDERS:
             raise ConfigError("ollama_provider must be auto, local or cloud", self.config_path)
 
+    def _prompt_dir(self, config: dict) -> str:
+        path = os.path.join(self.config_dir, config.get("prompt_version_dir", PROMPT_VERSION_DIR), config["prompt_version"])
+        if not os.path.isdir(path):
+            raise ConfigError("prompt version not found", path)
+        return path
+
     def get_configs(self) -> ConfigData:
         config = read_yaml(self.config_path)
         self._validate_config(config)
         names = {field.name for field in fields(ConfigData)}
         values = {key: value for key, value in config.items() if key in names}
+        prompt_dir = self._prompt_dir(config)
         for key in PROMPT_KEYS:
-            values[key] = read_prompt(self.config_dir, config[key])
+            values[key] = read_prompt(prompt_dir, config[key])
         values["config_dir"] = self.config_dir
         return ConfigData(**values)

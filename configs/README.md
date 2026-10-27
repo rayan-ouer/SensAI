@@ -22,9 +22,10 @@ The CLI takes it with `wu -c configs/local_config.yaml`. The API reads the one s
 | Key | Required | Type | Role |
 |---|---|---|---|
 | `model` | yes | string | model name, local (`ollama list`) or on Ollama Cloud |
-| `system_prompt` | yes | path | general rules shared by every profile |
-| `spec_prompt` | yes | path | instructions of the note-keeper that updates the specification |
-| `question_prompt` | yes | path | what the clarification tool tells the agent once the web interface shows its question |
+| `prompt_version` | yes | string | version of the global prompts, a folder of `prompt/versions/` |
+| `system_prompt` | yes | file | general rules shared by every profile |
+| `spec_prompt` | yes | file | instructions of the note-keeper that updates the specification |
+| `question_prompt` | yes | file | what the clarification tool tells the agent once the web interface shows its question |
 | `spec_path` | yes | path | the living specification, created if missing |
 | `profiles_dir` | yes | path | folder of the agent profiles |
 | `default_profile` | yes | string | profile active at start, a file name of `profiles_dir` without `.yaml` |
@@ -33,10 +34,11 @@ The CLI takes it with `wu -c configs/local_config.yaml`. The API reads the one s
 | `max_loops` | no | int | maximum agent steps (model and tool calls) for one message, 10 by default |
 | `llm_settings` | no | dict | options passed to the model, for example `{temperature: 0.2, top_k: 50}` |
 | `ollama_provider` | no | string | `auto` (local then cloud), `local` or `cloud`, `auto` by default |
+| `prompt_version_dir` | no | path | folder of the prompt versions, `prompt/versions` by default |
 | `file_access_config` | no | path | permissions file of the file tools, `file_access.yaml` by default |
 | `response_format` | no | dict | JSON schema the replies must follow, free text by default |
 
-Paths are relative to the config file, except `spec_path` which is relative to the folder you start SensAI from.
+The three prompt files are read in the folder of `prompt_version`. Paths are relative to the config file, except `spec_path` which is relative to the folder you start SensAI from.
 A missing required key or an invalid `ollama_provider` stops the program with a clear error and exit code 84.
 
 ## Environment variables
@@ -70,7 +72,8 @@ at the next start.
 ## Prompts
 
 The global prompts are versioned in `prompt/versions/`: each folder holds `system.txt`, `spec.txt`, `question.txt`
-and a `version.yaml` with its date and what changed. The config files point to the current version.
+and a `version.yaml` with its date and what changed. `prompt_version` in the config picks one: rolling back is
+writing the previous version there.
 
 | File | Used by |
 |---|---|
