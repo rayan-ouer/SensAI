@@ -5,9 +5,9 @@
 ** useChat
 */
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
-import { streamReply } from '@/services/chatApi'
+import { ConversationNotFoundError, createConversation, streamReply } from '@/services/chatApi'
 import type { ChatStatus, Message } from '@/types/chat'
 
 function appendToMessage(messages: Message[], id: string, chunk: string): Message[] {
@@ -20,11 +20,32 @@ export function useChat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [status, setStatus] = useState<ChatStatus>('idle')
   const [error, setError] = useState<string | null>(null)
+  const conversationId = useRef<string | null>(null)
 
-  async function receiveReply(history: Message[], replyId: string) {
-    for await (const chunk of streamReply(history)) {
-      setStatus('streaming')
-      setMessages((current) => appendToMessage(current, replyId, chunk))
+  async function currentConversation(): Promise<string> {
+    conversationId.current ??= await createConversation()
+    return conversationId.current
+  }
+
+  async function receiveReply(text: string, replyId: string) {
+    for await (const event of streamReply(await currentConversation(), text)) {
+      if (event.type === 'error')
+        throw new Error(event.message)
+      if (event.type === 'content') {
+        setStatus('streaming')
+        setMessages((current) => appendToMessage(current, replyId, event.text))
+      }
+    }
+  }
+
+  async function receiveReplyOrRetry(text: string, replyId: string) {
+    try {
+      await receiveReply(text, replyId)
+    } catch (e) {
+      if (!(e instanceof ConversationNotFoundError))
+        throw e
+      conversationId.current = null
+      await receiveReply(text, replyId)
     }
   }
 
@@ -37,13 +58,12 @@ export function useChat() {
       return
     const userMessage: Message = { id: crypto.randomUUID(), role: 'user', content: text }
     const reply: Message = { id: crypto.randomUUID(), role: 'assistant', content: '' }
-    const history = [...messages, userMessage]
 
-    setMessages([...history, reply])
+    setMessages((current) => [...current, userMessage, reply])
     setError(null)
     setStatus('thinking')
     try {
-      await receiveReply(history, reply.id)
+      await receiveReplyOrRetry(text, reply.id)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'The assistant could not reply.')
     } finally {

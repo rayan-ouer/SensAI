@@ -36,7 +36,7 @@ src/
     useChat.ts          messages, status, sending
 
   services/             calls to the backend
-    chatApi.ts          the only contact point with the API (mocked for now)
+    chatApi.ts          the only contact point with the API
 
   types/                types shared across the app
     chat.ts             Message, Role, ChatStatus
@@ -56,5 +56,14 @@ Each one starts with a comment giving its source. Add or update them with the CL
 
 ## Connecting the API
 
-The page only depends on `streamReply(messages)` in `services/chatApi.ts`.
-Replace its body with the real request; nothing else has to change.
+Start the API first (`wu-api`, from the repository root), then `npm run dev`.
+In development, Vite forwards `/api` to `http://127.0.0.1:8084`: set `SENSAI_API` to use another address,
+or `VITE_API_URL` to call the API directly without the proxy.
+
+`services/chatApi.ts` is the only file that talks to the API:
+
+- `createConversation()` creates a conversation, the first time a message is sent
+- `streamReply(conversationId, content)` sends a message and yields the events of the reply,
+  one JSON object per line: `content` and `thinking` chunks, then `done` or `error`
+
+If the API restarted and lost the conversation, the page creates a new one and sends the message again.
