@@ -10,7 +10,8 @@ configs/
   config.yaml.example   every key with its type and default value
   file_access.yaml      permissions of the workspace file tools
   profiles/             one YAML file per agent profile
-  prompt/               the text prompts referenced by the files above
+  prompt/               the persona prompts of the profiles
+  prompt/versions/      one folder per version of the global prompts
 ```
 
 ## Main config file
@@ -68,11 +69,14 @@ at the next start.
 
 ## Prompts
 
+The global prompts are versioned in `prompt/versions/`: each folder holds `system.txt`, `spec.txt`, `question.txt`
+and a `version.yaml` with its date and what changed. The config files point to the current version.
+
 | File | Used by |
 |---|---|
-| `prompt/system.txt` | every profile: honesty, brevity, scope, language and the rules of each tool |
-| `prompt/question.txt` | the clarification tool in the web interface: the question is shown, the agent ends its turn |
-| `prompt/spec.txt` | the note-keeper: sections of the specification, what it may record and the JSON edits it returns |
+| `system.txt` | every profile: honesty, brevity, scope, language and the rules of each tool |
+| `question.txt` | the clarification tool in the web interface: the question is shown, the agent ends its turn |
+| `spec.txt` | the note-keeper: sections of the specification, what it may record and the JSON edits it returns |
 | `prompt/wu.txt`, `prompt/math_tutor.txt`, `prompt/sensei.txt`, `prompt/code_reviewer.txt`, `prompt/product_coach.txt` | the detailed persona of each profile |
 
 The system prompt sent to the model is built from three layers: `system.txt`, the active profile and the current
