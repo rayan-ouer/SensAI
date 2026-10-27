@@ -16,3 +16,13 @@ class StreamEvent(BaseModel):
     type: str
     text: str | None = None
     message: str | None = None
+
+
+class MessageResponse(BaseModel):
+    role: str
+    content: str
+    thinking: str | None = None
+
+
+class MessagesResponse(BaseModel):
+    messages: list[MessageResponse]

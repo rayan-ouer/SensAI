@@ -12,10 +12,16 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from core.conversation import ConversationNotFoundError
+from core.types import MessageType
 from interfaces.api.chat import create_agent, run_turn, stream_events
 from interfaces.api.dependencies import ConversationDep
 from interfaces.api.schemas.input.conversation import CreateConversationRequest, MessageRequest
-from interfaces.api.schemas.output.conversation import CreateConversationResponse, StreamEvent
+from interfaces.api.schemas.output.conversation import (
+    CreateConversationResponse,
+    MessageResponse,
+    MessagesResponse,
+    StreamEvent,
+)
 
 conversation_router = APIRouter(
     prefix="/conversations",
@@ -58,3 +64,24 @@ def send_message(
         daemon=True,
     ).start()
     return StreamingResponse(stream_events(events), media_type="application/x-ndjson")
+
+
+def is_displayed(message) -> bool:
+    return message.role in (MessageType.HUMAN, MessageType.AI) and message.content != ""
+
+
+def to_message_response(message) -> MessageResponse:
+    if message.role == MessageType.HUMAN:
+        return MessageResponse(role="user", content=message.content)
+    return MessageResponse(role="assistant", content=message.content, thinking=message.thinking)
+
+
+@conversation_router.get("/{conversation_id}/messages", response_model=MessagesResponse)
+def get_messages(conversation_id: str, store: ConversationDep) -> MessagesResponse:
+    try:
+        store.get_conversation_by_id(conversation_id)
+    except ConversationNotFoundError:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    history = store.get_used_history(conversation_id)
+    messages = [to_message_response(message) for message in history if is_displayed(message)]
+    return MessagesResponse(messages=messages)
