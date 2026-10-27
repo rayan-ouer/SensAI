@@ -71,7 +71,7 @@ at the next start.
 |---|---|
 | `prompt/system.txt` | every profile: honesty, brevity, scope, language and the rules of each tool |
 | `prompt/spec.txt` | the note-keeper: sections of the specification, what it may record and the JSON edits it returns |
-| `prompt/wu.txt`, `prompt/math_tutor.txt`, `prompt/sensei.txt`, `prompt/code_reviewer.txt`, `prompt/product_coach.txt`, `prompt/rayan.txt`, `prompt/sacha.txt`, `prompt/armand.txt` | the detailed persona of each profile |
+| `prompt/wu.txt`, `prompt/math_tutor.txt`, `prompt/sensei.txt`, `prompt/code_reviewer.txt`, `prompt/product_coach.txt` | the detailed persona of each profile |
 
 The system prompt sent to the model is built from three layers: `system.txt`, the active profile and the current
 specification. In the CLI, the workspace directory and its listing are added at the end.
