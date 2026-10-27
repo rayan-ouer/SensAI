@@ -1,5 +1,5 @@
 """Agent package."""
 
-from .agent import Agent, AgentIterationLimitError
+from .agent import Agent, AgentIterationLimitError, AgentTurn
 
-__all__ = ["Agent", "AgentIterationLimitError"]
+__all__ = ["Agent", "AgentIterationLimitError", "AgentTurn"]

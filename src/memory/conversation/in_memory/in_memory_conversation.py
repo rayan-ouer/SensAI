@@ -1,11 +1,12 @@
+import uuid
 from dataclasses import dataclass, field
 
 from core.conversation import (
     ConversationNotFoundError,
-    IConversation,
+    IConversationService,
     MessageNotFoundError,
 )
-from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage
+from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage, ToolMessage
 
 
 @dataclass
@@ -13,18 +14,25 @@ class InMemoryConversationData:
     messages: dict[str, IMessage] = field(default_factory=dict)
     parent_ids: dict[str, str | None] = field(default_factory=dict)
     active_message_id: str | None = None
+    user_id: str | None = None
 
 
-class InMemoryConversation(IConversation):
+class InMemoryConversation(IConversationService):
     def __init__(self) -> None:
         self._conversations: dict[str, InMemoryConversationData] = {}
 
-    def create_conversation(self, conversation_id: str) -> InMemoryConversationData:
-        if conversation_id in self._conversations:
-            raise ValueError(f"Conversation '{conversation_id}' already exists")
-        conversation = InMemoryConversationData()
-        self._conversations[conversation_id] = conversation
-        return conversation
+    def create_conversation(
+        self,
+        user_id: str,
+        system_prompt: str | None = None,
+    ) -> str:
+        conversation_id: str = str(uuid.uuid4())
+        self._conversations[conversation_id] = InMemoryConversationData(user_id=user_id)
+        if system_prompt:
+            self.add_system_message(
+                conversation_id, SystemMessage(content=system_prompt)
+            )
+        return conversation_id
 
     """Getters"""
 
@@ -111,6 +119,9 @@ class InMemoryConversation(IConversation):
         )
 
     def add_ai_message(self, conversation_id: str, message: AIMessage) -> IMessage:
+        return self.add_message(conversation_id, message)
+
+    def add_tool_message(self, conversation_id: str, message: ToolMessage) -> IMessage:
         return self.add_message(conversation_id, message)
 
     def add_human_message(

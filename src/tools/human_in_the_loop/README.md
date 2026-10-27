@@ -25,10 +25,10 @@ the free-form option is added automatically.
 
 ## Registration
 
-`register_human_in_the_loop_tools(manager, answers)` creates the local MCP
-server, adapts its tools, and registers them with the `ToolHandler`. The
-`answers` list receives each question and its answer. The CLI passes those
-answers to the specification updater for the current turn.
+`create_human_in_the_loop_tools(answers)` creates the local MCP server and
+returns its tools, which the CLI registers with the other tools. The `answers`
+list (`CliState.human_answers`) receives each question and its answer. The CLI
+adds those answers to the specification update of the current turn.
 
 The system prompt instructs the agent to use this tool for important missing
 project details, ask one concise question at a time, and avoid guessing the

@@ -17,7 +17,7 @@ The file tools are exposed through the existing FastMCP client and adapter:
 
 Access is restricted to the confirmed workspace and the permissions file
 referenced by the CLI config (`file_access_config`, relative to the config
-directory). Permission paths are relative to the workspace root by default;
+directory, `file_access.yaml` by default). Permission paths are relative to the workspace root by default;
 the most specific matching path takes precedence.
 
 ```yaml

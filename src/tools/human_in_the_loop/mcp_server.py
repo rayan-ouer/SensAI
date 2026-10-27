@@ -1,14 +1,22 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## mcp_server
+##
+
 from collections.abc import Callable
 
 from fastmcp import FastMCP
 
-from core.tools import ToolHandler
+from core.tools import ITool
+from tools.human_in_the_loop.utils import display_menu, normalize_inputs, prompt_for_answer
 from tools.mcp.adapter import MCPAdapter
 from tools.mcp.client import MCPClient
-from tools.human_in_the_loop.utils import normalize_inputs, display_menu, prompt_for_answer
 
 AnswerCallback = Callable[[str, str], None]
 InputFunction = Callable[[str], str]
+
 
 def create_human_in_the_loop_server(
     on_answer: AnswerCallback | None = None,
@@ -35,11 +43,10 @@ def create_human_in_the_loop_server(
     return mcp
 
 
-def register_human_in_the_loop_tools(
-    manager: ToolHandler,
+def create_human_in_the_loop_tools(
     answers: list[dict[str, str]],
     input_function: InputFunction = input,
-) -> None:
+) -> list[ITool]:
     def record_answer(question: str, answer: str) -> None:
         answers.append({"question": question, "answer": answer})
 
@@ -51,4 +58,4 @@ def register_human_in_the_loop_tools(
             )
         )
     )
-    manager.register_many(adapter.list_tools())
+    return adapter.list_tools()

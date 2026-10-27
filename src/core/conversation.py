@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from .messages import AIMessage, HumanMessage, IMessage, SystemMessage
+from .messages import AIMessage, HumanMessage, IMessage, SystemMessage, ToolMessage
 
 
 class ConversationError(Exception):
@@ -27,7 +27,15 @@ class MessageNotFoundError(Exception):
         super().__init__(f"Message {message_id} not found.")
 
 
-class IConversation(ABC):
+class IConversationService(ABC):
+    @abstractmethod
+    def create_conversation(
+        self,
+        user_id: str,
+        system_prompt: str | None = None,
+    ) -> str:
+        pass
+
     @abstractmethod
     def get_conversation_by_id_or_none(self, conversation_id: str):
         pass
@@ -62,6 +70,10 @@ class IConversation(ABC):
 
     @abstractmethod
     def add_ai_message(self, conversation_id: str, message: AIMessage):
+        pass
+
+    @abstractmethod
+    def add_tool_message(self, conversation_id: str, message: ToolMessage):
         pass
 
     @abstractmethod

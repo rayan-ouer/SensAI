@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## workspace
+##
+
 from pathlib import Path
 from typing import Any, Callable
 
@@ -180,7 +187,7 @@ class WorkspaceSession:
         while True:
             try:
                 answer = self._input(
-                    f"Allow Wu to write to {relative_path}? [y/N] "
+                    f"Allow the agent to write to {relative_path}? [y/N] "
                 ).strip().lower()
             except (EOFError, KeyboardInterrupt) as error:
                 raise RuntimeError("File write confirmation was interrupted") from error

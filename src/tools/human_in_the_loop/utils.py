@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## utils
+##
+
 def normalize_inputs(question: str, options: list[str]) -> tuple[str, list[str]]:
     question_text = question.strip()
     choices = [option.strip() for option in options if option.strip()]
@@ -34,6 +41,7 @@ def ask_free_form(input_function) -> str | None:
         return answer
     print("Please provide a non-empty answer.")
     return None
+
 
 def prompt_for_answer(choices: list[str], other_index: int, input_function) -> str:
     while True:
