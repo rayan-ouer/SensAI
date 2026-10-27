@@ -13,15 +13,18 @@ import { FileText, SquarePen } from 'lucide-react'
 import Composer from '@/components/chat/Composer'
 import EmptyState from '@/components/chat/EmptyState'
 import MessageList from '@/components/chat/MessageList'
+import ProfileSelect from '@/components/chat/ProfileSelect'
 import SpecPanel from '@/components/spec/SpecPanel'
 import { useChat } from '@/hooks/useChat'
+import { useProfiles } from '@/hooks/useProfiles'
 import { useSpec } from '@/hooks/useSpec'
 
 const WIDE_SCREEN = '(min-width: 1024px)'
 
 function ChatPage() {
   const spec = useSpec()
-  const { messages, status, error, send, reset } = useChat(spec)
+  const profiles = useProfiles()
+  const { messages, status, error, send, reset } = useChat(spec, profiles.selected)
   const [typing, setTyping] = useState(false)
   const [specOpen, setSpecOpen] = useState(() => window.matchMedia(WIDE_SCREEN).matches)
 
@@ -29,7 +32,15 @@ function ChatPage() {
     <div className="flex h-dvh">
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="mx-auto flex w-full max-w-2xl items-center justify-between px-4 py-4">
-          <span className="text-sm font-medium tracking-tight text-amber-50">SensAI</span>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium tracking-tight text-amber-50">SensAI</span>
+            <ProfileSelect
+              profiles={profiles.profiles}
+              selected={profiles.selected}
+              disabled={status !== 'idle'}
+              onSelect={profiles.select}
+            />
+          </div>
           <div className="flex items-center gap-1">
             {messages.length > 0 && (
               <button

@@ -14,6 +14,12 @@ export type Message = {
   thinking?: string
 }
 
+export type Profile = {
+  key: string
+  name: string
+  role: string
+}
+
 export type ChatStatus = 'idle' | 'thinking' | 'streaming'
 
 export type StreamEvent =

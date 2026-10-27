@@ -5,7 +5,7 @@
 ** chatApi
 */
 
-import type { Message, StreamEvent } from '@/types/chat'
+import type { Message, Profile, StreamEvent } from '@/types/chat'
 
 const API_URL = import.meta.env.VITE_API_URL ?? '/api'
 const USER_ID = 'web'
@@ -67,6 +67,15 @@ export async function fetchMessages(conversationId: string): Promise<Message[]> 
   }))
 }
 
+export async function fetchProfiles(): Promise<{ profiles: Profile[]; default: string }> {
+  const response = await fetch(`${API_URL}/profiles`).catch(() => {
+    throw new Error(UNREACHABLE)
+  })
+  if (!response.ok)
+    throw await failure(response)
+  return response.json()
+}
+
 export async function createConversation(): Promise<string> {
   const response = await post('/conversations/', { user_id: USER_ID })
   if (!response.ok)
@@ -92,8 +101,12 @@ async function* readLines(body: ReadableStream<Uint8Array>): AsyncGenerator<stri
     yield buffer
 }
 
-export async function* streamReply(conversationId: string, content: string): AsyncGenerator<StreamEvent> {
-  const response = await post(`/conversations/${conversationId}/messages`, { content })
+export async function* streamReply(
+  conversationId: string,
+  content: string,
+  profile: string | null,
+): AsyncGenerator<StreamEvent> {
+  const response = await post(`/conversations/${conversationId}/messages`, { content, profile })
   if (!response.ok || response.body === null)
     throw await failure(response)
   for await (const line of readLines(response.body))

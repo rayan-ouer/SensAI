@@ -40,7 +40,7 @@ function appendToMessage(messages: Message[], id: string, field: 'content' | 'th
   )
 }
 
-export function useChat(spec: SpecUpdates) {
+export function useChat(spec: SpecUpdates, profile: string | null) {
   const [messages, setMessages] = useState<Message[]>([])
   const [status, setStatus] = useState<ChatStatus>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -77,7 +77,7 @@ export function useChat(spec: SpecUpdates) {
   }
 
   async function receiveReply(text: string, replyId: string) {
-    for await (const event of streamReply(await currentConversation(), text)) {
+    for await (const event of streamReply(await currentConversation(), text, profile)) {
       if (event.type === 'error')
         throw new Error(event.message)
       if (event.type === 'thinking')
