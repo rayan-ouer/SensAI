@@ -52,7 +52,7 @@ class ConfigLoader:
         self.config_path = config_path
         self.config_dir = os.path.dirname(os.path.abspath(config_path))
 
-    def _validate_config(self, config: dict):
+    def _validate_config(self, config: dict) -> None:
         if not isinstance(config, dict):
             raise ConfigError("invalid config format", self.config_path)
         missing = [key for key in REQUIRED_KEYS if not config.get(key)]

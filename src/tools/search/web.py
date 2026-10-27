@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## web
+##
+
 import urllib.error
 import urllib.parse
 import urllib.request

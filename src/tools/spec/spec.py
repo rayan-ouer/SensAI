@@ -80,7 +80,7 @@ def update_spec(
     return new_spec
 
 
-def save_spec(path: str, content: str):
+def save_spec(path: str, content: str) -> None:
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(path).write_text(content, encoding="utf-8")
 

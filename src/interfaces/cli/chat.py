@@ -53,8 +53,12 @@ def answer_user_message(agent: Agent, state: CliState, spec: str, user_input: st
     return refresh_spec(state.llm, state.config, spec, spec_input, reply.content)
 
 
+<<<<<<< HEAD
 def agent_loop(agent: Agent, state: CliState, spec: str):
     configure_stdin()
+=======
+def agent_loop(agent: Agent, state: CliState, spec: str) -> None:
+>>>>>>> origin/main
     while True:
         user_input = read_user_input()
         if user_input is None or user_input == "/exit":

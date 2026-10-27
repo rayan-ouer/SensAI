@@ -18,9 +18,9 @@ By *Armand Lecomte* (armand.lecomte@epitech.eu), *Rayan Ouerdane* (rayan.ouerdan
 
 In progress: RAG on your documents, code sandbox, HTTP API, web frontend.
 
-- [USER_STORIES.md](USER_STORIES.md): the use cases of each feature
-- [SCENARIO.md](SCENARIO.md): a full usage scenario with prompts and expected answers
-- [TRACEABILITY.md](TRACEABILITY.md): where each requirement and feature is implemented
+- [USER_STORIES.md](docs/USER_STORIES.md): the use cases of each feature
+- [SCENARIO.md](docs/SCENARIO.md): a full usage scenario with prompts and expected answers
+- [TRACEABILITY.md](docs/TRACEABILITY.md): where each requirement and feature is implemented
 
 ## Installation
 

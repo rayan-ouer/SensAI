@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## sandbox
+##
+
 import re
 import json
 import uuid

@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## ollama
+##
+
 from collections.abc import Callable
 
 import httpx

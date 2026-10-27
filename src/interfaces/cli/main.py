@@ -22,7 +22,7 @@ from tools.chat.module import fatal
 from tools.spec.spec import load_spec
 
 
-def run():
+def run() -> None:
     args = handle_args()
     api_key = read_api_key()
     config = ConfigLoader(args.config).get_configs()
@@ -34,7 +34,7 @@ def run():
     agent_loop(agent, state, spec)
 
 
-def main():
+def main() -> None:
     try:
         run()
     except (AppError, ValidationError) as e:
