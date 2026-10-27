@@ -5,13 +5,34 @@
 ** useChat
 */
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-import { ConversationNotFoundError, createConversation, streamReply } from '@/services/chatApi'
+import { ConversationNotFoundError, createConversation, fetchMessages, streamReply } from '@/services/chatApi'
 import type { SpecState } from '@/hooks/useSpec'
 import type { ChatStatus, Message } from '@/types/chat'
 
 type SpecUpdates = Pick<SpecState, 'startUpdate' | 'receive' | 'stopUpdate'>
+
+const STORAGE_KEY = 'sensai.conversation'
+
+function readStoredId(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY)
+  } catch {
+    return null
+  }
+}
+
+function storeId(id: string | null) {
+  try {
+    if (id === null)
+      localStorage.removeItem(STORAGE_KEY)
+    else
+      localStorage.setItem(STORAGE_KEY, id)
+  } catch {
+    return
+  }
+}
 
 function appendToMessage(messages: Message[], id: string, field: 'content' | 'thinking', chunk: string): Message[] {
   return messages.map((message) =>
@@ -26,9 +47,33 @@ export function useChat(spec: SpecUpdates) {
   const conversationId = useRef<string | null>(null)
   const activeReply = useRef<string | null>(null)
 
+  useEffect(() => {
+    const storedId = readStoredId()
+    if (storedId === null)
+      return
+    fetchMessages(storedId)
+      .then((stored) => {
+        conversationId.current = storedId
+        setMessages(stored)
+      })
+      .catch(() => storeId(null))
+  }, [])
+
   async function currentConversation(): Promise<string> {
-    conversationId.current ??= await createConversation()
+    if (conversationId.current === null) {
+      conversationId.current = await createConversation()
+      storeId(conversationId.current)
+    }
     return conversationId.current
+  }
+
+  function reset() {
+    if (status !== 'idle')
+      return
+    conversationId.current = null
+    storeId(null)
+    setMessages([])
+    setError(null)
   }
 
   async function receiveReply(text: string, replyId: string) {
@@ -88,5 +133,5 @@ export function useChat(spec: SpecUpdates) {
     }
   }
 
-  return { messages, status, error, send }
+  return { messages, status, error, send, reset }
 }

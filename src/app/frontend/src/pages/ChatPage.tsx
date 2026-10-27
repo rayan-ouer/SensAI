@@ -8,7 +8,7 @@
 // Icon from Lucide: https://lucide.dev/
 
 import { useState } from 'react'
-import { FileText } from 'lucide-react'
+import { FileText, SquarePen } from 'lucide-react'
 
 import Composer from '@/components/chat/Composer'
 import EmptyState from '@/components/chat/EmptyState'
@@ -21,7 +21,7 @@ const WIDE_SCREEN = '(min-width: 1024px)'
 
 function ChatPage() {
   const spec = useSpec()
-  const { messages, status, error, send } = useChat(spec)
+  const { messages, status, error, send, reset } = useChat(spec)
   const [typing, setTyping] = useState(false)
   const [specOpen, setSpecOpen] = useState(() => window.matchMedia(WIDE_SCREEN).matches)
 
@@ -30,16 +30,29 @@ function ChatPage() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="mx-auto flex w-full max-w-2xl items-center justify-between px-4 py-4">
           <span className="text-sm font-medium tracking-tight text-amber-50">SensAI</span>
-          {!specOpen && (
-            <button
-              type="button"
-              onClick={() => setSpecOpen(true)}
-              className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-amber-100/60 hover:bg-white/10 hover:text-amber-50"
-            >
-              <FileText className="size-3.5" />
-              Specification
-            </button>
-          )}
+          <div className="flex items-center gap-1">
+            {messages.length > 0 && (
+              <button
+                type="button"
+                onClick={reset}
+                disabled={status !== 'idle'}
+                className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-amber-100/60 hover:bg-white/10 hover:text-amber-50 disabled:opacity-40"
+              >
+                <SquarePen className="size-3.5" />
+                New conversation
+              </button>
+            )}
+            {!specOpen && (
+              <button
+                type="button"
+                onClick={() => setSpecOpen(true)}
+                className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-amber-100/60 hover:bg-white/10 hover:text-amber-50"
+              >
+                <FileText className="size-3.5" />
+                Specification
+              </button>
+            )}
+          </div>
         </header>
         <main className="flex min-h-0 flex-1 flex-col">
           {messages.length === 0 ? <EmptyState listening={typing} /> : <MessageList messages={messages} status={status} />}

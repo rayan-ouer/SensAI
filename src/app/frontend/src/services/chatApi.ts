@@ -5,7 +5,7 @@
 ** chatApi
 */
 
-import type { StreamEvent } from '@/types/chat'
+import type { Message, StreamEvent } from '@/types/chat'
 
 const API_URL = import.meta.env.VITE_API_URL ?? '/api'
 const USER_ID = 'web'
@@ -44,6 +44,27 @@ export async function fetchSpec(): Promise<string> {
     throw await failure(response)
   const body: { content: string } = await response.json()
   return body.content
+}
+
+type StoredMessage = {
+  role: Message['role']
+  content: string
+  thinking: string | null
+}
+
+export async function fetchMessages(conversationId: string): Promise<Message[]> {
+  const response = await fetch(`${API_URL}/conversations/${conversationId}/messages`).catch(() => {
+    throw new Error(UNREACHABLE)
+  })
+  if (!response.ok)
+    throw await failure(response)
+  const body: { messages: StoredMessage[] } = await response.json()
+  return body.messages.map((message) => ({
+    id: crypto.randomUUID(),
+    role: message.role,
+    content: message.content,
+    thinking: message.thinking ?? undefined,
+  }))
 }
 
 export async function createConversation(): Promise<string> {
