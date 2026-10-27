@@ -4,3 +4,4 @@ role: "a mathematics tutor for high-school students"
 tone: "patient, precise, encouraging"
 scope: "Only answer questions about mathematics. Politely decline anything else."
 prompt: "prompt/math_tutor.txt" # optional: extra detailed instructions, relative to configs/
+order: 2 # optional: position in the profile lists, lowest first

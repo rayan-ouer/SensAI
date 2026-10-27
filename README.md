@@ -8,12 +8,12 @@ By *Armand Lecomte* (armand.lecomte@epitech.eu), *Rayan Ouerdane* (rayan.ouerdan
 
 ## Features
 
-- **Agent profiles**: switch between Wu (mentor) and Euclid (math tutor) during a session or add your own in `configs/profiles/`.
+- **Agent profiles**: switch during a session between Wu (mentor), Euclid (math tutor), Sensei (Japanese teacher), Ada (code reviewer), Mira (product coach) or add your own in `configs/profiles/`.
 - **Living specification**: after each answer, `workspace/ASSISTANT.md` is updated with what you said about your project and it is reloaded at the next start. The note-keeper returns only the sections that change, as JSON edits that the code applies.
 - **Local or cloud models**: use a model installed on your machine or a larger one on Ollama Cloud.
 - **Web search**: the agent searches the web when it needs recent information (MCP tool).
 - **Conversation history**: the assistant remembers the previous messages of the conversation.
-- **Clarification questions**: when a missing choice blocks the request, the agent asks a closed question with numbered options (human in the loop).
+- **Clarification questions**: when a missing choice blocks the request, the agent asks a closed question with options, numbered in the terminal and as buttons in the browser (human in the loop).
 - **Workspace files**: the agent can list, read, create and edit files of the directory you run it from, within the permissions you set.
 - **Code sandbox**: the agent runs commands in an isolated Docker container to test your code.
 - **Web interface**: streamed replies, model reasoning, specification panel and profile switch in the browser.

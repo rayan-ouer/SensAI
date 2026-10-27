@@ -13,9 +13,10 @@ import type { ChatStatus, Message } from '@/types/chat'
 type MessageListProps = {
   messages: Message[]
   status: ChatStatus
+  onAnswer: (answer: string) => void
 }
 
-function MessageList({ messages, status }: MessageListProps) {
+function MessageList({ messages, status, onAnswer }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -25,8 +26,13 @@ function MessageList({ messages, status }: MessageListProps) {
   return (
     <div className="flex-1 overflow-y-auto [mask-image:linear-gradient(to_bottom,transparent,black_1.5rem,black_calc(100%-1.5rem),transparent)] [scrollbar-color:rgb(255_255_255/0.15)_transparent] [scrollbar-gutter:stable_both-edges] [scrollbar-width:thin]">
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-6" aria-live="polite">
-        {messages.map((message) => (
-          <MessageBubble key={message.id} message={message} />
+        {messages.map((message, index) => (
+          <MessageBubble
+            key={message.id}
+            message={message}
+            canAnswer={status === 'idle' && index === messages.length - 1}
+            onAnswer={onAnswer}
+          />
         ))}
         <div ref={bottomRef} />
       </div>

@@ -17,12 +17,13 @@ REQUIRED_KEYS = (
     "model",
     "system_prompt",
     "spec_prompt",
+    "question_prompt",
     "profiles_dir",
     "default_profile",
     "spec_path",
 )
 
-PROMPT_KEYS = ("system_prompt", "spec_prompt")
+PROMPT_KEYS = ("system_prompt", "spec_prompt", "question_prompt")
 
 OLLAMA_PROVIDERS = ("auto", "local", "cloud")
 
