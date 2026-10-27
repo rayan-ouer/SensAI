@@ -16,6 +16,7 @@ class StreamEvent(BaseModel):
     type: str
     text: str | None = None
     message: str | None = None
+    options: list[str] | None = None
 
 
 class MessageResponse(BaseModel):

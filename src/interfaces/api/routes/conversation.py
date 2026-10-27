@@ -57,7 +57,7 @@ def send_message(
     events: Queue = Queue()
     agent = create_agent(
         request.app.state,
-        lambda kind, text: events.put(StreamEvent(type=kind, text=text)),
+        events,
         body.profile
     )
     Thread(

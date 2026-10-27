@@ -66,7 +66,7 @@ function ChatPage() {
           </div>
         </header>
         <main className="flex min-h-0 flex-1 flex-col">
-          {messages.length === 0 ? <EmptyState listening={typing} /> : <MessageList messages={messages} status={status} />}
+          {messages.length === 0 ? <EmptyState listening={typing} /> : <MessageList messages={messages} status={status} onAnswer={send} />}
         </main>
         <footer className="mx-auto w-full max-w-2xl px-4 pb-5">
           {error && <p role="alert" className="mb-2 px-2 text-sm text-red-300">{error}</p>}

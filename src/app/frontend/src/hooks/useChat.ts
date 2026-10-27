@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { ConversationNotFoundError, createConversation, fetchMessages, streamReply } from '@/services/chatApi'
 import type { SpecState } from '@/hooks/useSpec'
-import type { ChatStatus, Message } from '@/types/chat'
+import type { ChatStatus, Message, Question } from '@/types/chat'
 
 type SpecUpdates = Pick<SpecState, 'startUpdate' | 'receive' | 'stopUpdate'>
 
@@ -38,6 +38,10 @@ function appendToMessage(messages: Message[], id: string, field: 'content' | 'th
   return messages.map((message) =>
     message.id === id ? { ...message, [field]: (message[field] ?? '') + chunk } : message
   )
+}
+
+function attachQuestion(messages: Message[], id: string, question: Question): Message[] {
+  return messages.map((message) => (message.id === id ? { ...message, question } : message))
 }
 
 export function useChat(spec: SpecUpdates, profile: string | null) {
@@ -86,6 +90,8 @@ export function useChat(spec: SpecUpdates, profile: string | null) {
         setStatus('streaming')
         setMessages((current) => appendToMessage(current, replyId, 'content', event.text))
       }
+      if (event.type === 'question')
+        setMessages((current) => attachQuestion(current, replyId, { text: event.text, options: event.options }))
       if (event.type === 'done') {
         setStatus('idle')
         spec.startUpdate()
@@ -107,7 +113,7 @@ export function useChat(spec: SpecUpdates, profile: string | null) {
   }
 
   function dropEmptyReply(replyId: string) {
-    setMessages((current) => current.filter((message) => message.id !== replyId || message.content !== ''))
+    setMessages((current) => current.filter((message) => message.id !== replyId || message.content !== '' || message.question !== undefined))
   }
 
   async function send(text: string) {
