@@ -13,6 +13,10 @@ Acceptance criteria:
 - A question outside the active profile's scope is declined in one sentence.
 - `/profile unknown` prints `Unknown profile: 'unknown'. Type /profiles to see
   available ones.` and the active profile does not change.
+- Every profile replies in the language of my last message and says "tu" in
+  French, never "vous".
+- Asked what it is, the assistant answers with its profile name and role and
+  never names the underlying model.
 
 As a teacher, I want to describe a new tutor in a YAML file, so that I can adapt
 the assistant to my class without asking a developer.
@@ -24,6 +28,8 @@ Acceptance criteria:
   active at start and the start message shows its name.
 - An optional `prompt` key points to a text file whose instructions are added to
   the tutor's behavior.
+- An optional `order` key sets the position of the tutor in `/profiles` and in
+  the web interface, lowest first.
 - A profile file with a missing key stops the program with exit code 84 and an
   error naming the missing key and the file.
 
@@ -49,7 +55,10 @@ Acceptance criteria:
   under the matching section.
 - The file always starts with a Markdown title and never contains internal tags
   or code fences around the whole document.
-- A greeting or an off-topic question does not add requirements to the file.
+- A greeting, an off-topic question or a question about the assistant itself
+  does not add requirements to the file.
+- The note-keeper returns JSON edits that follow a fixed schema and only the
+  sections it names are rewritten, the others stay exactly as they were.
 - If the update fails or is interrupted, a warning is printed, the previous file
   is kept and the session continues.
 
@@ -148,7 +157,7 @@ Acceptance criteria:
 - A failing command is reported to the agent with its exit code and error
   output, so it can fix the script and try again.
 
-## Clarification questions (human in the loop)
+## Clarification questions
 
 As a student describing a project, I want the assistant to ask me when a choice
 is missing instead of guessing, so that it builds what I actually want.
@@ -169,6 +178,15 @@ Acceptance criteria:
 - After the turn, the specification contains the choice I selected.
 - A question asked with fewer than two options is refused as a tool error and
   the session continues.
+
+As a student using the browser, I want to answer the assistant's questions with
+one click, so that I do not have to type an answer it already proposed.
+
+Acceptance criteria:
+- The question is shown under the reply as a card with one button per option.
+- A click sends the option as my next message and the agent continues from it.
+- I can still type another answer in the message field instead.
+- The buttons are disabled once I have answered or while the agent replies.
 
 ## Workspace files
 
@@ -201,8 +219,8 @@ Acceptance criteria:
   unfolded above it.
 - A side panel shows the specification and refreshes after each reply, while I
   can already type the next message.
-- I can switch between Wu and Euclid from the header and the next reply comes
-  from the chosen profile.
+- I can switch between the profiles (Wu, Euclid, Sensei, Ada, Mira) from the
+  header and the next reply comes from the chosen profile.
 - After a page reload, the conversation is displayed again and "New
   conversation" starts an empty one.
 - If the API is not running, a readable error is shown instead of a blank page.
@@ -213,7 +231,8 @@ other interfaces on the same agent.
 Acceptance criteria:
 - `POST /api/conversations/` returns a conversation id.
 - `POST /api/conversations/{id}/messages` streams one JSON event per line:
-  `thinking` and `content` chunks, then `done`, then `spec` (or `error`).
+  `thinking` and `content` chunks, a `question` with its `options` when the
+  agent asks one, then `done`, then `spec` (or `error`).
 - `GET /api/conversations/{id}/messages`, `GET /api/spec` and `GET /api/profiles`
   return the history, the specification and the profiles.
 - An unknown conversation returns 404 and an unknown profile returns 400.
