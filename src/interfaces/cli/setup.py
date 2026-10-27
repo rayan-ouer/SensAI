@@ -7,7 +7,7 @@
 
 from agent.agent import Agent
 from core.messages import SystemMessage
-from core.tools import ITool, ToolHandler
+from core.tools import ITool, ToolDependencies, ToolHandler
 from interfaces.cli.cli_state import CliState
 from interfaces.cli.conversation_handle import ConversationHandle
 from interfaces.cli.display import ChunkDisplay
@@ -16,7 +16,12 @@ from memory.conversation.factory import ConversationServiceFactory, Conversation
 from tools.agent.profiles import build_profile_prompt, init_profiles
 from tools.chat.config_data import ConfigData
 from tools.chat.settings import Settings
-from core.tools import ToolDependencies
+from tools.file_access.file_access import (
+    build_workspace_context,
+    create_file_access_tools,
+    create_workspace,
+)
+from tools.human_in_the_loop.mcp_server import create_human_in_the_loop_tools
 from tools.sandbox.sandbox import create_sandbox_tools
 from tools.search.web import create_search_tools
 from tools.spec.spec import build_system_prompt
@@ -30,6 +35,7 @@ def read_api_key() -> str | None:
 def current_role(state: CliState, spec: str) -> SystemMessage:
     profile = state.current_profile()
     text = build_system_prompt(state.config.system_prompt, build_profile_prompt(profile), spec)
+    text += build_workspace_context(state.workspace)
     return SystemMessage(content=text)
 
 
@@ -45,6 +51,7 @@ def create_agent(state: CliState, tools: list[ITool], role: SystemMessage) -> Ag
         llm=state.llm,
         handler=tools_handler,
         max_loops=state.config.max_loops,
+        think=state.config.think,
         on_chunk=state.display,
     )
 
@@ -58,6 +65,15 @@ def init_conversation(config: ConfigData) -> ConversationHandle:
     return ConversationHandle(service, conversation_id)
 
 
+def create_llm(config: ConfigData, api_key: str | None) -> OllamaClient:
+    return OllamaClient(
+        config.model,
+        api_key,
+        options=config.llm_settings,
+        provider=config.ollama_provider,
+    )
+
+
 def create_cli_state(config: ConfigData, api_key: str | None) -> CliState:
     active_profile = config.default_profile
     return CliState(
@@ -65,13 +81,17 @@ def create_cli_state(config: ConfigData, api_key: str | None) -> CliState:
         profiles=init_profiles(config),
         active_profile=active_profile,
         display=ChunkDisplay(),
-        llm=OllamaClient(config.model, api_key, options=config.llm_settings),
+        llm=create_llm(config, api_key),
         conversation=init_conversation(config),
+        workspace=create_workspace(config),
     )
 
 
-def create_tools(dependencies: ToolDependencies) -> list[ITool]:
+def create_tools(state: CliState) -> list[ITool]:
+    dependencies = ToolDependencies(conversation_id=state.conversation.id)
     tools: list[ITool] = []
     tools.extend(create_search_tools())
     tools.extend(create_sandbox_tools(dependencies))
+    tools.extend(create_file_access_tools(state.workspace))
+    tools.extend(create_human_in_the_loop_tools(state.human_answers))
     return tools
