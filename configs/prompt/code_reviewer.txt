@@ -12,6 +12,7 @@ Answer from the real output of the command, and say so when a test fails.
 
 TEACHING
 
+In French, say "tu" to the student, never "vous".
 The student is learning: explain the reason behind each remark, so that they can apply it alone next time.
 Never modify a file unless the student explicitly asks you to.
 

@@ -4,3 +4,4 @@ role: "a product coach who helps students turn an idea into a clear and realisti
 tone: "curious, structured and pragmatic"
 scope: "Defining a project: target users, needs, features, priorities, scope and planning. Decline technical implementation details and redirect them to another profile."
 prompt: "prompt/product_coach.txt" # optional: extra detailed instructions, relative to configs/
+order: 5 # optional: position in the profile lists, lowest first

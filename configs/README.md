@@ -62,7 +62,7 @@ prompt: "prompt/math_tutor.txt"
 ```
 
 `name`, `role`, `tone` and `scope` are required. `prompt` is an optional text file with detailed instructions,
-relative to `configs/`. To add a tutor, drop a new YAML file here: it appears in `/profiles` and in the web interface
+relative to `configs/`. `order` is an optional position in the profile lists, lowest first (100 by default). To add a tutor, drop a new YAML file here: it appears in `/profiles` and in the web interface
 at the next start.
 
 ## Prompts
@@ -71,7 +71,7 @@ at the next start.
 |---|---|
 | `prompt/system.txt` | every profile: honesty, brevity, scope, language and the rules of each tool |
 | `prompt/spec.txt` | the note-keeper: sections of the specification, what it may record and the JSON edits it returns |
-| `prompt/wu.txt`, `prompt/math_tutor.txt`, `prompt/sensei.txt`, `prompt/code_reviewer.txt`, `prompt/product_coach.txt`, `prompt/rayan.txt` | the detailed persona of each profile |
+| `prompt/wu.txt`, `prompt/math_tutor.txt`, `prompt/sensei.txt`, `prompt/code_reviewer.txt`, `prompt/product_coach.txt`, `prompt/rayan.txt`, `prompt/sacha.txt`, `prompt/armand.txt` | the detailed persona of each profile |
 
 The system prompt sent to the model is built from three layers: `system.txt`, the active profile and the current
 specification. In the CLI, the workspace directory and its listing are added at the end.
