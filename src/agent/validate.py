@@ -16,6 +16,7 @@ from core.dfs import dfs
 def _reject_cycle(cycle: list[str]) -> None:
     raise AgentConfigError(f"cycle detected: {' -> '.join(cycle)}")
 
+
 def _validate_tools(
     agent: AgentDefinition,
     tool_set: set[str],
@@ -58,6 +59,7 @@ def _validate_duplicates(agents: dict[str, AgentDefinition]) -> None:
             raise AgentConfigError(
                 f"duplicate agent name '{agent.name}' ({seen[agent.name]} definitions)"
             )
+
 
 def validate_agents_config(
     config: AgentsConfig,

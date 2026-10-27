@@ -16,7 +16,7 @@ from agent.errors import AgentConfigError
 
 class AgentsLoader:
     @staticmethod
-    def _text(value: str, message: str) -> str:
+    def _strip_text(value: str, message: str) -> str:
         stripped = value.strip()
         if not stripped:
             raise AgentConfigError(message)
@@ -38,19 +38,19 @@ class AgentsLoader:
 
     @staticmethod
     def _parse_agent(raw: dict, index: int) -> AgentDefinition:
-        name = AgentsLoader._text(
+        name = AgentsLoader._strip_text(
             raw.get("name", str()),
             f"agent at index {index}: 'name' is required",
         )
-        description = AgentsLoader._text(
+        description = AgentsLoader._strip_text(
             raw.get("description", str()),
             f"agent '{name}': 'description' is required",
         )
-        role = AgentsLoader._text(
+        role = AgentsLoader._strip_text(
             raw.get("role", str()),
             f"agent '{name}': 'role' is required",
         )
-        model = AgentsLoader._text(
+        model = AgentsLoader._strip_text(
             raw.get("model", str()),
             f"agent '{name}': 'model' is required",
         )
@@ -75,7 +75,7 @@ class AgentsLoader:
 
     @staticmethod
     def parse(data: dict[str, Any]) -> AgentsConfig:
-        entry = AgentsLoader._text(
+        entry: str = AgentsLoader._strip_text(
             data.get("entry", str()),
             "missing or invalid 'entry' agent name",
         )
@@ -83,7 +83,7 @@ class AgentsLoader:
         if not raw_agents:
             raise AgentConfigError("'agents' must not be empty")
 
-        agents = [
+        agents: list[AgentDefinition] = [
             AgentsLoader._parse_agent(raw, index)
             for index, raw in enumerate(raw_agents)
         ]
@@ -94,10 +94,8 @@ class AgentsLoader:
         """Load agents config from YAML. Returns None if the file does not exist."""
 
         file_path = Path(path)
-
         if not file_path.is_file():
             return None
-
         try:
             with file_path.open("r", encoding="utf-8") as handle:
                 data = yaml.safe_load(handle) or {}

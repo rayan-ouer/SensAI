@@ -5,13 +5,12 @@
 ## factory
 ##
 
-from collections import defaultdict, deque
 from collections.abc import Callable
 
 from agent.agent import Agent
 from agent.definition import AgentDefinition, AgentsConfig
-from agent.errors import AgentConfigError
-from agent.validate import validate_agents_config
+from agent.validate import _reject_cycle, validate_agents_config
+from core.dfs import dfs
 from core.messages import SystemMessage
 from core.tools import ToolHandler
 from llm.client import ILLMClient
@@ -38,7 +37,7 @@ class AgentFactory:
             set([tool.name for tool in self._tools.list_tools()]),
         )
 
-        order = self._build_order(config)
+        order = self._build_graph(config)
         built: dict[str, Agent] = {}
         definitions = config.by_name()
 
@@ -97,32 +96,9 @@ class AgentFactory:
         )
 
     @staticmethod
-    def _build_order(config: AgentsConfig) -> list[str]:
-        """Topological order: children before parents."""
+    def _build_graph(config: AgentsConfig) -> list[str]:
         agents: dict[str, AgentDefinition] = config.by_name()
-        indegree: dict[str, int] = {name: 0 for name in agents}
-        dependents: dict[str, list[str]] = defaultdict(list)
-
-        for name, definition in agents.items():
-            for child in definition.agents:
-                if child not in agents:
-                    continue
-                dependents[child].append(name)
-                indegree[name] += 1
-
-        queue = deque(sorted(name for name, degree in indegree.items() if degree == 0))
-        order: list[str] = []
-        while queue:
-            name = queue.popleft()
-            order.append(name)
-            for parent in sorted(dependents[name]):
-                indegree[parent] -= 1
-                if indegree[parent] == 0:
-                    queue.append(parent)
-
-        if len(order) != len(agents):
-            missing = sorted(set(agents) - set(order))
-            raise AgentConfigError(
-                f"cannot order agents due to cycle involving: {', '.join(missing)}"
-            )
-        return order
+        return dfs(
+            {name: definition.agents for name, definition in agents.items()},
+            on_back_edge=_reject_cycle,
+        )
