@@ -39,19 +39,19 @@ class AgentsLoader:
     @staticmethod
     def _parse_agent(raw: dict, index: int) -> AgentDefinition:
         name = AgentsLoader._text(
-            raw.get("name", ""),
+            raw.get("name", str()),
             f"agent at index {index}: 'name' is required",
         )
         description = AgentsLoader._text(
-            raw.get("description", ""),
+            raw.get("description", str()),
             f"agent '{name}': 'description' is required",
         )
         role = AgentsLoader._text(
-            raw.get("role", ""),
+            raw.get("role", str()),
             f"agent '{name}': 'role' is required",
         )
         model = AgentsLoader._text(
-            raw.get("model", ""),
+            raw.get("model", str()),
             f"agent '{name}': 'model' is required",
         )
         tools = AgentsLoader._as_string_list(raw.get("tools"), "tools", name)
@@ -76,7 +76,7 @@ class AgentsLoader:
     @staticmethod
     def parse(data: dict[str, Any]) -> AgentsConfig:
         entry = AgentsLoader._text(
-            data.get("entry", ""),
+            data.get("entry", str()),
             "missing or invalid 'entry' agent name",
         )
         raw_agents: list[dict] = data.get("agents", [])
@@ -92,7 +92,9 @@ class AgentsLoader:
     @staticmethod
     def load(path: str | Path) -> AgentsConfig | None:
         """Load agents config from YAML. Returns None if the file does not exist."""
+
         file_path = Path(path)
+
         if not file_path.is_file():
             return None
 
