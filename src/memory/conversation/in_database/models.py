@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## models
+##
+
 import uuid
 from datetime import datetime
 

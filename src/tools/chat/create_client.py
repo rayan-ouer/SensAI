@@ -28,7 +28,6 @@ def create_cloud_client(cloud_host: str, api_key: str) -> ollama.Client:
         host=cloud_host, headers={"Authorization": f"Bearer {api_key}"}
     )
 
-
 def create_ollama_client(
     model: str,
     api_key: str | None = None,
@@ -44,3 +43,4 @@ def create_ollama_client(
     if model in get_model_list(cloud):
         return cloud
     raise ModelNotFoundError(model, "not found neither locally nor in the cloud")
+

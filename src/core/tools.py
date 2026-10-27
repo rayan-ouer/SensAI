@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## tools
+##
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
@@ -13,6 +20,8 @@ class ToolCall:
     id: str
     name: str
     arguments: dict[str, Any]
+    status: ToolStatus = ToolStatus.PENDING
+    result: dict[str, Any] | None = None
 
 
 @dataclass
@@ -27,6 +36,12 @@ class ToolNotFoundError(Exception):
         self.tool_name = tool_name
         super().__init__(f"Tool '{tool_name}' is not registered.")
 
+
+@dataclass()
+class ToolDependencies:
+    """Dependencies and context for tools."""
+
+    conversation_id: str | None = None
 
 class ITool(ABC):
     @property
