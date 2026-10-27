@@ -15,7 +15,7 @@ from tools.chat.module import warning
 from tools.spec.spec import save_spec, update_spec
 
 
-def configure_stdin():
+def configure_stdin() -> None:
     if isinstance(sys.stdin, io.TextIOWrapper):
         sys.stdin.reconfigure(errors="replace")
 
