@@ -31,9 +31,9 @@ function ChatPage() {
   return (
     <div className="flex h-dvh">
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="mx-auto flex w-full max-w-2xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium tracking-tight text-amber-50">SensAI</span>
+        <header className="mx-auto flex w-full max-w-2xl items-center justify-between gap-3 px-4 py-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="shrink-0 text-sm font-medium tracking-tight text-amber-50">SensAI</span>
             <ProfileSelect
               profiles={profiles.profiles}
               selected={profiles.selected}
@@ -41,13 +41,13 @@ function ChatPage() {
               onSelect={profiles.select}
             />
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1">
             {messages.length > 0 && (
               <button
                 type="button"
                 onClick={reset}
                 disabled={status !== 'idle'}
-                className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-amber-100/60 hover:bg-white/10 hover:text-amber-50 disabled:opacity-40"
+                className="flex items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-1 text-xs text-amber-100/60 hover:bg-white/10 hover:text-amber-50 disabled:opacity-40"
               >
                 <SquarePen className="size-3.5" />
                 New conversation
@@ -57,7 +57,7 @@ function ChatPage() {
               <button
                 type="button"
                 onClick={() => setSpecOpen(true)}
-                className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-amber-100/60 hover:bg-white/10 hover:text-amber-50"
+                className="flex items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-1 text-xs text-amber-100/60 hover:bg-white/10 hover:text-amber-50"
               >
                 <FileText className="size-3.5" />
                 Specification
