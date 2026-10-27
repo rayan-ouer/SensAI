@@ -17,8 +17,10 @@ PROFILES_KEY = ("name", "role", "tone", "scope")
 
 
 def validate_profile(
-    file_path: Path, config: dict, required_keys: tuple[str, str, str]
-):
+    file_path: Path,
+    config: dict,
+    required_keys: tuple[str, str, str]
+    ) -> None:
     if not isinstance(config, dict):
         raise ProfileError("invalid profile format", file_path)
     missing = [key for key in required_keys if not config.get(key)]

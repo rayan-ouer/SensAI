@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## client
+##
+
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 

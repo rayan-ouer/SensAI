@@ -1,15 +1,19 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## dependencies
+##
+
 from typing import Annotated
 
-from fastapi import Depends
-from fastapi.params import State
+from fastapi import Depends, Request
 
 from core.conversation import IConversationService
-from memory.conversation.factory import ConversationServiceFactory, ConversationStorage
 
-ConversationStorageDep = Annotated[
-    ConversationStorage, Depends(lambda: State().storage)
-]
-ConversationDep = Annotated[
-    IConversationService,
-    Depends(ConversationServiceFactory().create(ConversationStorageDep)),
-]
+
+def get_conversation_service(request: Request) -> IConversationService:
+    return request.app.state.conversations
+
+
+ConversationDep = Annotated[IConversationService, Depends(get_conversation_service)]

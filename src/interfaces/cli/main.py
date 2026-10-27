@@ -23,19 +23,19 @@ from tools.chat.module import fatal
 from tools.spec.spec import load_spec
 
 
-def run():
+def run() -> None:
     args = handle_args()
     api_key = read_api_key()
     config = ConfigLoader(args.config).get_configs()
     state = create_cli_state(config, api_key)
     print(f"Starting {state.current_profile().name}")
     spec = load_spec(state.config.spec_path)
-    tools = create_tools(ToolDependencies(conversation_id=state.conversation.id))
+    tools = create_tools(state)
     agent = create_agent(state, tools, current_role(state, spec))
     agent_loop(agent, state, spec)
 
 
-def main():
+def main() -> None:
     try:
         run()
     except (AppError, ValidationError) as e:

@@ -24,6 +24,8 @@ REQUIRED_KEYS = (
 
 PROMPT_KEYS = ("system_prompt", "spec_prompt")
 
+OLLAMA_PROVIDERS = ("auto", "local", "cloud")
+
 
 def read_prompt(config_dir: str, relative_path: str) -> str:
     full_path = os.path.join(config_dir, relative_path)
@@ -49,14 +51,14 @@ class ConfigLoader:
         self.config_path = config_path
         self.config_dir = os.path.dirname(os.path.abspath(config_path))
 
-    def _validate_config(self, config: dict):
+    def _validate_config(self, config: dict) -> None:
         if not isinstance(config, dict):
             raise ConfigError("invalid config format", self.config_path)
         missing = [key for key in REQUIRED_KEYS if not config.get(key)]
         if missing:
-            raise ConfigError(
-                f"missing config keys: {', '.join(missing)}", self.config_path
-            )
+            raise ConfigError(f"missing config keys: {', '.join(missing)}", self.config_path)
+        if config.get("ollama_provider", "auto") not in OLLAMA_PROVIDERS:
+            raise ConfigError("ollama_provider must be auto, local or cloud", self.config_path)
 
     def get_configs(self) -> ConfigData:
         config = read_yaml(self.config_path)

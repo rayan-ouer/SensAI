@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## messages
+##
+
 import uuid
 from dataclasses import dataclass, field
 

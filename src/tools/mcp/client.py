@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## client
+##
+
 import asyncio
 from typing import Any
 

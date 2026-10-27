@@ -29,18 +29,26 @@ def create_cloud_client(cloud_host: str, api_key: str) -> ollama.Client:
     )
 
 
-def create_ollama_client(
-    model: str,
-    api_key: str | None = None,
-    local_host: str = OLLAMA_LOCAL_HOST,
-    cloud_host: str = OLLAMA_CLOUD_HOST,
-) -> ollama.Client:
-    local = find_local_client(local_host, model)
-    if local is not None:
-        return local
+def find_cloud_client(cloud_host: str, model: str, api_key: str | None) -> ollama.Client:
     if not api_key:
         raise ModelNotFoundError(model, "not found locally and no API key was provided")
     cloud = create_cloud_client(cloud_host, api_key)
     if model in get_model_list(cloud):
         return cloud
     raise ModelNotFoundError(model, "not found neither locally nor in the cloud")
+
+
+def create_ollama_client(
+    model: str,
+    api_key: str | None = None,
+    local_host: str = OLLAMA_LOCAL_HOST,
+    cloud_host: str = OLLAMA_CLOUD_HOST,
+    provider: str = "auto",
+) -> ollama.Client:
+    if provider != "cloud":
+        local = find_local_client(local_host, model)
+        if local is not None:
+            return local
+        if provider == "local":
+            raise ModelNotFoundError(model, "not found locally")
+    return find_cloud_client(cloud_host, model, api_key)

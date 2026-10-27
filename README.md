@@ -13,12 +13,14 @@ By *Armand Lecomte* (armand.lecomte@epitech.eu), *Rayan Ouerdane* (rayan.ouerdan
 - **Local or cloud models**: use a model installed on your machine or a larger one on Ollama Cloud.
 - **Web search**: the agent searches the web when it needs recent information (MCP tool).
 - **Conversation history**: the assistant remembers the previous messages of the session.
+- **Clarification questions**: when a missing choice blocks the request, the agent asks a closed question with numbered options (human in the loop).
+- **Workspace files**: the agent can list, read, create and edit files of the directory you run it from, within the permissions you set.
 
 In progress: RAG on your documents, code sandbox, HTTP API, web frontend.
 
-- [USER_STORIES.md](USER_STORIES.md): the use cases of each feature
-- [SCENARIO.md](SCENARIO.md): a full usage scenario with prompts and expected answers
-- [TRACEABILITY.md](TRACEABILITY.md): where each requirement and feature is implemented
+- [USER_STORIES.md](docs/USER_STORIES.md): the use cases of each feature
+- [SCENARIO.md](docs/SCENARIO.md): a full usage scenario with prompts and expected answers
+- [TRACEABILITY.md](docs/TRACEABILITY.md): where each requirement and feature is implemented
 
 ## Installation
 
@@ -68,6 +70,19 @@ Switched to 'math_tutor' profile.
 | `/exit` | quit (or Ctrl+D) |
 
 Every key of the configuration files is described in [configs/config.yaml.example](configs/config.yaml.example).
+
+## File access
+
+At the first file operation, the agent asks you to confirm the working directory. Every write asks for your approval.
+Permissions are set in `configs/file_access.yaml`, the most specific path wins and a path without a rule is denied:
+
+```yaml
+permissions:
+  ".": read
+  "src": read_write
+```
+
+See [src/tools/file_access/README.md](src/tools/file_access/README.md) for the details.
 
 ## Limits
 

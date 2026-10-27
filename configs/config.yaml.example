@@ -34,5 +34,14 @@ max_loops: 10
 # temperature (float, 0 = always the same answer), top_k (int), top_p (float), num_ctx (int), seed (int)
 llm_settings: {temperature: 0.2, top_k: 50}
 
+# bool: model reasoning for chat replies (default: model's choice)
+think: true
+
+# string: where to find the model, auto (local then cloud), local or cloud (default: auto)
+ollama_provider: auto
+
+# string: permissions file of the workspace file tools, relative to this file's directory (default: file_access.yaml)
+file_access_config: "file_access.yaml"
+
 # dict: JSON schema the replies must follow (default: free text)
 # response_format: {type: object, properties: {answer: {type: string}}, required: [answer]}

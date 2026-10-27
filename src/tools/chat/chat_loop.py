@@ -5,11 +5,19 @@
 ## chat_loop
 ##
 
+import io
+import sys
+
 from llm.client import ILLMClient
 from llm.errors import LLMError
 from tools.chat.config_data import ConfigData
 from tools.chat.module import warning
 from tools.spec.spec import save_spec, update_spec
+
+
+def configure_stdin() -> None:
+    if isinstance(sys.stdin, io.TextIOWrapper):
+        sys.stdin.reconfigure(errors="replace")
 
 
 def read_user_input() -> str | None:

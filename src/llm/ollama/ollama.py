@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## ollama
+##
+
 from collections.abc import Callable
 
 import httpx
@@ -40,10 +47,12 @@ class OllamaClient(ILLMClient):
         api_key: str | None,
         prompt: IMessage | None = None,
         options: dict | None = None,
+        provider: str = "auto",
     ):
         self._model = model  # the model to use
         self._prompt = prompt  # the prompt to use
-        self._llm = create_ollama_client(model, api_key)  # a ollama client instance
+        # a ollama client instance
+        self._llm = create_ollama_client(model, api_key, provider=provider)
         self._thinking_support: dict[
             str, bool
         ] = {}  # a dictionary to cache the thinking support for each model
