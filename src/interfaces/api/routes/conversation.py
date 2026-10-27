@@ -54,7 +54,7 @@ def send_message(
     )
     Thread(
         target=run_turn,
-        args=(agent, store, conversation_id, body.content, events),
+        args=(agent, store, conversation_id, body.content, events, request.app.state),
         daemon=True,
     ).start()
     return StreamingResponse(stream_events(events), media_type="application/x-ndjson")
