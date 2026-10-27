@@ -15,3 +15,4 @@ class ProfileData:
     tone: str
     scope: str
     prompt: str = ""
+    order: int = 100

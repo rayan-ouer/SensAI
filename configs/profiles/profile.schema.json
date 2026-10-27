@@ -3,7 +3,12 @@
   "title": "SensAI agent profile",
   "description": "One file = one agent. Name, role, tone and scope are required; prompt is optional.",
   "type": "object",
-  "required": ["name", "role", "tone", "scope"],
+  "required": [
+    "name",
+    "role",
+    "tone",
+    "scope"
+  ],
   "additionalProperties": false,
   "properties": {
     "name": {
@@ -29,6 +34,10 @@
     "prompt": {
       "type": "string",
       "description": "Optional file with extra detailed instructions, relative to the configs/ directory."
+    },
+    "order": {
+      "type": "integer",
+      "description": "Position in the profile lists, lowest first (default: 100)."
     }
   }
 }
