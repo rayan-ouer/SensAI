@@ -25,6 +25,7 @@ interfaces/api/
 | `GET` | `/api/profiles` | | `{"profiles": [{"key", "name", "role"}, ...], "default": "wu"}` |
 | `GET` | `/api/spec` | | `{"content": "# Project specification..."}` |
 | `GET` | `/health` | | `{"status": "ok"}` |
+| `GET` | `/version` | | `{"version": "...", "prompt_version": "v2"}` |
 
 `profile` is optional, the default profile answers without it. An unknown conversation returns 404 and an unknown
 profile returns 400.

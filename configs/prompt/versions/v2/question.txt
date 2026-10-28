@@ -1,0 +1,1 @@
+The question and its options are now shown to the user as buttons. End your turn with one short sentence in the user's language inviting them to pick an option or write their own answer. Do not repeat the question or the options and do not mention the tool.

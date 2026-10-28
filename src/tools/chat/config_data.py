@@ -8,12 +8,16 @@
 from dataclasses import dataclass, field
 
 
+PROMPT_VERSION_DIR = "prompt/versions"
+
+
 @dataclass(frozen=True)
 class ConfigData:
     model: str
     system_prompt: str
     spec_prompt: str
     question_prompt: str
+    prompt_version: str
     spec_path: str
     profiles_dir: str
     default_profile: str
@@ -25,3 +29,4 @@ class ConfigData:
     think: bool | None = None
     ollama_provider: str = "auto"
     file_access_config: str = "file_access.yaml"
+    prompt_version_dir: str = PROMPT_VERSION_DIR

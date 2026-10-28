@@ -5,16 +5,22 @@
 ## REQUIRED KEYS
 
 # string: model name, local (see `ollama list`) or Ollama Cloud (needs OLLAMA_API_KEY in .env)
-model: "qwen2.5-coder:7b"
+model: "qwen2.5:7b"
 
-# string: path to the general system prompt, a text file
-system_prompt: "prompt/system.txt"
+# string: version of the global prompts, a folder of prompt_version_dir
+prompt_version: "v2"
 
-# string: path to the prompt of the note-keeper that updates the specification, a text file
-spec_prompt: "prompt/spec.txt"
+# string (optional): folder that holds the prompt versions, "prompt/versions" by default
+prompt_version_dir: "prompt/versions"
 
-# string: path to what the clarification tool tells the agent once the web interface shows its question, a text file
-question_prompt: "prompt/question.txt"
+# string: general system prompt, a file of the prompt version folder
+system_prompt: "system.txt"
+
+# string: prompt of the note-keeper that updates the specification, a file of the prompt version folder
+spec_prompt: "spec.txt"
+
+# string: what the clarification tool tells the agent once the web interface shows its question, a file of the prompt version folder
+question_prompt: "question.txt"
 
 # string: path of the living specification, a Markdown file created if missing
 spec_path: "workspace/ASSISTANT.md"
