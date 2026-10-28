@@ -12,12 +12,14 @@ By *Armand Lecomte* (armand.lecomte@epitech.eu), *Rayan Ouerdane* (rayan.ouerdan
 - **Living specification**: after each answer, `workspace/ASSISTANT.md` is updated with what you said about your project and it is reloaded at the next start. The note-keeper returns only the sections that change, as JSON edits that the code applies.
 - **Local or cloud models**: use a model installed on your machine or a larger one on Ollama Cloud.
 - **Web search**: the agent searches the web when it needs recent information (MCP tool).
+- **Multi-agent**: with `-m`, a coordinator hands parts of the task to specialized agents (research, code, files, review) described in a YAML file.
 - **Conversation history**: the assistant remembers the previous messages of the conversation.
 - **Clarification questions**: when a missing choice blocks the request, the agent asks a closed question with options, numbered in the terminal and as buttons in the browser (human in the loop).
 - **Workspace files**: the agent can list, read, create and edit files of the directory you run it from, within the permissions you set.
 - **Code sandbox**: the agent runs commands in an isolated Docker container to test your code.
 - **Web interface**: streamed replies, model reasoning, specification panel and profile switch in the browser.
 - **HTTP API**: conversations, streamed replies, profiles and specification for other interfaces.
+- **Prompt versions and automated eval**: `wu-compare` runs two versions of the prompts on the same messages and a judge agent scores every reply.
 
 In progress: RAG on your documents.
 
@@ -50,6 +52,7 @@ Then pick a model:
 ```sh
 wu -c configs/local_config.yaml   # local model
 wu -c configs/cloud_config.yaml   # Ollama Cloud
+wu -c configs/cloud_config.yaml -m agents/agent.yaml   # multi-agent, path relative to configs/
 ```
 
 ```
@@ -115,6 +118,7 @@ Start with `wu -c configs/cloud_config.yaml` (or `local_config.yaml`), then:
 | Code sandbox | Ada | `Write a fizzbuzz in Python and run it` | the real output of the script, Docker must be running |
 | Prompt versions | - | set `prompt_version: "v1"` in the config and restart | `Starting Wu with prompts v1` |
 | Prompt comparison | - | `wu-compare` | `docs/PROMPT_COMPARISON.md` compares v1 and v2 |
+| Multi-agent | coordinator | `-m agents/agent.yaml` then `What is the latest version of Python? Check it in the sandbox` | the coordinator hands the search and the check to its agents |
 | Automated eval | - | `wu-compare` | each reply has relevance, coherence and faithfulness scores and its flagged claims |
 
 The full scenario with the expected answers is in [docs/SCENARIO.md](docs/SCENARIO.md).
@@ -127,6 +131,7 @@ The full scenario with the expected answers is in [docs/SCENARIO.md](docs/SCENAR
 | HTTP API and the message stream | [src/interfaces/api/README.md](src/interfaces/api/README.md) |
 | Web interface | [src/app/frontend/README.md](src/app/frontend/README.md) |
 | Workspace files | [src/tools/file_access/README.md](src/tools/file_access/README.md) |
+| Multi-agent files | [configs/README.md](configs/README.md#agents-files) |
 | Clarification questions | [src/tools/human_in_the_loop/README.md](src/tools/human_in_the_loop/README.md) |
 | Code sandbox | [src/tools/sandbox/README.md](src/tools/sandbox/README.md) |
 | MCP tools | [src/tools/mcp/README.MD](src/tools/mcp/README.MD) |
@@ -144,6 +149,8 @@ The full scenario with the expected answers is in [docs/SCENARIO.md](docs/SCENAR
 - **Cloud models reason at length**: the thinking part can be much longer than the answer.
 - **Conversations are kept in memory**: they are lost when the CLI or the API stops, only the specification persists.
 - **One shared specification**: every conversation and the CLI write to the same `ASSISTANT.md`.
+- **The CLI needs Docker to start**: the sandbox connects to Docker at start, even if you never run a command.
+- **One model server for every agent**: with `-m`, each agent's model must exist where the main model was found, local or cloud.
 
 ## License
 

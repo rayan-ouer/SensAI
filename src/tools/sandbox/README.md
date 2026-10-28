@@ -1,6 +1,6 @@
 # Sandbox tool for AI agents
 
-This tool gives Sensai AI project a way to run shell commands in an isolated
+This tool gives SensAI a way to run shell commands in an isolated
 Docker container. The AI can call `Sandbox.run_command()` as a tool and inspect
 the returned output. Commands run in `/work`, a persistent Docker volume that
 is separate from the project directory on the host.
@@ -9,11 +9,7 @@ is separate from the project directory on the host.
 
 - Docker must be installed and running. The Python process must be allowed to
   access the Docker daemon.
-- Install the project dependencies, including the Docker Python SDK:
-
-  ```sh
-  pip install -r ../../../backend/requirements.txt
-  ```
+- The Docker Python SDK comes with the project dependencies (`pip install -e .` at the root).
 
 ## Use from the project
 
@@ -21,7 +17,7 @@ Import `Sandbox` into the AI tool or agent code. A sandbox can execute multiple
 commands against the same `/work` directory:
 
 ```python
-from create_sandbox import Sandbox
+from tools.sandbox.sandbox import Sandbox
 
 
 def main():
@@ -37,8 +33,7 @@ def main():
     sbx.destroy()
 ```
 
-Run this example from the sandbox directory, or make `src/tools/sandbox`
-available on Python's import path. `run_command()` returns a dictionary with
+Run this example with `src` on Python's import path. `run_command()` returns a dictionary with
 `stdout`, `stderr`, `exit_code`, and `timed_out` fields, which an AI agent can
 use to interpret the result and decide what to do next.
 

@@ -154,6 +154,21 @@ Acceptance criteria:
 - The number of chunks returned is limited to a configurable maximum.
 - The answer is built from the retrieved passages.
 
+## Multi-agent orchestration (A2)
+
+As a student with a task that mixes research and code, I want several
+specialized agents to share the work, so that each part is done by an agent
+with the right instructions and tools.
+
+Acceptance criteria:
+- `wu -c <config> -m agents/agent.yaml` starts with the agent named by `entry`
+  and the profile is not used.
+- An agent calls the agents listed under it as tools and only the parent's
+  reply is shown to the user.
+- Each agent only gets the tools listed in its `tools` key.
+- An unknown tool or agent, a missing `entry` or a cycle between agents stops
+  the program with exit code 84 and an error naming the problem.
+
 ## Approval before changing a file (A3)
 
 As a student, I want to approve every change to my files, so that the
