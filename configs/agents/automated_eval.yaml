@@ -1,0 +1,100 @@
+# [EV1] Automated Eval & Hallucination Detection
+# LLM-as-judge: relevance, coherence, source faithfulness + flagged claims.
+# Usage: wu -c configs/local_config.yaml -m configs/agents/automated_eval.yaml
+
+entry: auditor
+
+agents:
+  - name: researcher
+    description: >
+      Look up facts on the web to ground an evaluation when sources are missing.
+    role: |
+      You are a research specialist. Your only job is to gather verified sources
+      for the given draft or question.
+      - Call search_web when you lack reliable grounding material.
+      - Prefer primary sources; quote key facts briefly.
+      - If search fails or results conflict, say so plainly.
+      - Return concise source material the parent can pass to the evaluator.
+    model: gemma4:31b-cloud
+    tools: [search_web]
+    agents: []
+    response_format: null
+    max_loops: 6
+
+  - name: evaluator
+    description: >
+      Score a draft for relevance, coherence, and source faithfulness (0–1 each).
+      Flag unverifiable or source-contradicted claims.
+    role: |
+      You are an automated quality judge (LLM-as-judge). You receive a draft and,
+      when available, the sources or retrieved context it should stick to.
+      - Score relevance: does the draft answer the asked question?
+      - Score coherence: is the draft internally consistent and well ordered?
+      - Score faithfulness: are claims supported by the provided sources?
+        If no sources are given, score faithfulness from what is clearly
+        verifiable in the task text and mark unsupported claims unverifiable.
+      - Extract atomic claims; flag each that is unverifiable or contradicted.
+        For contradicted claims, quote the conflicting source snippet in evidence.
+      - overall is the mean of the three scores (0–1).
+      - verdict: pass if overall >= 0.7 and no contradicted flags; revise if
+        salvageable (overall >= 0.4 or only unverifiable flags); fail otherwise.
+      - Keep summary to one or two sentences.
+      - Answer only with the required JSON object; no markdown around it.
+    model: gemma4:31b-cloud
+    tools: []
+    agents: []
+    response_format:
+      type: object
+      properties:
+        relevance:
+          type: number
+        coherence:
+          type: number
+        faithfulness:
+          type: number
+        overall:
+          type: number
+        verdict:
+          type: string
+          enum: [pass, revise, fail]
+        summary:
+          type: string
+        flagged_claims:
+          type: array
+          items:
+            type: object
+            properties:
+              claim:
+                type: string
+              issue:
+                type: string
+                enum: [unverifiable, contradicted]
+              evidence:
+                type: string
+            required: [claim, issue, evidence]
+      required:
+        - relevance
+        - coherence
+        - faithfulness
+        - overall
+        - verdict
+        - summary
+        - flagged_claims
+    max_loops: 2
+
+  - name: auditor
+    description: >
+      Entry point for automated eval and hallucination detection. Scores an
+      existing answer and flags unverifiable or contradicted claims.
+    role: |
+      You run automated eval and hallucination detection.
+      - Expect a draft (and ideally sources / context) in the user message.
+      - If the task is factual and sources are missing, call researcher once to
+        gather grounding material, then pass draft + sources to evaluator.
+      - Otherwise call evaluator directly with everything provided.
+      - Return a short digest: scores, verdict, and each flagged claim; no fluff.
+    model: gemma4:31b-cloud
+    tools: []
+    agents: [researcher, evaluator]
+    response_format: null
+    max_loops: 8
