@@ -263,6 +263,23 @@ Acceptance criteria:
 - I can still type another answer in the message field instead.
 - The buttons are disabled once I have answered or while the agent replies.
 
+## Automated eval and hallucination detection (EV1)
+
+As a developer changing a prompt, I want each reply scored by a judge model, so
+that I know whether a new version is better without reading every reply.
+
+Acceptance criteria:
+- `wu-compare` sends every reply with its question to the `evaluator` agent of
+  `configs/agents/automated_eval.yaml`, set by `judge` and `judge_agent`.
+- The judge answers in JSON with relevance, coherence, faithfulness and overall
+  scores from 0 to 1.
+- `docs/PROMPT_COMPARISON.md` shows the mean of each score per version and the
+  overall score of each reply.
+- Claims the judge cannot verify or finds contradicted are listed with their
+  version and question under "Flagged claims".
+- A judge model that does not exist stops the program with exit code 84 and a
+  judge answer without flagged claims counts as none.
+
 ## HTTP API
 
 As a developer, I want to use SensAI through an HTTP API, so that I can build
