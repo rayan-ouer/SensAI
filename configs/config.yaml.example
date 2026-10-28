@@ -5,7 +5,7 @@
 ## REQUIRED KEYS
 
 # string: model name, local (see `ollama list`) or Ollama Cloud (needs OLLAMA_API_KEY in .env)
-model: "qwen2.5-coder:7b"
+model: "qwen2.5:7b"
 
 # string: version of the global prompts, a folder of prompt_version_dir
 prompt_version: "v2"
