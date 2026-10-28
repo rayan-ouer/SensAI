@@ -10,6 +10,7 @@ from pathlib import Path
 from agent.agent import Agent
 from agent.factory import AgentFactory
 from agent.load import AgentsLoader
+from agent.definition import AgentsConfig
 from core.messages import SystemMessage
 from core.tools import ITool, ToolDependencies, ToolHandler
 from interfaces.cli.cli_state import CliState
@@ -36,6 +37,23 @@ def read_api_key() -> str | None:
     return key.get_secret_value() if key else None
 
 
+def load_agents_config(path: str | None, config_dir: str) -> AgentsConfig | None:
+    if not path:
+        return None
+    file_path = Path(path)
+    if not file_path.is_absolute():
+        file_path = Path(config_dir, path)
+    return AgentsLoader.load(file_path)
+
+
+def apply_agents_config(state: CliState, agents_config: AgentsConfig | None) -> None:
+    if agents_config is None:
+        return
+    state.uses_agents_file = True
+    entry = agents_config.by_name().get(agents_config.entry)
+    state.entry_role = entry.role if entry is not None else ""
+
+
 def current_role(state: CliState, spec: str) -> SystemMessage:
     if state.uses_agents_file:
         identity = state.entry_role
@@ -46,16 +64,15 @@ def current_role(state: CliState, spec: str) -> SystemMessage:
     return SystemMessage(content=text)
 
 
-def create_agent(state: CliState, tools: list[ITool], role: SystemMessage) -> Agent:
+def create_agent(
+    state: CliState,
+    tools: list[ITool],
+    role: SystemMessage,
+    agents_config: AgentsConfig | None = None,
+) -> Agent:
     registry = ToolHandler()
     registry.register_many(tools)
-    agents_path = Path(state.config.config_dir, state.config.agents_path)
-    agents_config = AgentsLoader.load(agents_path)
-    if agents_config is not None:
-        state.uses_agents_file = True
-        entry = agents_config.by_name().get(agents_config.entry)
-        state.entry_role = entry.role if entry is not None else ""
-    else:
+    if agents_config is None:
         agents_config = AgentsLoader.default(
             model=state.config.model,
             role=role.content,

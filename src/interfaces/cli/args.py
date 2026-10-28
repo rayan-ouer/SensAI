@@ -18,4 +18,12 @@ def handle_args() -> argparse.Namespace:
         required=True,
         help="YAML configuration file to use",
     )
+    parser.add_argument(
+        "-m",
+        "--multi-agent",
+        dest="multi_agent",
+        type=str,
+        required=False,
+        help="Multi-agent YAML path (relative to the config directory, or absolute)",
+    )
     return parser.parse_args()
