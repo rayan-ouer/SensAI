@@ -3,6 +3,10 @@ config: "cloud_config.yaml" # key required: main config file, relative to config
 versions: ["v1", "v2"] # key required: folders of prompt/versions to compare
 profile: "wu" # key required: profile that answers
 report_path: "docs/PROMPT_COMPARISON.md" # key required: report written by wu-compare, relative to the current folder
+judge: "agents/automated_eval.yaml" # key required: agents file of the judge, relative to configs/
+judge_agent: "evaluator" # key required: agent of that file that scores each reply
+judge_model: "gemma4:31b" # optional: replaces the model of the judge agent, the cloud name has no -cloud suffix
+judge_message: "Question: {question}\n\nDraft: {reply}\n\nList the flagged claims under flagged_claims, each with claim, issue (unverifiable or contradicted) and evidence." # key required: what the judge receives, {question} and {reply} are replaced
 messages: # key required
   - "Bonjour, qui es-tu ?"
   - "Est-ce que vous pouvez m'aider à organiser mon projet ?"

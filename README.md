@@ -115,6 +115,7 @@ Start with `wu -c configs/cloud_config.yaml` (or `local_config.yaml`), then:
 | Code sandbox | Ada | `Write a fizzbuzz in Python and run it` | the real output of the script, Docker must be running |
 | Prompt versions | - | set `prompt_version: "v1"` in the config and restart | `Starting Wu with prompts v1` |
 | Prompt comparison | - | `wu-compare` | `docs/PROMPT_COMPARISON.md` compares v1 and v2 |
+| Automated eval | - | `wu-compare` | each reply has relevance, coherence and faithfulness scores and its flagged claims |
 
 The full scenario with the expected answers is in [docs/SCENARIO.md](docs/SCENARIO.md).
 
