@@ -25,6 +25,8 @@ class CliState:
     conversation: ConversationHandle
     workspace: WorkspaceSession
     human_answers: list[dict[str, str]] = field(default_factory=list)
+    uses_agents_file: bool = False
+    entry_role: str = str()
 
     def current_profile(self) -> ProfileData:
         return self.profiles[self.active_profile]

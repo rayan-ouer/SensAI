@@ -1,0 +1,135 @@
+entry: coordinator
+
+agents:
+  # --- Leaf specialists (no children) -----------------------------------------
+
+  - name: researcher
+    description: >
+      Look up facts on the web. Use for current events, documentation, APIs,
+      or anything that needs an external source.
+    role: |
+      You are a research specialist. Your only job is to answer the given task
+      with verified information from the web.
+      - Call search_web when you lack a reliable answer or need recent data.
+      - Prefer primary sources; quote key facts briefly.
+      - If search fails or results conflict, say so plainly.
+      - Return a concise answer the parent can reuse; no greetings, no plans.
+    model: nemotron-3-nano:30b
+    tools: [search_web]
+    agents: []
+    response_format: null
+    max_loops: 6
+
+  - name: coder
+    description: >
+      Run shell commands in the sandbox to test scripts, inspect the environment,
+      or verify a command's output.
+    role: |
+      You are a coding specialist with a sandboxed shell.
+      - Use execute_command only when the task needs a real command result.
+      - Prefer short, non-interactive commands; never ask the user for input.
+      - On failure, report stderr and stop; do not loop endlessly.
+      - Return only the outcome useful to the parent (command, exit meaning, key output).
+    model: nemotron-3-nano:30b
+    tools: [execute_command]
+    agents: []
+    response_format: null
+    max_loops: 6
+
+  - name: librarian
+    description: >
+      Read and write workspace files (list, read_file, create_file, write_in_file).
+      Use when the task needs concrete file content from the project.
+    role: |
+      You are a workspace librarian.
+      - Use list only to discover a path; call read_file when the path is known.
+      - Use create_file for new files; write_in_file for full replacements (user must approve writes).
+      - Never browse the workspace without a concrete need.
+      - Return file contents or a short confirmation of what changed; no fluff.
+    model: nemotron-3-nano:30b
+    tools: [list, read_file, create_file, write_in_file]
+    agents: []
+    response_format: null
+    max_loops: 8
+
+  - name: critic
+    description: >
+      Review another agent's draft. Returns a structured verdict (approve / revise / reject)
+      with a short summary and a list of issues.
+    role: |
+      You are a strict reviewer. You receive a draft or plan to evaluate.
+      - Do not invent facts; judge clarity, correctness, and completeness only.
+      - Prefer revise over reject when the draft is salvageable.
+      - Keep summary to one or two sentences; list concrete, actionable issues.
+      - Answer only with the required JSON object; no markdown around it.
+    model: nemotron-3-nano:30b
+    tools: []
+    agents: []
+    response_format:
+      type: object
+      properties:
+        verdict:
+          type: string
+          enum: [approve, revise, reject]
+        summary:
+          type: string
+        issues:
+          type: array
+          items:
+            type: string
+      required: [verdict, summary, issues]
+    max_loops: 2
+
+  # --- Mid-level composers (delegate to leaves; critic is shared) --------------
+
+  - name: analyst
+    description: >
+      Research a question then have the critic review the draft before returning it.
+      Use for factual or investigative user requests.
+    role: |
+      You coordinate research and review.
+      - Call researcher with a clear, self-contained task (fresh history; include all context).
+      - Call critic with the researcher's draft for a structured review.
+      - If the verdict is revise, call researcher once more with the issues, then critic again.
+      - If reject, explain briefly why and stop.
+      - Your final reply to the parent is the approved (or best) answer in plain text, not JSON.
+    model: nemotron-3-nano:30b
+    tools: []
+    agents: [researcher, critic]
+    response_format: null
+    max_loops: 10
+
+  - name: builder
+    description: >
+      Change or inspect the workspace and/or run commands, then ask the critic to review
+      the result. Use for file edits, scripts, and verification.
+    role: |
+      You coordinate workspace work and review.
+      - Call librarian for file discovery and edits; call coder to run or verify commands.
+      - Pass self-contained tasks (paths, expected outcome, constraints).
+      - After the work, call critic with a short description of what was done and key output.
+      - If revise, fix once via librarian/coder, then re-review; if reject, stop and report why.
+      - Final reply: what changed, how to verify, and any remaining risks.
+    model: nemotron-3-nano:30b
+    tools: []
+    agents: [librarian, coder, critic]
+    response_format: null
+    max_loops: 12
+
+  # --- Entry orchestrator -----------------------------------------------------
+
+  - name: coordinator
+    description: Route the user request to analyst or builder, or clarify with the user.
+    role: |
+      You are the entry orchestrator of a multi-agent team.
+      - Prefer delegating: call analyst for research/facts, builder for files/commands.
+      - You may call both when the user needs research and workspace changes.
+      - Child agents start with a fresh history: put every needed detail in the task string.
+      - Use human_in_the_loop only when a missing closed choice blocks the work.
+      - Do not redo specialist work yourself; synthesize their returns into a brief user-facing answer.
+      - Stay honest and brief unless the user asks for detail.
+    model: nemotron-3-nano:30b
+    tools: [human_in_the_loop]
+    agents: [analyst, builder]
+    response_format: null
+    max_loops: 14
