@@ -5,7 +5,8 @@
 ## chat
 ##
 
-from collections.abc import Callable, Iterator
+from collections.abc import Iterator
+from functools import partial
 from queue import Queue
 
 from fastapi.datastructures import State
@@ -13,12 +14,34 @@ from fastapi.datastructures import State
 from agent.agent import Agent, AgentIterationLimitError, AgentTurn
 from core.conversation import IConversationService
 from core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
+from core.tools import ToolHandler
 from interfaces.api.schemas.output.conversation import StreamEvent
 from llm.errors import LLMError
 from tools.agent.profile_data import ProfileData
 from tools.agent.profiles import build_profile_prompt
 from tools.chat.chat_loop import refresh_spec
+from tools.human_in_the_loop.mcp_server import create_human_in_the_loop_tools
 from tools.spec.spec import build_system_prompt, load_spec
+
+
+def ask_in_stream(events: Queue, shown: str, question: str, options: list[str]) -> str:
+    events.put(StreamEvent(type="question", text=question, options=options))
+    return shown
+
+
+def build_tools(state: State, events: Queue) -> ToolHandler:
+    tool_handler = ToolHandler()
+    tool_handler.register_many(state.tools.list_tools())
+    tool_handler.register_many(
+        create_human_in_the_loop_tools(
+            [], ask=partial(
+                ask_in_stream,
+                events,
+                state.config.question_prompt
+            )
+        )
+    )
+    return tool_handler
 
 
 def build_role(state: State, profile: ProfileData) -> SystemMessage:
@@ -33,20 +56,22 @@ def build_role(state: State, profile: ProfileData) -> SystemMessage:
 
 def create_agent(
     state: State,
-    on_chunk: Callable[[str, str], None],
+    events: Queue,
     profile_key: str | None,
 ) -> Agent:
+    handler = build_tools(state, events)
     profile = state.profiles[profile_key or state.config.default_profile]
     return Agent(
         name=profile.name,
         model=state.config.model,
-        tools=[tool.name for tool in state.tools.list_tools()],
+        tools=[tool.name for tool in handler.list_tools()],
         role=build_role(state, profile),
         response_format=state.config.response_format,
         llm=state.llm,
-        handler=state.tools,
+        handler=handler,
         max_loops=state.config.max_loops,
-        on_chunk=on_chunk,
+        think=state.config.think,
+        on_chunk=lambda kind, text: events.put(StreamEvent(type=kind, text=text)),
     )
 
 

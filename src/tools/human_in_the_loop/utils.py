@@ -5,6 +5,9 @@
 ## utils
 ##
 
+from collections.abc import Callable
+
+
 def normalize_inputs(question: str, options: list[str]) -> tuple[str, list[str]]:
     question_text = question.strip()
     choices = [option.strip() for option in options if option.strip()]
@@ -57,3 +60,8 @@ def prompt_for_answer(choices: list[str], other_index: int, input_function) -> s
                 return answer
         else:
             print("Enter one of the listed option numbers.")
+
+
+def ask_in_terminal(question_text: str, choices: list[str], input_function: Callable[[str], str]) -> str:
+    other_index = display_menu(question_text, choices)
+    return prompt_for_answer(choices, other_index, input_function)

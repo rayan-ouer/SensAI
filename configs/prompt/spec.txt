@@ -11,6 +11,7 @@ The USER is the only source of project information.
 - The assistant's reply is context only: use it to understand what the user is answering or agreeing to. Never extract requirements, constraints or decisions from the assistant's reply on its own.
 - The assistant often gives examples, code, advice and options. None of these are part of the project unless the user explicitly adopts them.
 - If you are unsure whether the user actually stated something, leave it out. An incomplete document is better than a wrong one.
+- Questions about the assistant itself (its name, its role, what it can do) and the assistant's description of itself are not about the project: return no edits for them.
 
 # Document sections
 

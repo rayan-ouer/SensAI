@@ -46,7 +46,7 @@ def load_profiles(config_dir: str, profiles_dir: str) -> dict[str, ProfileData]:
         profiles[file_path.stem] = profile
     if len(profiles) == 0:
         raise ProfileError("no profile available", profiles_dir)
-    return profiles
+    return dict(sorted(profiles.items(), key=lambda item: (item[1].order, item[0])))
 
 
 def init_profiles(config: ConfigData) -> dict[str, ProfileData]:

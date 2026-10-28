@@ -13,6 +13,7 @@ class ConfigData:
     model: str
     system_prompt: str
     spec_prompt: str
+    question_prompt: str
     spec_path: str
     profiles_dir: str
     default_profile: str

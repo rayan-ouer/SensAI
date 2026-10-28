@@ -27,7 +27,7 @@ def print_profiles(state: CliState, _args: list[str]) -> None:
     for key, profile in state.profiles.items():
         profile_name = profile.name
         marker = "-> " if key == state.active_profile else "   "
-        print(f"{marker}{key:<12}{profile_name}")
+        print(f"{marker}{key:<16}{profile_name}")
 
 
 COMMANDS = {

@@ -13,6 +13,9 @@ system_prompt: "prompt/system.txt"
 # string: path to the prompt of the note-keeper that updates the specification, a text file
 spec_prompt: "prompt/spec.txt"
 
+# string: path to what the clarification tool tells the agent once the web interface shows its question, a text file
+question_prompt: "prompt/question.txt"
+
 # string: path of the living specification, a Markdown file created if missing
 spec_path: "workspace/ASSISTANT.md"
 

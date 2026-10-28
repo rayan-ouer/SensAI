@@ -45,6 +45,7 @@ profile returns 400.
 |---|---|
 | `thinking` | a piece of the model reasoning, only with models that reason |
 | `content` | a piece of the reply |
+| `question` | a clarification question with its `options`, the client shows them and sends the choice as the next message |
 | `done` | the reply is complete and saved in the conversation, the client can send the next message |
 | `spec` | the specification updated from this exchange, the last event of the stream |
 | `error` | the model failed, the message is not saved, the last event of the stream |
@@ -55,6 +56,7 @@ the agent succeeds, so a failed request leaves the conversation unchanged.
 ## Limits
 
 - Conversations are kept in memory: they are lost when the API restarts. The web interface then starts a new one.
-- The agent of the API only has the web search tool: the clarification questions and the file tools read the
+- The agent of the API has the web search and the clarification questions: the file tools ask for approval in the
   terminal and the sandbox is not connected yet.
+- A question card disappears when the page is reloaded: the history route does not return the tool calls.
 - The specification is a single file shared by every conversation and by the CLI.
