@@ -51,7 +51,6 @@ Copy `.env.example` to `.env` at the root of the repository.
 |---|---|
 | `OLLAMA_API_KEY` | key for Ollama Cloud, only needed for cloud models |
 | `CONFIG_PATH` | main config file used by the API |
-| `OLLAMA_LOCAL_HOST`, `OLLAMA_CLOUD_HOST` | Ollama addresses, the defaults are `http://localhost:11434` and `https://ollama.com` |
 | `CONVERSATION_STORAGE` | where the API keeps conversations, `memory` by default |
 
 ## Agent profiles
