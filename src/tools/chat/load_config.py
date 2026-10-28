@@ -13,7 +13,6 @@ import yaml
 from tools.chat.config_data import PROMPT_VERSION_DIR, ConfigData
 from tools.chat.errors import ConfigError
 
-
 REQUIRED_KEYS = (
     "model",
     "system_prompt",

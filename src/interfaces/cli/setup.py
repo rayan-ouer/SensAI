@@ -5,7 +5,12 @@
 ## setup
 ##
 
+from pathlib import Path
+
 from agent.agent import Agent
+from agent.factory import AgentFactory
+from agent.load import AgentsLoader
+from agent.definition import AgentsConfig
 from core.messages import SystemMessage
 from core.tools import ITool, ToolDependencies, ToolHandler
 from interfaces.cli.cli_state import CliState
@@ -32,28 +37,56 @@ def read_api_key() -> str | None:
     return key.get_secret_value() if key else None
 
 
+def load_agents_config(path: str | None, config_dir: str) -> AgentsConfig | None:
+    if not path:
+        return None
+    file_path = Path(path)
+    if not file_path.is_file():
+        file_path = Path(config_dir, path)
+    return AgentsLoader.load(file_path)
+
+
+def apply_agents_config(state: CliState, agents_config: AgentsConfig | None) -> None:
+    if agents_config is None:
+        return
+    state.uses_agents_file = True
+    entry = agents_config.by_name().get(agents_config.entry)
+    state.entry_role = entry.role if entry is not None else ""
+
+
 def current_role(state: CliState, spec: str) -> SystemMessage:
-    profile = state.current_profile()
-    text = build_system_prompt(state.config.system_prompt, build_profile_prompt(profile), spec)
+    if state.uses_agents_file:
+        identity = state.entry_role
+    else:
+        identity = build_profile_prompt(state.current_profile())
+    text = build_system_prompt(state.config.system_prompt, identity, spec)
     text += build_workspace_context(state.workspace)
     return SystemMessage(content=text)
 
 
-def create_agent(state: CliState, tools: list[ITool], role: SystemMessage) -> Agent:
-    tools_handler: ToolHandler = ToolHandler()
-    tools_handler.register_many(tools)
-    return Agent(
-        name=state.current_profile().name,
-        model=state.config.model,
-        tools=[tool.name for tool in tools_handler.list_tools()],
-        role=role,
-        response_format=state.config.response_format,
-        llm=state.llm,
-        handler=tools_handler,
-        max_loops=state.config.max_loops,
-        think=state.config.think,
+def create_agent(
+    state: CliState,
+    tools: list[ITool],
+    role: SystemMessage,
+    agents_config: AgentsConfig | None = None,
+) -> Agent:
+    registry = ToolHandler()
+    registry.register_many(tools)
+    if agents_config is None:
+        agents_config = AgentsLoader.default(
+            model=state.config.model,
+            role=role.content,
+            tool_names=[tool.name for tool in registry.list_tools()],
+            response_format=state.config.response_format,
+            max_loops=state.config.max_loops,
+            name=state.current_profile().name,
+            description=state.current_profile().role,
+        )
+    agent = AgentFactory(state.llm, registry).build(
+        agents_config,
         on_chunk=state.display,
     )
+    return agent
 
 
 def init_conversation(config: ConfigData) -> ConversationHandle:

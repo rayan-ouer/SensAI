@@ -13,7 +13,6 @@ from tools.chat.config_data import ConfigData
 from tools.chat.errors import ProfileError
 from tools.chat.load_config import read_prompt, read_yaml
 
-
 PROFILES_KEY = ("name", "role", "tone", "scope")
 
 
