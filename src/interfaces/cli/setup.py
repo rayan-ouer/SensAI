@@ -78,7 +78,7 @@ def create_agent(
             response_format=state.config.response_format, max_loops=state.config.max_loops,
             name=state.current_profile().name, description=state.current_profile().role,
         )
-    return AgentFactory(state.llm, registry).build(agents_config, on_chunk=state.display)
+    return AgentFactory(state.llm, registry).build(agents_config, on_chunk=state.display, think=state.config.think)
 
 
 def init_conversation(config: ConfigData) -> ConversationHandle:

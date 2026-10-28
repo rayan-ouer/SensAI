@@ -97,6 +97,20 @@ def run_turn(
     send_spec_update(content, events, state, turn)
 
 
+def run_turn_safely(
+    agent: Agent,
+    service: IConversationService,
+    conversation_id: str,
+    content: str,
+    events: Queue,
+    state: State,
+) -> None:
+    try:
+        run_turn(agent, service, conversation_id, content, events, state)
+    except Exception as e:
+        events.put(StreamEvent(type="error", message=str(e)))
+
+
 def stream_events(events: Queue) -> Iterator[str]:
     while True:
         event: StreamEvent = events.get()

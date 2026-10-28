@@ -21,6 +21,7 @@ def init_agent_resources(state: State, settings: Settings, config: ConfigData) -
         config.model,
         settings.ollama_api_key.get_secret_value() if settings.ollama_api_key else None,
         options=config.llm_settings,
+        provider=config.ollama_provider,
     )
     state.tools = ToolHandler()
     state.tools.register_many(create_search_tools())

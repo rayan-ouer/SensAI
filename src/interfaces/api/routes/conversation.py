@@ -12,7 +12,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from core.conversation import ConversationNotFoundError
-from interfaces.api.chat import create_agent, run_turn, stream_events
+from interfaces.api.chat import create_agent, run_turn_safely, stream_events
 from interfaces.api.dependencies import ConversationDep
 from interfaces.api.schemas.input.conversation import CreateConversationRequest, MessageRequest
 from interfaces.api.schemas.output.conversation import (
@@ -56,7 +56,7 @@ def send_message(
     events: Queue = Queue()
     agent = create_agent(request.app.state, events, body.profile)
     args = (agent, store, conversation_id, body.content, events, request.app.state)
-    Thread(target=run_turn, args=args, daemon=True).start()
+    Thread(target=run_turn_safely, args=args, daemon=True).start()
     return StreamingResponse(stream_events(events), media_type="application/x-ndjson")
 
 
