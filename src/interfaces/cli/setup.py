@@ -41,7 +41,7 @@ def load_agents_config(path: str | None, config_dir: str) -> AgentsConfig | None
     if not path:
         return None
     file_path = Path(path)
-    if not file_path.is_absolute():
+    if not file_path.is_file():
         file_path = Path(config_dir, path)
     return AgentsLoader.load(file_path)
 
