@@ -18,6 +18,7 @@ dynamic = ["dependencies"]
 [project.scripts]
 wu = "interfaces.cli.main:main"
 wu-api = "interfaces.api.server:main"
+wu-compare = "interfaces.compare.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

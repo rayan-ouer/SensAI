@@ -114,6 +114,7 @@ Start with `wu -c configs/cloud_config.yaml` (or `local_config.yaml`), then:
 | Workspace files | Ada | `Read README.md and summarise it` | the agent asks to confirm the folder, then reads the file |
 | Code sandbox | Ada | `Write a fizzbuzz in Python and run it` | the real output of the script, Docker must be running |
 | Prompt versions | - | set `prompt_version: "v1"` in the config and restart | `Starting Wu with prompts v1` |
+| Prompt comparison | - | `wu-compare` | `docs/PROMPT_COMPARISON.md` compares v1 and v2 |
 
 The full scenario with the expected answers is in [docs/SCENARIO.md](docs/SCENARIO.md).
 
@@ -131,6 +132,7 @@ The full scenario with the expected answers is in [docs/SCENARIO.md](docs/SCENAR
 | User stories | [docs/USER_STORIES.md](docs/USER_STORIES.md) |
 | Usage scenario with prompts and expected answers | [docs/SCENARIO.md](docs/SCENARIO.md) |
 | Where each requirement and feature is implemented | [docs/TRACEABILITY.md](docs/TRACEABILITY.md) |
+| Comparison of the prompt versions | [docs/PROMPT_COMPARISON.md](docs/PROMPT_COMPARISON.md) |
 
 ## Limits
 

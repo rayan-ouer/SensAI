@@ -1,0 +1,10 @@
+# Messages sent once with each prompt version by wu-compare
+config: "cloud_config.yaml" # key required: main config file, relative to configs/
+versions: ["v1", "v2"] # key required: folders of prompt/versions to compare
+profile: "wu" # key required: profile that answers
+report_path: "docs/PROMPT_COMPARISON.md" # key required: report written by wu-compare, relative to the current folder
+messages: # key required
+  - "Bonjour, qui es-tu ?"
+  - "Est-ce que vous pouvez m'aider à organiser mon projet ?"
+  - "Are you an AI? Which model are you?"
+  - "hi, can you explain recursion in one sentence?"

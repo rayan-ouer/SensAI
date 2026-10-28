@@ -9,6 +9,7 @@ configs/
   cloud_config.yaml     main config for an Ollama Cloud model
   config.yaml.example   every key with its type and default value
   file_access.yaml      permissions of the workspace file tools
+  prompt_comparison.yaml  messages, versions and profile compared by wu-compare
   profiles/             one YAML file per agent profile
   prompt/               the persona prompts of the profiles
   prompt/versions/      one folder per version of the global prompts
@@ -73,7 +74,8 @@ at the next start.
 
 The global prompts are versioned in `prompt/versions/`: each folder holds `system.txt`, `spec.txt`, `question.txt`
 and a `version.yaml` with its date and what changed. `prompt_version` in the config picks one: rolling back is
-writing the previous version there.
+writing the previous version there. `wu-compare` sends the messages of `prompt_comparison.yaml` with each version
+and writes the latency, the tokens and the replies side by side in `docs/PROMPT_COMPARISON.md`.
 
 | File | Used by |
 |---|---|

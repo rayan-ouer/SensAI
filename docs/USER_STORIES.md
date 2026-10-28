@@ -179,6 +179,9 @@ Acceptance criteria:
 - An unknown version stops the program with `prompt version not found: <path>`
   and exit code 84.
 - The CLI start message and `GET /version` show the version in use.
+- `wu-compare` sends the messages of `configs/prompt_comparison.yaml` with each
+  version and writes `docs/PROMPT_COMPARISON.md`: mean latency, prompt and reply
+  tokens and the replies side by side.
 
 ## Agent profiles (A5)
 
