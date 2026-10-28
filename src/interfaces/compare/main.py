@@ -112,14 +112,7 @@ def run(comparison: dict) -> str:
     judge = load_judge(comparison, config)
     results = []
     for version in comparison["versions"]:
-        results += compare_version(
-            client,
-            config,
-            read_yaml(config_path),
-            comparison,
-            version,
-            judge
-        )
+        results += compare_version(client, config, read_yaml(config_path), comparison, version, judge)
     return render_report(config.model, comparison["profile"], comparison["versions"], results)
 
 

@@ -8,6 +8,11 @@
 from core.messages import SystemMessage
 from interfaces.cli.cli_state import CliState
 
+PROFILE_NOTE = (
+    "The active agent has changed. From now on you are '{name}'. "
+    "Earlier assistant replies were written by a different agent."
+)
+
 
 def switch_profile(state: CliState, args: list[str]) -> None:
     if len(args) != 1:
@@ -18,7 +23,7 @@ def switch_profile(state: CliState, args: list[str]) -> None:
         print(f"Unknown profile: '{name}'. Type /profiles to see available ones.")
         return
     state.active_profile = name
-    note = f"The active agent has changed. From now on you are '{state.current_profile().name}'. Earlier assistant replies were written by a different agent."
+    note = PROFILE_NOTE.format(name=state.current_profile().name)
     state.conversation.add_system_message(SystemMessage(content=note))
     print(f"Switched to '{name}' profile.")
 

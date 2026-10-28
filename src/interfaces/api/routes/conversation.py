@@ -18,7 +18,6 @@ from interfaces.api.schemas.input.conversation import CreateConversationRequest,
 from interfaces.api.schemas.output.conversation import (
     CreateConversationResponse,
     MessagesResponse,
-    StreamEvent,
 )
 from interfaces.api.utils.messages import is_displayed, to_message_response
 
@@ -55,16 +54,9 @@ def send_message(
     if body.profile is not None and body.profile not in request.app.state.profiles:
         raise HTTPException(status_code=400, detail="Unknown profile")
     events: Queue = Queue()
-    agent = create_agent(
-        request.app.state,
-        events,
-        body.profile
-    )
-    Thread(
-        target=run_turn,
-        args=(agent, store, conversation_id, body.content, events, request.app.state),
-        daemon=True,
-    ).start()
+    agent = create_agent(request.app.state, events, body.profile)
+    args = (agent, store, conversation_id, body.content, events, request.app.state)
+    Thread(target=run_turn, args=args, daemon=True).start()
     return StreamingResponse(stream_events(events), media_type="application/x-ndjson")
 
 

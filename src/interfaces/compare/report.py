@@ -42,15 +42,21 @@ def summary_row(version: str, results: list[Result]) -> str:
 
 
 def summary(versions: list[str], results: list[Result]) -> list[str]:
-    header = ["| Version | Mean latency | Prompt tokens | Reply tokens | Relevance | Coherence | Faithfulness | Flagged claims |", "|---|---|---|---|---|---|---|---|"]
+    header = [
+        "| Version | Mean latency | Prompt tokens | Reply tokens "
+        "| Relevance | Coherence | Faithfulness | Flagged claims |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
     return header + [summary_row(version, results) for version in versions]
 
 
 def message_section(message: str, results: list[Result]) -> list[str]:
-    lines = [f"### {message}", "", "| Version | Latency | Tokens | Score | Flagged | Reply |", "|---|---|---|---|---|---|"]
+    lines = [f"### {message}", "", "| Version | Latency | Tokens | Score | Flagged | Reply |"]
+    lines.append("|---|---|---|---|---|---|")
     for r in results:
         if r.message == message:
-            lines.append(f"| {r.version} | {r.latency:.1f} s | {r.reply_tokens} | {r.overall:.2f} | {len(r.flagged)} | {one_line(r.reply)} |")
+            scores = f"{r.overall:.2f} | {len(r.flagged)}"
+            lines.append(f"| {r.version} | {r.latency:.1f} s | {r.reply_tokens} | {scores} | {one_line(r.reply)} |")
     return lines + [""]
 
 

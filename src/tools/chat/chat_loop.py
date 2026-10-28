@@ -37,15 +37,8 @@ def refresh_spec(
     reply: str,
 ) -> str:
     try:
-        new_spec = update_spec(
-            llm_client_instance,
-            config.model,
-            config.spec_prompt,
-            spec,
-            user_input,
-            reply,
-            config.spec_think,
-        )
+        args = (config.model, config.spec_prompt, spec, user_input, reply, config.spec_think)
+        new_spec = update_spec(llm_client_instance, *args)
         save_spec(config.spec_path, new_spec)
         return new_spec
     except (LLMError, OSError) as e:
