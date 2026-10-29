@@ -11,7 +11,6 @@ from pathlib import Path
 from core.messages import HumanMessage, SystemMessage
 from llm.client import ILLMClient
 
-
 SPEC_TITLE = "# Project specification"
 SPEC_SECTIONS = (
     "Overview",
@@ -117,13 +116,7 @@ def update_spec(
         SystemMessage(content=spec_prompt),
         HumanMessage(content=build_update_message(spec, user_input, reply)),
     ]
-    res = llm_client_instance.chat(
-        model=model,
-        messages=spec_messages,
-        tools=[],
-        response_format=EDIT_SCHEMA,
-        think=spec_think,
-    )
+    res = llm_client_instance.chat(model, spec_messages, [], EDIT_SCHEMA, think=spec_think)
     return apply_edits(spec, read_edits(res.content))
 
 

@@ -65,7 +65,10 @@ or `VITE_API_URL` to call the API directly without the proxy.
 `services/chatApi.ts` is the only file that talks to the API:
 
 - `createConversation()` creates a conversation, the first time a message is sent
-- `streamReply(conversationId, content)` sends a message and yields the events of the reply,
-  one JSON object per line: `content` and `thinking` chunks, then `done` or `error`
+- `streamReply(conversationId, content, profile)` sends a message with the selected profile and yields the events of the reply,
+  one JSON object per line: `content` and `thinking` chunks, a `question` with its options, then `done` and `spec`,
+  or `error`
+- `fetchMessages(conversationId)` returns the history shown after a page reload
+- `fetchSpec()` and `fetchProfiles()` return the specification and the profiles with the default one
 
 If the API restarted and lost the conversation, the page creates a new one and sends the message again.

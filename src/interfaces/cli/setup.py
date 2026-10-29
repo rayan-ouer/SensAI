@@ -8,9 +8,9 @@
 from pathlib import Path
 
 from agent.agent import Agent
+from agent.definition import AgentsConfig
 from agent.factory import AgentFactory
 from agent.load import AgentsLoader
-from agent.definition import AgentsConfig
 from core.messages import SystemMessage
 from core.tools import ITool, ToolDependencies, ToolHandler
 from interfaces.cli.cli_state import CliState
@@ -74,19 +74,11 @@ def create_agent(
     registry.register_many(tools)
     if agents_config is None:
         agents_config = AgentsLoader.default(
-            model=state.config.model,
-            role=role.content,
-            tool_names=[tool.name for tool in registry.list_tools()],
-            response_format=state.config.response_format,
-            max_loops=state.config.max_loops,
-            name=state.current_profile().name,
-            description=state.current_profile().role,
+            model=state.config.model, role=role.content, tool_names=[tool.name for tool in registry.list_tools()],
+            response_format=state.config.response_format, max_loops=state.config.max_loops,
+            name=state.current_profile().name, description=state.current_profile().role,
         )
-    agent = AgentFactory(state.llm, registry).build(
-        agents_config,
-        on_chunk=state.display,
-    )
-    return agent
+    return AgentFactory(state.llm, registry).build(agents_config, on_chunk=state.display, think=state.config.think)
 
 
 def init_conversation(config: ConfigData) -> ConversationHandle:

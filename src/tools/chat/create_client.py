@@ -10,7 +10,9 @@ import ollama
 
 from tools.chat.errors import ModelNotFoundError
 from tools.chat.model_list import get_model_list
-from tools.chat.module import OLLAMA_CLOUD_HOST, OLLAMA_LOCAL_HOST
+
+OLLAMA_LOCAL_HOST = "http://localhost:11434"
+OLLAMA_CLOUD_HOST = "https://ollama.com"
 
 
 def find_local_client(local_host: str, model: str) -> ollama.Client | None:
@@ -41,14 +43,12 @@ def find_cloud_client(cloud_host: str, model: str, api_key: str | None) -> ollam
 def create_ollama_client(
     model: str,
     api_key: str | None = None,
-    local_host: str = OLLAMA_LOCAL_HOST,
-    cloud_host: str = OLLAMA_CLOUD_HOST,
     provider: str = "auto",
 ) -> ollama.Client:
     if provider != "cloud":
-        local = find_local_client(local_host, model)
+        local = find_local_client(OLLAMA_LOCAL_HOST, model)
         if local is not None:
             return local
         if provider == "local":
             raise ModelNotFoundError(model, "not found locally")
-    return find_cloud_client(cloud_host, model, api_key)
+    return find_cloud_client(OLLAMA_CLOUD_HOST, model, api_key)

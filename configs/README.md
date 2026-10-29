@@ -10,6 +10,7 @@ configs/
   config.yaml.example   every key with its type and default value
   file_access.yaml      permissions of the workspace file tools
   prompt_comparison.yaml  messages, versions, profile and judge of wu-compare
+  agents/               multi-agent files for wu -m and the judge of wu-compare
   profiles/             one YAML file per agent profile
   prompt/               the persona prompts of the profiles
   prompt/versions/      one folder per version of the global prompts
@@ -50,7 +51,6 @@ Copy `.env.example` to `.env` at the root of the repository.
 |---|---|
 | `OLLAMA_API_KEY` | key for Ollama Cloud, only needed for cloud models |
 | `CONFIG_PATH` | main config file used by the API |
-| `OLLAMA_LOCAL_HOST`, `OLLAMA_CLOUD_HOST` | Ollama addresses, the defaults are `http://localhost:11434` and `https://ollama.com` |
 | `CONVERSATION_STORAGE` | where the API keeps conversations, `memory` by default |
 
 ## Agent profiles
@@ -89,6 +89,34 @@ coherence and faithfulness from 0 to 1 and flags the claims it cannot verify or 
 
 The system prompt sent to the model is built from three layers: `system.txt`, the active profile and the current
 specification. In the CLI, the workspace directory and its listing are added at the end.
+
+## Agents files
+
+`wu -c <config> -m agents/agent.yaml` replaces the profile by a team of agents. The path is relative to the folder
+you start from, or else to `configs/`. `entry` names the agent that talks to the user. Each agent can call its
+`tools` and the `agents` listed under it, which it sees as tools named after them.
+
+```yaml
+entry: coordinator
+agents:
+  - name: researcher
+    description: "Look up facts on the web."   # what the parent sees
+    role: "You are a research specialist..."   # system prompt of this agent
+    model: nemotron-3-nano:30b
+    tools: [search_web]
+    agents: []
+    response_format: null                      # optional JSON schema
+    max_loops: 6
+```
+
+| File | Agents |
+|---|---|
+| `agents/agent.yaml` | `coordinator` hands work to `analyst` (`researcher`, `critic`) and `builder` (`librarian`, `coder`, `critic`) |
+| `agents/automated_eval.yaml` | `auditor` with `researcher` and `evaluator`, the judge of `wu-compare` |
+
+The available tools are `search_web`, `execute_command`, `list`, `read_file`, `create_file`, `write_in_file` and
+`human_in_the_loop`. An unknown tool or agent, a missing `entry` or a cycle between agents stops the program with
+exit code 84. Every model must exist on the server where the `model` of the main config was found.
 
 ## File permissions
 

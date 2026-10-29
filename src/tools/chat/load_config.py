@@ -63,7 +63,8 @@ class ConfigLoader:
             raise ConfigError("ollama_provider must be auto, local or cloud", self.config_path)
 
     def _prompt_dir(self, config: dict) -> str:
-        path = os.path.join(self.config_dir, config.get("prompt_version_dir", PROMPT_VERSION_DIR), config["prompt_version"])
+        version_dir = config.get("prompt_version_dir", PROMPT_VERSION_DIR)
+        path = os.path.join(self.config_dir, version_dir, config["prompt_version"])
         if not os.path.isdir(path):
             raise ConfigError("prompt version not found", path)
         return path

@@ -7,7 +7,6 @@
 
 from dataclasses import dataclass, field
 
-
 PROMPT_VERSION_DIR = "prompt/versions"
 
 

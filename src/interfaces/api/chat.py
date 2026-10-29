@@ -32,15 +32,8 @@ def ask_in_stream(events: Queue, shown: str, question: str, options: list[str]) 
 def build_tools(state: State, events: Queue) -> ToolHandler:
     tool_handler = ToolHandler()
     tool_handler.register_many(state.tools.list_tools())
-    tool_handler.register_many(
-        create_human_in_the_loop_tools(
-            [], ask=partial(
-                ask_in_stream,
-                events,
-                state.config.question_prompt
-            )
-        )
-    )
+    ask = partial(ask_in_stream, events, state.config.question_prompt)
+    tool_handler.register_many(create_human_in_the_loop_tools([], ask=ask))
     return tool_handler
 
 
@@ -54,23 +47,13 @@ def build_role(state: State, profile: ProfileData) -> SystemMessage:
     )
 
 
-def create_agent(
-    state: State,
-    events: Queue,
-    profile_key: str | None,
-) -> Agent:
+def create_agent(state: State, events: Queue, profile_key: str | None) -> Agent:
     handler = build_tools(state, events)
     profile = state.profiles[profile_key or state.config.default_profile]
     return Agent(
-        name=profile.name,
-        model=state.config.model,
-        tools=[tool.name for tool in handler.list_tools()],
-        role=build_role(state, profile),
-        response_format=state.config.response_format,
-        llm=state.llm,
-        handler=handler,
-        max_loops=state.config.max_loops,
-        think=state.config.think,
+        name=profile.name, model=state.config.model, tools=[tool.name for tool in handler.list_tools()],
+        role=build_role(state, profile), response_format=state.config.response_format, llm=state.llm,
+        handler=handler, max_loops=state.config.max_loops, think=state.config.think,
         on_chunk=lambda kind, text: events.put(StreamEvent(type=kind, text=text)),
     )
 
@@ -112,6 +95,20 @@ def run_turn(
     save_turn(service, conversation_id, turn)
     events.put(StreamEvent(type="done"))
     send_spec_update(content, events, state, turn)
+
+
+def run_turn_safely(
+    agent: Agent,
+    service: IConversationService,
+    conversation_id: str,
+    content: str,
+    events: Queue,
+    state: State,
+) -> None:
+    try:
+        run_turn(agent, service, conversation_id, content, events, state)
+    except Exception as e:
+        events.put(StreamEvent(type="error", message=str(e)))
 
 
 def stream_events(events: Queue) -> Iterator[str]:

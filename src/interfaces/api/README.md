@@ -49,7 +49,7 @@ profile returns 400.
 | `question` | a clarification question with its `options`, the client shows them and sends the choice as the next message |
 | `done` | the reply is complete and saved in the conversation, the client can send the next message |
 | `spec` | the specification updated from this exchange, the last event of the stream |
-| `error` | the model failed, the message is not saved, the last event of the stream |
+| `error` | the turn failed (model, tool loop or unexpected error), the message is not saved, the last event of the stream |
 
 The agent runs in a thread and pushes its chunks in a queue that the response reads. The exchange is saved only when
 the agent succeeds, so a failed request leaves the conversation unchanged.
