@@ -41,6 +41,13 @@ function MessageBubble({ message, canAnswer, onAnswer }: MessageBubbleProps) {
           </p>
         )}
         {message.question && <QuestionCard question={message.question} disabled={!canAnswer} onAnswer={onAnswer} />}
+        {message.usage && (
+          <p className="mt-2 text-xs text-amber-50/45">
+            Tokens used: {message.usage.totalTokens.toLocaleString()} (input:{' '}
+            {message.usage.promptTokens.toLocaleString()}, output:{' '}
+            {message.usage.completionTokens.toLocaleString()})
+          </p>
+        )}
       </div>
     </div>
   )

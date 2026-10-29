@@ -110,6 +110,17 @@ def run_turn(
         return
     service.add_human_message(conversation_id, human)
     save_turn(service, conversation_id, turn)
+    if turn.prompt_tokens is not None or turn.completion_tokens is not None:
+        prompt_tokens = turn.prompt_tokens or 0
+        completion_tokens = turn.completion_tokens or 0
+        events.put(
+            StreamEvent(
+                type="usage",
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                total_tokens=prompt_tokens + completion_tokens,
+            )
+        )
     events.put(StreamEvent(type="done"))
     send_spec_update(content, events, state, turn)
 

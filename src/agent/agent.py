@@ -13,6 +13,22 @@ class AgentTurn:
     messages: list[IMessage]
     reply: AIMessage
 
+    @property
+    def prompt_tokens(self) -> int | None:
+        counts = []
+        for message in self.messages:
+            if isinstance(message, AIMessage) and message.prompt_eval_count is not None:
+                counts.append(message.prompt_eval_count)
+        return sum(counts) if counts else None
+
+    @property
+    def completion_tokens(self) -> int | None:
+        counts = []
+        for message in self.messages:
+            if isinstance(message, AIMessage) and message.eval_count is not None:
+                counts.append(message.eval_count)
+        return sum(counts) if counts else None
+
 
 class AgentIterationLimitError(Exception):
     def __init__(self, max_loops: int, message: AIMessage):
