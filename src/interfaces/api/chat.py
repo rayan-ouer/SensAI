@@ -14,7 +14,7 @@ from fastapi.datastructures import State
 
 from agent.agent import Agent, AgentTurn
 from core.conversation import IConversationService
-from core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
+from core.messages import AIMessage, HumanMessage, IMessage, SystemMessage, ToolMessage
 from core.tools import ToolHandler
 from interfaces.api.schemas.output.conversation import StreamEvent
 from tools.agent.profile_data import ProfileData
@@ -78,6 +78,21 @@ def send_spec_update(
     events.put(StreamEvent(type="spec", text=new_spec))
 
 
+def turn_history(service: IConversationService, conversation_id: str, edited_id: str | None) -> list[IMessage]:
+    history = service.get_used_history(conversation_id)
+    if edited_id is None:
+        return history
+    ids = [message.id for message in history]
+    return history[:ids.index(edited_id)]
+
+
+def save_human(service: IConversationService, conversation_id: str, human: HumanMessage, edited_id: str | None) -> None:
+    if edited_id is None:
+        service.add_human_message(conversation_id, human)
+    else:
+        service.edit_message(conversation_id, edited_id, human)
+
+
 def run_turn(
     agent: Agent,
     service: IConversationService,
@@ -85,10 +100,11 @@ def run_turn(
     content: str,
     events: Queue,
     state: State,
+    edited_id: str | None,
 ) -> AgentTurn:
     human = HumanMessage(content=content)
-    turn = agent.invoke(service.get_used_history(conversation_id) + [human])
-    service.add_human_message(conversation_id, human)
+    turn = agent.invoke(turn_history(service, conversation_id, edited_id) + [human])
+    save_human(service, conversation_id, human, edited_id)
     save_turn(service, conversation_id, turn)
     if turn.prompt_tokens is not None or turn.completion_tokens is not None:
         prompt_tokens = turn.prompt_tokens or 0
@@ -101,7 +117,7 @@ def run_turn(
                 total_tokens=prompt_tokens + completion_tokens,
             )
         )
-    events.put(StreamEvent(type="done"))
+    events.put(StreamEvent(type="done", message_id=human.id))
     send_spec_update(content, events, state, turn)
     return turn
 
@@ -113,13 +129,14 @@ def run_turn_safely(
     content: str,
     events: Queue,
     state: State,
+    edited_id: str | None,
 ) -> None:
     started = perf_counter()
     turn: AgentTurn | None = None
     error: Exception | None = None
-    with state.monitor.bind(conversation_id, agent.name, state.config.model):
+    with state.monitor.bind(conversation_id, agent.name, agent.model):
         try:
-            turn = run_turn(agent, service, conversation_id, content, events, state)
+            turn = run_turn(agent, service, conversation_id, content, events, state, edited_id)
         except Exception as e:
             error = e
             events.put(StreamEvent(type="error", message=str(e)))

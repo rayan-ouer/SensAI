@@ -44,6 +44,10 @@ function attachQuestion(messages: Message[], id: string, question: Question): Me
   return messages.map((message) => (message.id === id ? { ...message, question } : message))
 }
 
+function attachServerId(messages: Message[], id: string, serverId: string): Message[] {
+  return messages.map((message) => (message.id === id ? { ...message, serverId } : message))
+}
+
 export function useChat(spec: SpecUpdates, profile: string | null, model: string | null) {
   const [messages, setMessages] = useState<Message[]>([])
   const [status, setStatus] = useState<ChatStatus>('idle')
@@ -80,8 +84,9 @@ export function useChat(spec: SpecUpdates, profile: string | null, model: string
     setError(null)
   }
 
-  async function receiveReply(text: string, replyId: string) {
-    for await (const event of streamReply(await currentConversation(), text, profile, model)) {
+  async function receiveReply(userMessage: Message, replyId: string, editedId: string | null) {
+    const conversation = await currentConversation()
+    for await (const event of streamReply(conversation, userMessage.content, profile, model, editedId)) {
       if (event.type === 'error')
         throw new Error(event.message)
       if (event.type === 'thinking')
@@ -107,6 +112,7 @@ export function useChat(spec: SpecUpdates, profile: string | null, model: string
         ))
       }
       if (event.type === 'done') {
+        setMessages((current) => attachServerId(current, userMessage.id, event.message_id))
         setStatus('idle')
         spec.startUpdate()
       }
@@ -115,14 +121,14 @@ export function useChat(spec: SpecUpdates, profile: string | null, model: string
     }
   }
 
-  async function receiveReplyOrRetry(text: string, replyId: string) {
+  async function receiveReplyOrRetry(userMessage: Message, replyId: string, editedId: string | null) {
     try {
-      await receiveReply(text, replyId)
+      await receiveReply(userMessage, replyId, editedId)
     } catch (e) {
-      if (!(e instanceof ConversationNotFoundError))
+      if (!(e instanceof ConversationNotFoundError) || editedId !== null)
         throw e
       conversationId.current = null
-      await receiveReply(text, replyId)
+      await receiveReply(userMessage, replyId, editedId)
     }
   }
 
@@ -130,20 +136,20 @@ export function useChat(spec: SpecUpdates, profile: string | null, model: string
     setMessages((current) => current.filter((message) => message.id !== replyId || message.content !== '' || message.question !== undefined))
   }
 
-  async function send(text: string) {
-    if (status !== 'idle')
-      return
+  async function runTurn(text: string, kept: Message[], editedId: string | null) {
     const userMessage: Message = { id: crypto.randomUUID(), role: 'user', content: text }
     const reply: Message = { id: crypto.randomUUID(), role: 'assistant', content: '' }
 
     activeReply.current = reply.id
-    setMessages((current) => [...current, userMessage, reply])
+    setMessages([...kept, userMessage, reply])
     setError(null)
     setStatus('thinking')
     try {
-      await receiveReplyOrRetry(text, reply.id)
+      await receiveReplyOrRetry(userMessage, reply.id, editedId)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'The assistant could not reply.')
+      if (editedId !== null)
+        setMessages(messages)
     } finally {
       dropEmptyReply(reply.id)
       if (activeReply.current === reply.id) {
@@ -153,5 +159,15 @@ export function useChat(spec: SpecUpdates, profile: string | null, model: string
     }
   }
 
-  return { messages, status, error, send, reset }
+  async function send(text: string) {
+    if (status === 'idle')
+      await runTurn(text, messages, null)
+  }
+
+  async function edit(message: Message, text: string) {
+    if (status === 'idle' && message.serverId !== undefined)
+      await runTurn(text, messages.slice(0, messages.indexOf(message)), message.serverId)
+  }
+
+  return { messages, status, error, send, edit, reset }
 }

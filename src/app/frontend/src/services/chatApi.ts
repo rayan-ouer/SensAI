@@ -24,10 +24,10 @@ async function failure(response: Response): Promise<Error> {
   return new Error(`The API answered ${response.status}: ${detail}`)
 }
 
-async function post(path: string, payload: object): Promise<Response> {
+async function post(path: string, payload: object, method = 'POST'): Promise<Response> {
   try {
     return await fetch(`${API_URL}${path}`, {
-      method: 'POST',
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
@@ -47,6 +47,7 @@ export async function fetchSpec(): Promise<string> {
 }
 
 type StoredMessage = {
+  id: string
   role: Message['role']
   content: string
   thinking: string | null
@@ -61,6 +62,7 @@ export async function fetchMessages(conversationId: string): Promise<Message[]> 
   const body: { messages: StoredMessage[] } = await response.json()
   return body.messages.map((message) => ({
     id: crypto.randomUUID(),
+    serverId: message.id,
     role: message.role,
     content: message.content,
     thinking: message.thinking ?? undefined,
@@ -115,8 +117,11 @@ export async function* streamReply(
   content: string,
   profile: string | null,
   model: string | null,
+  editedId: string | null,
 ): AsyncGenerator<StreamEvent> {
-  const response = await post(`/conversations/${conversationId}/messages`, { content, profile, model })
+  const path = `/conversations/${conversationId}/messages`
+  const payload = { content, profile, model }
+  const response = await (editedId === null ? post(path, payload) : post(`${path}/${editedId}`, payload, 'PUT'))
   if (!response.ok || response.body === null)
     throw await failure(response)
   for await (const line of readLines(response.body))

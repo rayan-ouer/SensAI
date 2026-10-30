@@ -80,6 +80,10 @@ class Agent:
         return self._name
 
     @property
+    def model(self) -> str:
+        return self._model
+
+    @property
     def description(self) -> str:
         return self._description
 

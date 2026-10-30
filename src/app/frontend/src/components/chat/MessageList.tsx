@@ -14,9 +14,10 @@ type MessageListProps = {
   messages: Message[]
   status: ChatStatus
   onAnswer: (answer: string) => void
+  onEdit: (message: Message, text: string) => void
 }
 
-function MessageList({ messages, status, onAnswer }: MessageListProps) {
+function MessageList({ messages, status, onAnswer, onEdit }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -31,7 +32,9 @@ function MessageList({ messages, status, onAnswer }: MessageListProps) {
             key={message.id}
             message={message}
             canAnswer={status === 'idle' && index === messages.length - 1}
+            canEdit={status === 'idle'}
             onAnswer={onAnswer}
+            onEdit={onEdit}
           />
         ))}
         <div ref={bottomRef} />
