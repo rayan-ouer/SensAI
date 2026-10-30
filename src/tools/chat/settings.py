@@ -18,3 +18,4 @@ class Settings(BaseSettings):
     config_path: str = Field(default="configs/local_config.yaml")
     conversation_storage: str = Field(default="memory")
     database_url: str | None = Field(default=None)
+    monitor_db_path: str = Field(default="workspace/monitoring.sqlite3")

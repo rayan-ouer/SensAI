@@ -92,6 +92,20 @@ export function useChat(spec: SpecUpdates, profile: string | null, model: string
       }
       if (event.type === 'question')
         setMessages((current) => attachQuestion(current, replyId, { text: event.text, options: event.options }))
+      if (event.type === 'usage') {
+        setMessages((current) => current.map((message) =>
+          message.id === replyId
+            ? {
+                ...message,
+                usage: {
+                  promptTokens: event.prompt_tokens,
+                  completionTokens: event.completion_tokens,
+                  totalTokens: event.total_tokens,
+                },
+              }
+            : message
+        ))
+      }
       if (event.type === 'done') {
         setStatus('idle')
         spec.startUpdate()

@@ -8,7 +8,7 @@
 // Icon from Lucide: https://lucide.dev/
 
 import { useState } from 'react'
-import { FileText, SquarePen } from 'lucide-react'
+import { Activity, FileText, SquarePen } from 'lucide-react'
 
 import Composer from '@/components/chat/Composer'
 import EmptyState from '@/components/chat/EmptyState'
@@ -16,6 +16,7 @@ import MessageList from '@/components/chat/MessageList'
 import ModelSelect from '@/components/chat/ModelSelect'
 import ProfileSelect from '@/components/chat/ProfileSelect'
 import SpecPanel from '@/components/spec/SpecPanel'
+import MonitoringPage from '@/pages/MonitoringPage'
 import { useChat } from '@/hooks/useChat'
 import { useModels } from '@/hooks/useModels'
 import { useProfiles } from '@/hooks/useProfiles'
@@ -30,6 +31,10 @@ function ChatPage() {
   const { messages, status, error, send, reset } = useChat(spec, profiles.selected, models.selected)
   const [typing, setTyping] = useState(false)
   const [specOpen, setSpecOpen] = useState(() => window.matchMedia(WIDE_SCREEN).matches)
+  const [monitoringOpen, setMonitoringOpen] = useState(false)
+
+  if (monitoringOpen)
+    return <MonitoringPage onBack={() => setMonitoringOpen(false)} />
 
   return (
     <div className="flex h-dvh">
@@ -51,6 +56,14 @@ function ChatPage() {
               disabled={status !== 'idle'}
               onSelect={models.select}
             />
+            <button
+              type="button"
+              onClick={() => setMonitoringOpen(true)}
+              className="flex items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-1 text-xs text-amber-100/60 hover:bg-white/10 hover:text-amber-50"
+            >
+              <Activity className="size-3.5" />
+              Monitoring
+            </button>
             {messages.length > 0 && (
               <button
                 type="button"

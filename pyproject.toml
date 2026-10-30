@@ -20,6 +20,9 @@ wu = "interfaces.cli.main:main"
 wu-api = "interfaces.api.server:main"
 wu-compare = "interfaces.compare.main:main"
 
+[project.optional-dependencies]
+monitoring = ["jupyter", "pandas", "matplotlib"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 namespaces = true

@@ -18,6 +18,11 @@ export type Message = {
   content: string
   thinking?: string
   question?: Question
+  usage?: {
+    promptTokens: number
+    completionTokens: number
+    totalTokens: number
+  }
 }
 
 export type Profile = {
@@ -30,6 +35,7 @@ export type ChatStatus = 'idle' | 'thinking' | 'streaming'
 
 export type StreamEvent =
   | { type: 'thinking' | 'content'; text: string }
+  | { type: 'usage'; prompt_tokens: number; completion_tokens: number; total_tokens: number }
   | { type: 'done' }
   | { type: 'question'; text: string; options: string[] }
   | { type: 'spec'; text: string }
