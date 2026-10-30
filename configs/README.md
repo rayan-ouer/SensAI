@@ -9,8 +9,11 @@ configs/
   cloud_config.yaml     main config for an Ollama Cloud model
   config.yaml.example   every key with its type and default value
   file_access.yaml      permissions of the workspace file tools
+  prompt_comparison.yaml  messages, versions, profile and judge of wu-compare
+  agents/               multi-agent files for wu -m and the judge of wu-compare
   profiles/             one YAML file per agent profile
-  prompt/               the text prompts referenced by the files above
+  prompt/               the persona prompts of the profiles
+  prompt/versions/      one folder per version of the global prompts
 ```
 
 ## Main config file
@@ -21,9 +24,10 @@ The CLI takes it with `wu -c configs/local_config.yaml`. The API reads the one s
 | Key | Required | Type | Role |
 |---|---|---|---|
 | `model` | yes | string | model name, local (`ollama list`) or on Ollama Cloud |
-| `system_prompt` | yes | path | general rules shared by every profile |
-| `spec_prompt` | yes | path | instructions of the note-keeper that updates the specification |
-| `question_prompt` | yes | path | what the clarification tool tells the agent once the web interface shows its question |
+| `prompt_version` | yes | string | version of the global prompts, a folder of `prompt/versions/` |
+| `system_prompt` | yes | file | general rules shared by every profile |
+| `spec_prompt` | yes | file | instructions of the note-keeper that updates the specification |
+| `question_prompt` | yes | file | what the clarification tool tells the agent once the web interface shows its question |
 | `spec_path` | yes | path | the living specification, created if missing |
 | `profiles_dir` | yes | path | folder of the agent profiles |
 | `default_profile` | yes | string | profile active at start, a file name of `profiles_dir` without `.yaml` |
@@ -32,10 +36,11 @@ The CLI takes it with `wu -c configs/local_config.yaml`. The API reads the one s
 | `max_loops` | no | int | maximum agent steps (model and tool calls) for one message, 10 by default |
 | `llm_settings` | no | dict | options passed to the model, for example `{temperature: 0.2, top_k: 50}` |
 | `ollama_provider` | no | string | `auto` (local then cloud), `local` or `cloud`, `auto` by default |
+| `prompt_version_dir` | no | path | folder of the prompt versions, `prompt/versions` by default |
 | `file_access_config` | no | path | permissions file of the file tools, `file_access.yaml` by default |
 | `response_format` | no | dict | JSON schema the replies must follow, free text by default |
 
-Paths are relative to the config file, except `spec_path` which is relative to the folder you start SensAI from.
+The three prompt files are read in the folder of `prompt_version`. Paths are relative to the config file, except `spec_path` which is relative to the folder you start SensAI from.
 A missing required key or an invalid `ollama_provider` stops the program with a clear error and exit code 84.
 
 ## Environment variables
@@ -46,7 +51,6 @@ Copy `.env.example` to `.env` at the root of the repository.
 |---|---|
 | `OLLAMA_API_KEY` | key for Ollama Cloud, only needed for cloud models |
 | `CONFIG_PATH` | main config file used by the API |
-| `OLLAMA_LOCAL_HOST`, `OLLAMA_CLOUD_HOST` | Ollama addresses, the defaults are `http://localhost:11434` and `https://ollama.com` |
 | `CONVERSATION_STORAGE` | where the API keeps conversations, `memory` by default |
 
 ## Agent profiles
@@ -68,15 +72,51 @@ at the next start.
 
 ## Prompts
 
+The global prompts are versioned in `prompt/versions/`: each folder holds `system.txt`, `spec.txt`, `question.txt`
+and a `version.yaml` with its date and what changed. `prompt_version` in the config picks one: rolling back is
+writing the previous version there. `wu-compare` sends the messages of `prompt_comparison.yaml` with each version
+and writes the latency, the tokens and the replies side by side in `docs/PROMPT_COMPARISON.md`. Each reply is
+scored by the `evaluator` agent of `agents/automated_eval.yaml` (`judge` and `judge_agent`), which gives relevance,
+coherence and faithfulness from 0 to 1 and flags the claims it cannot verify or that are contradicted.
+`judge_model` replaces the model of that agent: on Ollama Cloud the name has no `-cloud` suffix.
+
 | File | Used by |
 |---|---|
-| `prompt/system.txt` | every profile: honesty, brevity, scope, language and the rules of each tool |
-| `prompt/question.txt` | the clarification tool in the web interface: the question is shown, the agent ends its turn |
-| `prompt/spec.txt` | the note-keeper: sections of the specification, what it may record and the JSON edits it returns |
+| `system.txt` | every profile: honesty, brevity, scope, language and the rules of each tool |
+| `question.txt` | the clarification tool in the web interface: the question is shown, the agent ends its turn |
+| `spec.txt` | the note-keeper: sections of the specification, what it may record and the JSON edits it returns |
 | `prompt/wu.txt`, `prompt/math_tutor.txt`, `prompt/sensei.txt`, `prompt/code_reviewer.txt`, `prompt/product_coach.txt` | the detailed persona of each profile |
 
 The system prompt sent to the model is built from three layers: `system.txt`, the active profile and the current
 specification. In the CLI, the workspace directory and its listing are added at the end.
+
+## Agents files
+
+`wu -c <config> -m agents/agent.yaml` replaces the profile by a team of agents. The path is relative to the folder
+you start from, or else to `configs/`. `entry` names the agent that talks to the user. Each agent can call its
+`tools` and the `agents` listed under it, which it sees as tools named after them.
+
+```yaml
+entry: coordinator
+agents:
+  - name: researcher
+    description: "Look up facts on the web."   # what the parent sees
+    role: "You are a research specialist..."   # system prompt of this agent
+    model: nemotron-3-nano:30b
+    tools: [search_web]
+    agents: []
+    response_format: null                      # optional JSON schema
+    max_loops: 6
+```
+
+| File | Agents |
+|---|---|
+| `agents/agent.yaml` | `coordinator` hands work to `analyst` (`researcher`, `critic`) and `builder` (`librarian`, `coder`, `critic`) |
+| `agents/automated_eval.yaml` | `auditor` with `researcher` and `evaluator`, the judge of `wu-compare` |
+
+The available tools are `search_web`, `execute_command`, `list`, `read_file`, `create_file`, `write_in_file` and
+`human_in_the_loop`. An unknown tool or agent, a missing `entry` or a cycle between agents stops the program with
+exit code 84. Every model must exist on the server where the `model` of the main config was found.
 
 ## File permissions
 

@@ -1,0 +1,8 @@
+version: "v2"
+date: "2026-10-27T21:22:47+01:00"
+changes:
+  - "Every profile replies in the language of the user's last message."
+  - "In French the agent always says tu, never vous."
+  - "Asked what it is, the agent answers with its profile name and role and never names the model."
+  - "The note-keeper ignores questions about the assistant itself."
+  - "question.txt tells the agent to end its turn once the web interface shows its question."

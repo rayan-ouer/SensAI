@@ -1,0 +1,4 @@
+version: "v1"
+date: "2026-10-27T14:48:29+01:00"
+changes:
+  - "The note-keeper returns JSON edits of the specification sections instead of rewriting the whole document."

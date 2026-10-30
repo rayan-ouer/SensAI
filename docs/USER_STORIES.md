@@ -154,6 +154,21 @@ Acceptance criteria:
 - The number of chunks returned is limited to a configurable maximum.
 - The answer is built from the retrieved passages.
 
+## Multi-agent orchestration (A2)
+
+As a student with a task that mixes research and code, I want several
+specialized agents to share the work, so that each part is done by an agent
+with the right instructions and tools.
+
+Acceptance criteria:
+- `wu -c <config> -m agents/agent.yaml` starts with the agent named by `entry`
+  and the profile is not used.
+- An agent calls the agents listed under it as tools and only the parent's
+  reply is shown to the user.
+- Each agent only gets the tools listed in its `tools` key.
+- An unknown tool or agent, a missing `entry` or a cycle between agents stops
+  the program with exit code 84 and an error naming the problem.
+
 ## Approval before changing a file (A3)
 
 As a student, I want to approve every change to my files, so that the
@@ -164,6 +179,24 @@ Acceptance criteria:
   leaves the file unchanged.
 - `create_file` needs a `read_write` permission and never replaces an existing
   file.
+
+## Prompt versioning (A4)
+
+As a developer tuning the assistant, I want each version of the global prompts
+kept with its date and changes, so that I can go back to a previous one when a
+change makes the answers worse.
+
+Acceptance criteria:
+- Each folder of `configs/prompt/versions/` holds `system.txt`, `spec.txt`,
+  `question.txt` and a `version.yaml` with its date and what changed.
+- `prompt_version` in the configuration file selects the folder and writing
+  the previous version there rolls back, with no code change.
+- An unknown version stops the program with `prompt version not found: <path>`
+  and exit code 84.
+- The CLI start message and `GET /version` show the version in use.
+- `wu-compare` sends the messages of `configs/prompt_comparison.yaml` with each
+  version and writes `docs/PROMPT_COMPARISON.md`: mean latency, prompt and reply
+  tokens and the replies side by side.
 
 ## Agent profiles (A5)
 
@@ -244,6 +277,23 @@ Acceptance criteria:
 - A click sends the option as my next message and the agent continues from it.
 - I can still type another answer in the message field instead.
 - The buttons are disabled once I have answered or while the agent replies.
+
+## Automated eval and hallucination detection (EV1)
+
+As a developer changing a prompt, I want each reply scored by a judge model, so
+that I know whether a new version is better without reading every reply.
+
+Acceptance criteria:
+- `wu-compare` sends every reply with its question to the `evaluator` agent of
+  `configs/agents/automated_eval.yaml`, set by `judge` and `judge_agent`.
+- The judge answers in JSON with relevance, coherence, faithfulness and overall
+  scores from 0 to 1.
+- `docs/PROMPT_COMPARISON.md` shows the mean of each score per version and the
+  overall score of each reply.
+- Claims the judge cannot verify or finds contradicted are listed with their
+  version and question under "Flagged claims".
+- A judge model that does not exist stops the program with exit code 84 and a
+  judge answer without flagged claims counts as none.
 
 ## HTTP API
 
