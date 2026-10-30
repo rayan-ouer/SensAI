@@ -9,6 +9,7 @@ from fastapi.datastructures import State
 
 from core.tools import ToolHandler
 from llm.ollama.ollama import OllamaClient
+from monitoring.store import InteractionMonitor, MonitoredLLMClient, MonitoringStore
 from tools.agent.profiles import init_profiles
 from tools.chat.config_data import ConfigData
 from tools.chat.settings import Settings
@@ -17,11 +18,13 @@ from tools.search.web import create_search_tools
 
 def init_agent_resources(state: State, settings: Settings, config: ConfigData) -> None:
     state.profiles = init_profiles(config)
-    state.llm = OllamaClient(
+    llm = OllamaClient(
         config.model,
         settings.ollama_api_key.get_secret_value() if settings.ollama_api_key else None,
         options=config.llm_settings,
         provider=config.ollama_provider,
     )
+    state.monitor = InteractionMonitor(MonitoringStore(settings.monitor_db_path))
+    state.llm = MonitoredLLMClient(llm, state.monitor)
     state.tools = ToolHandler()
     state.tools.register_many(create_search_tools())
