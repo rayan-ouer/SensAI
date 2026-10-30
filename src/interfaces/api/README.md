@@ -25,6 +25,7 @@ interfaces/api/
 | `GET` | `/api/profiles` | | `{"profiles": [{"key", "name", "role"}, ...], "default": "wu"}` |
 | `GET` | `/api/models` | | `{"models": ["..."], "default": "..."}` |
 | `GET` | `/api/spec` | | `{"content": "# Project specification..."}` |
+| `GET` | `/api/monitoring/summary` | | Interaction metrics, 14-day series and latest 100 trace events |
 | `GET` | `/health` | | `{"status": "ok"}` |
 | `GET` | `/version` | | `{"version": "...", "prompt_version": "v2"}` |
 
@@ -55,6 +56,14 @@ returns 404, an unknown profile or model returns 400.
 
 The agent runs in a thread and pushes its chunks in a queue that the response reads. The exchange is saved only when
 the agent succeeds, so a failed request leaves the conversation unchanged.
+
+## Logging and monitoring
+
+The API records each chat turn, each model request (including the prompt context sent), and each executed tool call in a
+local SQLite database. Events include available prompt/completion token counts, elapsed time, success/error state, model,
+profile, and tool arguments/results. The database defaults to `workspace/monitoring.sqlite3`; configure another path with
+`MONITOR_DB_PATH`. `/api/monitoring/summary` returns aggregate interaction metrics and the latest 100 events for the
+web and Jupyter dashboards. Stored prompt and tool content is plaintext and may contain sensitive data.
 
 ## Limits
 

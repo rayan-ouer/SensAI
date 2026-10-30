@@ -1,6 +1,7 @@
 import json
 from collections.abc import Callable
 from dataclasses import dataclass
+from time import perf_counter
 
 from core.messages import AIMessage, IMessage, SystemMessage, ToolMessage
 from core.tools import ITool, ToolCall, ToolExecution, ToolHandler
@@ -12,6 +13,22 @@ from llm.client import ILLMClient
 class AgentTurn:
     messages: list[IMessage]
     reply: AIMessage
+
+    @property
+    def prompt_tokens(self) -> int | None:
+        counts = []
+        for message in self.messages:
+            if isinstance(message, AIMessage) and message.prompt_eval_count is not None:
+                counts.append(message.prompt_eval_count)
+        return sum(counts) if counts else None
+
+    @property
+    def completion_tokens(self) -> int | None:
+        counts = []
+        for message in self.messages:
+            if isinstance(message, AIMessage) and message.eval_count is not None:
+                counts.append(message.eval_count)
+        return sum(counts) if counts else None
 
 
 class AgentIterationLimitError(Exception):
@@ -38,6 +55,7 @@ class Agent:
         extract_thinking_tags: bool = False,  # whether to extract thinking tags or not
         on_chunk: Callable[[str, str], None]
         | None = None,  # the function to call when a chunk is received
+        on_tool_call: Callable[[ToolCall, ToolExecution, float], None] | None = None,
         is_cancelled: Callable[[], bool]
         | None = None,  # the function to call to check if the agent is cancelled
     ):
@@ -54,6 +72,7 @@ class Agent:
         self._keep_thinking = keep_thinking
         self._extract_thinking_tags = extract_thinking_tags
         self._on_chunk = on_chunk
+        self._on_tool_call = on_tool_call
         self._is_cancelled = is_cancelled
 
     @property
@@ -112,7 +131,12 @@ class Agent:
             if not response.tool_calls:
                 return AgentTurn(messages=produced, reply=response)
             for tool_call in response.tool_calls:
+                started = perf_counter()
                 execution: ToolExecution = self.execute_tool(tool_call, self._handler)
+                if self._on_tool_call is not None:
+                    self._on_tool_call(
+                        tool_call, execution, (perf_counter() - started) * 1000
+                    )
                 tool_call.status = execution.status
                 tool_call.result = execution.result
                 self._record(

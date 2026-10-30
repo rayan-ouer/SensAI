@@ -18,7 +18,7 @@ from tools.chat.module import error
 
 def send_to_agent(
     agent: Agent, conversation: ConversationHandle, user_input: str
-) -> AIMessage | None:
+) -> AgentTurn | None:
     human_message: HumanMessage = HumanMessage(content=user_input)
     try:
         turn: AgentTurn = agent.invoke(
@@ -33,7 +33,7 @@ def send_to_agent(
             conversation.add_ai_message(message)
         elif isinstance(message, ToolMessage):
             conversation.add_tool_message(message)
-    return turn.reply
+    return turn
 
 
 def with_human_answers(user_input: str, answers: list[dict[str, str]]) -> str:
@@ -47,12 +47,18 @@ def answer_user_message(agent: Agent, state: CliState, spec: str, user_input: st
     agent.set_role(current_role(state, spec))
     state.display.reset()
     state.human_answers.clear()
-    reply = send_to_agent(agent, state.conversation, user_input)
-    if reply is None:
+    turn = send_to_agent(agent, state.conversation, user_input)
+    if turn is None:
         return spec
-    print()
+    if turn.prompt_tokens is not None or turn.completion_tokens is not None:
+        prompt_tokens = turn.prompt_tokens or 0
+        completion_tokens = turn.completion_tokens or 0
+        print(
+            f"\nTokens used: {prompt_tokens + completion_tokens} "
+            f"(input: {prompt_tokens}, output: {completion_tokens})"
+        )
     spec_input = with_human_answers(user_input, state.human_answers)
-    return refresh_spec(state.llm, state.config, spec, spec_input, reply.content)
+    return refresh_spec(state.llm, state.config, spec, spec_input, turn.reply.content)
 
 
 def agent_loop(agent: Agent, state: CliState, spec: str) -> None:

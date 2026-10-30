@@ -8,15 +8,15 @@
 from collections.abc import Iterator
 from functools import partial
 from queue import Queue
+from time import perf_counter
 
 from fastapi.datastructures import State
 
-from agent.agent import Agent, AgentIterationLimitError, AgentTurn
+from agent.agent import Agent, AgentTurn
 from core.conversation import IConversationService
 from core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from core.tools import ToolHandler
 from interfaces.api.schemas.output.conversation import StreamEvent
-from llm.errors import LLMError
 from tools.agent.profile_data import ProfileData
 from tools.agent.profiles import build_profile_prompt
 from tools.chat.chat_loop import refresh_spec
@@ -55,6 +55,7 @@ def create_agent(state: State, events: Queue, profile_key: str | None, model: st
         role=build_role(state, profile), response_format=state.config.response_format, llm=state.llm,
         handler=handler, max_loops=state.config.max_loops, think=state.config.think,
         on_chunk=lambda kind, text: events.put(StreamEvent(type=kind, text=text)),
+        on_tool_call=state.monitor.record_tool,
     )
 
 
@@ -84,17 +85,25 @@ def run_turn(
     content: str,
     events: Queue,
     state: State,
-) -> None:
+) -> AgentTurn:
     human = HumanMessage(content=content)
-    try:
-        turn = agent.invoke(service.get_used_history(conversation_id) + [human])
-    except (LLMError, AgentIterationLimitError) as e:
-        events.put(StreamEvent(type="error", message=str(e)))
-        return
+    turn = agent.invoke(service.get_used_history(conversation_id) + [human])
     service.add_human_message(conversation_id, human)
     save_turn(service, conversation_id, turn)
+    if turn.prompt_tokens is not None or turn.completion_tokens is not None:
+        prompt_tokens = turn.prompt_tokens or 0
+        completion_tokens = turn.completion_tokens or 0
+        events.put(
+            StreamEvent(
+                type="usage",
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                total_tokens=prompt_tokens + completion_tokens,
+            )
+        )
     events.put(StreamEvent(type="done"))
     send_spec_update(content, events, state, turn)
+    return turn
 
 
 def run_turn_safely(
@@ -105,10 +114,26 @@ def run_turn_safely(
     events: Queue,
     state: State,
 ) -> None:
-    try:
-        run_turn(agent, service, conversation_id, content, events, state)
-    except Exception as e:
-        events.put(StreamEvent(type="error", message=str(e)))
+    started = perf_counter()
+    turn: AgentTurn | None = None
+    error: Exception | None = None
+    with state.monitor.bind(conversation_id, agent.name, state.config.model):
+        try:
+            turn = run_turn(agent, service, conversation_id, content, events, state)
+        except Exception as e:
+            error = e
+            events.put(StreamEvent(type="error", message=str(e)))
+        finally:
+            state.monitor.record(
+                "interaction",
+                prompt=content,
+                response=turn.reply.content if turn else None,
+                latency_ms=(perf_counter() - started) * 1000,
+                prompt_tokens=turn.prompt_tokens if turn else None,
+                completion_tokens=turn.completion_tokens if turn else None,
+                success=error is None and turn is not None,
+                error=str(error) if error else None,
+            )
 
 
 def stream_events(events: Queue) -> Iterator[str]:
