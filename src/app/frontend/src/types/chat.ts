@@ -14,6 +14,7 @@ export type Question = {
 
 export type Message = {
   id: string
+  serverId?: string
   role: Role
   content: string
   thinking?: string
@@ -36,7 +37,7 @@ export type ChatStatus = 'idle' | 'thinking' | 'streaming'
 export type StreamEvent =
   | { type: 'thinking' | 'content'; text: string }
   | { type: 'usage'; prompt_tokens: number; completion_tokens: number; total_tokens: number }
-  | { type: 'done' }
+  | { type: 'done'; message_id: string }
   | { type: 'question'; text: string; options: string[] }
   | { type: 'spec'; text: string }
   | { type: 'error'; message: string }

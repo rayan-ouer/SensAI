@@ -21,7 +21,8 @@ interfaces/api/
 |---|---|---|---|
 | `POST` | `/api/conversations/` | `{"user_id": "..."}` | `{"id": "..."}` |
 | `POST` | `/api/conversations/{id}/messages` | `{"content": "...", "profile": "math_tutor", "model": "..."}` | stream of events, see below |
-| `GET` | `/api/conversations/{id}/messages` | | `{"messages": [{"role": "user", "content": "..."}, ...]}` |
+| `PUT` | `/api/conversations/{id}/messages/{message_id}` | same as `POST` | stream of events, the message is replaced and what followed it is dropped |
+| `GET` | `/api/conversations/{id}/messages` | | `{"messages": [{"id": "...", "role": "user", "content": "..."}, ...]}` |
 | `GET` | `/api/profiles` | | `{"profiles": [{"key", "name", "role"}, ...], "default": "wu"}` |
 | `GET` | `/api/models` | | `{"models": ["..."], "default": "..."}` |
 | `GET` | `/api/spec` | | `{"content": "# Project specification..."}` |
@@ -31,7 +32,8 @@ interfaces/api/
 
 `profile` and `model` are optional, the default profile and the `model` of the config answer without them. `model`
 must be one of the `models` of the config and the specification update always uses `model`. An unknown conversation
-returns 404, an unknown profile or model returns 400.
+or a `message_id` that is not a user message of the current conversation returns 404, an unknown profile or model
+returns 400.
 
 ## The message stream
 
@@ -41,7 +43,7 @@ returns 404, an unknown profile or model returns 400.
 {"type":"thinking","text":"The user asks..."}
 {"type":"content","text":"Pleasure"}
 {"type":"content","text":" to meet you."}
-{"type":"done"}
+{"type":"done","message_id":"msg_..."}
 {"type":"spec","text":"# Project specification\n..."}
 ```
 
@@ -50,7 +52,7 @@ returns 404, an unknown profile or model returns 400.
 | `thinking` | a piece of the model reasoning, only with models that reason |
 | `content` | a piece of the reply |
 | `question` | a clarification question with its `options`, the client shows them and sends the choice as the next message |
-| `done` | the reply is complete and saved in the conversation, the client can send the next message |
+| `done` | the reply is complete and saved in the conversation, `message_id` is the id of the user message, the client can send the next message |
 | `spec` | the specification updated from this exchange, the last event of the stream |
 | `error` | the turn failed (model, tool loop or unexpected error), the message is not saved, the last event of the stream |
 
@@ -71,4 +73,5 @@ web and Jupyter dashboards. Stored prompt and tool content is plaintext and may 
 - The agent of the API has the web search and the clarification questions: the file tools ask for approval in the
   terminal and the sandbox is not connected yet.
 - A question card disappears when the page is reloaded: the history route does not return the tool calls.
+- Editing a message rolls the conversation back, not the specification: what the note-keeper recorded stays.
 - The specification is a single file shared by every conversation and by the CLI.

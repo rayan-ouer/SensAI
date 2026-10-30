@@ -17,7 +17,7 @@ By *Armand Lecomte* (armand.lecomte@epitech.eu), *Rayan Ouerdane* (rayan.ouerdan
 - **Clarification questions**: when a missing choice blocks the request, the agent asks a closed question with options, numbered in the terminal and as buttons in the browser (human in the loop).
 - **Workspace files**: the agent can list, read, create and edit files of the directory you run it from, within the permissions you set.
 - **Code sandbox**: the agent runs commands in an isolated Docker container to test your code.
-- **Web interface**: streamed replies, model reasoning, specification panel, profile switch and model choice in the browser.
+- **Web interface**: streamed replies, model reasoning, specification panel, profile switch, model choice and message editing in the browser.
 - **HTTP API**: conversations, streamed replies, profiles and specification for other interfaces.
 - **Logging & monitoring**: local interaction traces and dashboards for call volume, latency, errors, token use and response-size drift.
 - **Prompt versions and automated eval**: `wu-compare` runs two versions of the prompts on the same messages and a judge agent scores every reply.
@@ -166,6 +166,7 @@ The full scenario with the expected answers is in [docs/SCENARIO.md](docs/SCENAR
 - **Cloud models reason at length**: the thinking part can be much longer than the answer.
 - **Conversations are kept in memory**: they are lost when the CLI or the API stops, only the specification persists.
 - **One shared specification**: every conversation and the CLI write to the same `ASSISTANT.md`.
+- **Editing a message does not undo the specification**: the conversation goes back, what the note-keeper recorded stays.
 - **The CLI needs Docker to start**: the sandbox connects to Docker at start, even if you never run a command.
 - **One model server for every agent**: with `-m`, each agent's model must exist where the main model was found, local or cloud.
 

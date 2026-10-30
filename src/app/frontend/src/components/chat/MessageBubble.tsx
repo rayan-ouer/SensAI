@@ -9,24 +9,20 @@ import AssistantAvatar from '@/components/chat/AssistantAvatar'
 import QuestionCard from '@/components/chat/QuestionCard'
 import Reasoning from '@/components/chat/Reasoning'
 import ThinkingIndicator from '@/components/chat/ThinkingIndicator'
+import UserMessage from '@/components/chat/UserMessage'
 import type { Message } from '@/types/chat'
 
 type MessageBubbleProps = {
   message: Message
   canAnswer: boolean
+  canEdit: boolean
   onAnswer: (answer: string) => void
+  onEdit: (message: Message, text: string) => void
 }
 
-function MessageBubble({ message, canAnswer, onAnswer }: MessageBubbleProps) {
-  if (message.role === 'user') {
-    return (
-      <div className="flex justify-end">
-        <p className="max-w-[80%] rounded-2xl rounded-br-md border border-white/10 bg-white/10 px-4 py-2.5 text-[0.95rem] leading-relaxed whitespace-pre-wrap text-amber-50 backdrop-blur-md">
-          {message.content}
-        </p>
-      </div>
-    )
-  }
+function MessageBubble({ message, canAnswer, canEdit, onAnswer, onEdit }: MessageBubbleProps) {
+  if (message.role === 'user')
+    return <UserMessage message={message} canEdit={canEdit} onEdit={onEdit} />
   const thinking = message.content === '' && message.question === undefined
   const reasoning = message.thinking ?? ''
   return (

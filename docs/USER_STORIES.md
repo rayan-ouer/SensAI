@@ -249,6 +249,16 @@ Acceptance criteria:
   conversation" starts an empty one.
 - If the API is not running, a readable error is shown instead of a blank page.
 
+As a student who made a mistake in a message, I want to edit it and get a new
+reply, so that the conversation goes on from the right question.
+
+Acceptance criteria:
+- A pencil on my messages lets me rewrite one in place, Enter sends it and
+  Escape cancels.
+- What followed the message disappears and the agent only sees what came before.
+- If the model fails, an error is shown and the conversation stays as it was.
+- The specification keeps what was recorded before the edit.
+
 ## Clarification questions (X4)
 
 As a student describing a project, I want the assistant to ask me when a choice
@@ -310,4 +320,7 @@ Acceptance criteria:
 - `GET /api/conversations/{id}/messages`, `GET /api/spec` and `GET /api/profiles`
   return the history, the specification and the profiles.
 - `GET /api/models` returns the models of the configuration and the default one.
-- An unknown conversation returns 404, an unknown profile or model returns 400.
+- `PUT /api/conversations/{id}/messages/{message_id}` replaces a user message
+  and streams the new reply.
+- An unknown conversation or message returns 404, an unknown profile or model
+  returns 400.
