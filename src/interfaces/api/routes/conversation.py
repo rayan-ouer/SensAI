@@ -11,7 +11,8 @@ from threading import Thread
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
-from core.conversation import ConversationNotFoundError
+from core.conversation import ConversationNotFoundError, IConversationService
+from core.types import MessageType
 from interfaces.api.chat import create_agent, run_turn_safely, stream_events
 from interfaces.api.dependencies import ConversationDep
 from interfaces.api.schemas.input.conversation import CreateConversationRequest, MessageRequest
@@ -48,6 +49,30 @@ def check_choices(body: MessageRequest, request: Request) -> None:
         raise HTTPException(status_code=400, detail="Unknown model")
 
 
+def start_turn(
+    request: Request,
+    store: IConversationService,
+    conversation_id: str,
+    body: MessageRequest,
+    edited_id: str | None,
+) -> StreamingResponse:
+    check_choices(body, request)
+    events: Queue = Queue()
+    agent = create_agent(request.app.state, events, body.profile, body.model)
+    args = (agent, store, conversation_id, body.content, events, request.app.state, edited_id)
+    Thread(target=run_turn_safely, args=args, daemon=True).start()
+    return StreamingResponse(stream_events(events), media_type="application/x-ndjson")
+
+
+def check_editable(store: IConversationService, conversation_id: str, message_id: str) -> None:
+    try:
+        history = store.get_used_history(conversation_id)
+    except ConversationNotFoundError:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    if not any(message.id == message_id and message.role == MessageType.HUMAN for message in history):
+        raise HTTPException(status_code=404, detail="Message not found")
+
+
 @conversation_router.post("/{conversation_id}/messages")
 def send_message(
     conversation_id: str,
@@ -59,12 +84,7 @@ def send_message(
         store.get_conversation_by_id(conversation_id)
     except ConversationNotFoundError:
         raise HTTPException(status_code=404, detail="Conversation not found")
-    check_choices(body, request)
-    events: Queue = Queue()
-    agent = create_agent(request.app.state, events, body.profile, body.model)
-    args = (agent, store, conversation_id, body.content, events, request.app.state)
-    Thread(target=run_turn_safely, args=args, daemon=True).start()
-    return StreamingResponse(stream_events(events), media_type="application/x-ndjson")
+    return start_turn(request, store, conversation_id, body, None)
 
 
 @conversation_router.get("/{conversation_id}/messages", response_model=MessagesResponse)
@@ -76,3 +96,15 @@ def get_messages(conversation_id: str, store: ConversationDep) -> MessagesRespon
     history = store.get_used_history(conversation_id)
     messages = [to_message_response(message) for message in history if is_displayed(message)]
     return MessagesResponse(messages=messages)
+
+
+@conversation_router.put("/{conversation_id}/messages/{message_id}")
+def edit_message(
+    conversation_id: str,
+    message_id: str,
+    body: MessageRequest,
+    request: Request,
+    store: ConversationDep,
+) -> StreamingResponse:
+    check_editable(store, conversation_id, message_id)
+    return start_turn(request, store, conversation_id, body, message_id)
