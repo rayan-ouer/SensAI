@@ -12,7 +12,7 @@ interfaces/api/
   routes/         one file per resource, endpoints only
   schemas/input/  request bodies
   schemas/output/ response bodies and stream events
-  utils/          helpers used by the routes
+  utils/          helpers used by the routes, http.py holds the checks and starts a turn
 ```
 
 ## Endpoints
