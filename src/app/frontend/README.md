@@ -25,6 +25,7 @@ src/
 
   pages/                one file per screen
     ChatPage.tsx
+    MonitoringPage.tsx   local interaction trace and metrics dashboard
 
   components/
     chat/               the pieces of the chat screen (written for this project)

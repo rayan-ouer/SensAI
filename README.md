@@ -19,6 +19,7 @@ By *Armand Lecomte* (armand.lecomte@epitech.eu), *Rayan Ouerdane* (rayan.ouerdan
 - **Code sandbox**: the agent runs commands in an isolated Docker container to test your code.
 - **Web interface**: streamed replies, model reasoning, specification panel and profile switch in the browser.
 - **HTTP API**: conversations, streamed replies, profiles and specification for other interfaces.
+- **Logging & monitoring**: local interaction traces and dashboards for call volume, latency, errors, token use and response-size drift.
 - **Prompt versions and automated eval**: `wu-compare` runs two versions of the prompts on the same messages and a judge agent scores every reply.
 
 In progress: RAG on your documents.
@@ -86,6 +87,22 @@ npm run dev                             # then open http://localhost:5173
 ```
 
 The API uses the config set by `CONFIG_PATH` in `.env`, `configs/local_config.yaml` by default.
+
+Open **Monitoring** in the chat header for the live dashboard. The API stores prompts, model requests and replies, tool
+arguments/results, errors, latency and available token counts in `workspace/monitoring.sqlite3`. Set
+`MONITOR_DB_PATH` to choose another SQLite file. The database is local and unencrypted; traces can contain sensitive
+prompt and tool data.
+
+For the Jupyter dashboard, install its optional dependencies and open `notebooks/monitoring_dashboard.ipynb` from the
+repository root:
+
+```sh
+pip install -e '.[monitoring]'
+jupyter lab notebooks/monitoring_dashboard.ipynb
+```
+
+Both dashboards read the same database. The displayed drift metric tracks changes in average completion-token count;
+it is an operational response-size signal, not semantic model-quality drift.
 
 ## Agents
 
