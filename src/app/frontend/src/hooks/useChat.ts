@@ -44,7 +44,7 @@ function attachQuestion(messages: Message[], id: string, question: Question): Me
   return messages.map((message) => (message.id === id ? { ...message, question } : message))
 }
 
-export function useChat(spec: SpecUpdates, profile: string | null) {
+export function useChat(spec: SpecUpdates, profile: string | null, model: string | null) {
   const [messages, setMessages] = useState<Message[]>([])
   const [status, setStatus] = useState<ChatStatus>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -81,7 +81,7 @@ export function useChat(spec: SpecUpdates, profile: string | null) {
   }
 
   async function receiveReply(text: string, replyId: string) {
-    for await (const event of streamReply(await currentConversation(), text, profile)) {
+    for await (const event of streamReply(await currentConversation(), text, profile, model)) {
       if (event.type === 'error')
         throw new Error(event.message)
       if (event.type === 'thinking')

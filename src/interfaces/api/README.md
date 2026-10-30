@@ -20,16 +20,18 @@ interfaces/api/
 | Method | Path | Body | Response |
 |---|---|---|---|
 | `POST` | `/api/conversations/` | `{"user_id": "..."}` | `{"id": "..."}` |
-| `POST` | `/api/conversations/{id}/messages` | `{"content": "...", "profile": "math_tutor"}` | stream of events, see below |
+| `POST` | `/api/conversations/{id}/messages` | `{"content": "...", "profile": "math_tutor", "model": "..."}` | stream of events, see below |
 | `GET` | `/api/conversations/{id}/messages` | | `{"messages": [{"role": "user", "content": "..."}, ...]}` |
 | `GET` | `/api/profiles` | | `{"profiles": [{"key", "name", "role"}, ...], "default": "wu"}` |
+| `GET` | `/api/models` | | `{"models": ["..."], "default": "..."}` |
 | `GET` | `/api/spec` | | `{"content": "# Project specification..."}` |
 | `GET` | `/api/monitoring/summary` | | Interaction metrics, 14-day series and latest 100 trace events |
 | `GET` | `/health` | | `{"status": "ok"}` |
 | `GET` | `/version` | | `{"version": "...", "prompt_version": "v2"}` |
 
-`profile` is optional, the default profile answers without it. An unknown conversation returns 404 and an unknown
-profile returns 400.
+`profile` and `model` are optional, the default profile and the `model` of the config answer without them. `model`
+must be one of the `models` of the config and the specification update always uses `model`. An unknown conversation
+returns 404, an unknown profile or model returns 400.
 
 ## The message stream
 
