@@ -194,9 +194,17 @@ Acceptance criteria:
 - An unknown version stops the program with `prompt version not found: <path>`
   and exit code 84.
 - The CLI start message and `GET /version` show the version in use.
+
+As a developer who changed a prompt, I want to run the old and the new version
+on the same messages, so that I can measure what changed before keeping it.
+
+Acceptance criteria:
 - `wu-compare` sends the messages of `configs/prompt_comparison.yaml` with each
-  version and writes `docs/PROMPT_COMPARISON.md`: mean latency, prompt and reply
-  tokens and the replies side by side.
+  listed version, the same model and the same profile.
+- `docs/PROMPT_COMPARISON.md` shows the mean latency, the prompt and reply
+  tokens of each version and the replies side by side.
+- Messages and versions are changed in that file, with no code change.
+- A version that does not exist stops `wu-compare` with exit code 84.
 
 ## Agent profiles (A5)
 
@@ -243,11 +251,20 @@ Acceptance criteria:
   can already type the next message.
 - I can switch between the profiles (Wu, Euclid, Sensei, Ada, Mira) from the
   header and the next reply comes from the chosen profile.
-- I can pick another model from the header when the `models` key of the
-  configuration lists several and the next reply comes from it.
 - After a page reload, the conversation is displayed again and "New
   conversation" starts an empty one.
 - If the API is not running, a readable error is shown instead of a blank page.
+
+As a student comparing models, I want to choose the model from the header and
+see the tokens of each reply, so that I can pick the one that fits my question.
+
+Acceptance criteria:
+- When the `models` key of the configuration lists several models, a selector
+  in the header offers them and the next reply comes from the chosen one.
+- My choice is kept after a page reload.
+- The tokens used, input and output, are shown under each new reply.
+
+## Message editing and interruption (X2)
 
 As a student who made a mistake in a message, I want to edit it and get a new
 reply, so that the conversation goes on from the right question.
@@ -258,6 +275,15 @@ Acceptance criteria:
 - What followed the message disappears and the agent only sees what came before.
 - If the model fails, an error is shown and the conversation stays as it was.
 - The specification keeps what was recorded before the edit.
+
+As a student reading a reply that goes the wrong way, I want to stop it in the
+terminal and give new instructions, so that I do not wait for the end of an
+answer I do not need.
+
+Acceptance criteria:
+- Ctrl+C during a reply stops the generation and the session continues.
+- What was already written stays in the conversation.
+- The next message is answered with that partial reply in its context.
 
 ## Clarification questions (X4)
 
@@ -302,10 +328,17 @@ Acceptance criteria:
   scores from 0 to 1.
 - `docs/PROMPT_COMPARISON.md` shows the mean of each score per version and the
   overall score of each reply.
-- Claims the judge cannot verify or finds contradicted are listed with their
-  version and question under "Flagged claims".
-- A judge model that does not exist stops the program with exit code 84 and a
-  judge answer without flagged claims counts as none.
+- A judge model that does not exist stops the program with exit code 84.
+
+As a developer reviewing the assistant, I want the claims it cannot back up to
+be listed, so that I can see where it may be inventing facts.
+
+Acceptance criteria:
+- Each flagged claim appears under "Flagged claims" with its version and
+  question.
+- A claim is marked `unverifiable` or `contradicted`.
+- The report counts the flagged claims per version and per reply.
+- A judge answer without flagged claims counts as none and the run continues.
 
 ## HTTP API
 
