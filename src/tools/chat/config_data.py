@@ -25,6 +25,7 @@ class ConfigData:
     response_format: dict | None = None
     max_loops: int = 10
     llm_settings: dict = field(default_factory=dict)
+    models: list[str] = field(default_factory=list)
     think: bool | None = None
     ollama_provider: str = "auto"
     file_access_config: str = "file_access.yaml"

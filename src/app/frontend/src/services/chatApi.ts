@@ -76,6 +76,15 @@ export async function fetchProfiles(): Promise<{ profiles: Profile[]; default: s
   return response.json()
 }
 
+export async function fetchModels(): Promise<{ models: string[]; default: string }> {
+  const response = await fetch(`${API_URL}/models`).catch(() => {
+    throw new Error(UNREACHABLE)
+  })
+  if (!response.ok)
+    throw await failure(response)
+  return response.json()
+}
+
 export async function createConversation(): Promise<string> {
   const response = await post('/conversations/', { user_id: USER_ID })
   if (!response.ok)
@@ -105,8 +114,9 @@ export async function* streamReply(
   conversationId: string,
   content: string,
   profile: string | null,
+  model: string | null,
 ): AsyncGenerator<StreamEvent> {
-  const response = await post(`/conversations/${conversationId}/messages`, { content, profile })
+  const response = await post(`/conversations/${conversationId}/messages`, { content, profile, model })
   if (!response.ok || response.body === null)
     throw await failure(response)
   for await (const line of readLines(response.body))

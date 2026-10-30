@@ -47,11 +47,11 @@ def build_role(state: State, profile: ProfileData) -> SystemMessage:
     )
 
 
-def create_agent(state: State, events: Queue, profile_key: str | None) -> Agent:
+def create_agent(state: State, events: Queue, profile_key: str | None, model: str | None) -> Agent:
     handler = build_tools(state, events)
     profile = state.profiles[profile_key or state.config.default_profile]
     return Agent(
-        name=profile.name, model=state.config.model, tools=[tool.name for tool in handler.list_tools()],
+        name=profile.name, model=model or state.config.model, tools=[tool.name for tool in handler.list_tools()],
         role=build_role(state, profile), response_format=state.config.response_format, llm=state.llm,
         handler=handler, max_loops=state.config.max_loops, think=state.config.think,
         on_chunk=lambda kind, text: events.put(StreamEvent(type=kind, text=text)),

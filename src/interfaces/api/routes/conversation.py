@@ -20,6 +20,7 @@ from interfaces.api.schemas.output.conversation import (
     MessagesResponse,
 )
 from interfaces.api.utils.messages import is_displayed, to_message_response
+from interfaces.api.utils.models import available_models
 
 conversation_router = APIRouter(
     prefix="/conversations",
@@ -40,6 +41,13 @@ def create_conversation(
     return CreateConversationResponse(id=conversation_id)
 
 
+def check_choices(body: MessageRequest, request: Request) -> None:
+    if body.profile is not None and body.profile not in request.app.state.profiles:
+        raise HTTPException(status_code=400, detail="Unknown profile")
+    if body.model is not None and body.model not in available_models(request.app.state.config):
+        raise HTTPException(status_code=400, detail="Unknown model")
+
+
 @conversation_router.post("/{conversation_id}/messages")
 def send_message(
     conversation_id: str,
@@ -51,10 +59,9 @@ def send_message(
         store.get_conversation_by_id(conversation_id)
     except ConversationNotFoundError:
         raise HTTPException(status_code=404, detail="Conversation not found")
-    if body.profile is not None and body.profile not in request.app.state.profiles:
-        raise HTTPException(status_code=400, detail="Unknown profile")
+    check_choices(body, request)
     events: Queue = Queue()
-    agent = create_agent(request.app.state, events, body.profile)
+    agent = create_agent(request.app.state, events, body.profile, body.model)
     args = (agent, store, conversation_id, body.content, events, request.app.state)
     Thread(target=run_turn_safely, args=args, daemon=True).start()
     return StreamingResponse(stream_events(events), media_type="application/x-ndjson")
