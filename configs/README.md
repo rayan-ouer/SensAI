@@ -31,6 +31,7 @@ The CLI takes it with `wu -c configs/local_config.yaml`. The API reads the one s
 | `spec_path` | yes | path | the living specification, created if missing |
 | `profiles_dir` | yes | path | folder of the agent profiles |
 | `default_profile` | yes | string | profile active at start, a file name of `profiles_dir` without `.yaml` |
+| `models` | no | list | models offered by the web interface, on the same server as `model`, only `model` by default |
 | `spec_think` | no | bool | model reasoning during specification updates, `false` is faster |
 | `think` | no | bool | model reasoning for chat replies, by default the model decides |
 | `max_loops` | no | int | maximum agent steps (model and tool calls) for one message, 10 by default |

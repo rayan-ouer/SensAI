@@ -13,9 +13,11 @@ import { FileText, SquarePen } from 'lucide-react'
 import Composer from '@/components/chat/Composer'
 import EmptyState from '@/components/chat/EmptyState'
 import MessageList from '@/components/chat/MessageList'
+import ModelSelect from '@/components/chat/ModelSelect'
 import ProfileSelect from '@/components/chat/ProfileSelect'
 import SpecPanel from '@/components/spec/SpecPanel'
 import { useChat } from '@/hooks/useChat'
+import { useModels } from '@/hooks/useModels'
 import { useProfiles } from '@/hooks/useProfiles'
 import { useSpec } from '@/hooks/useSpec'
 
@@ -24,7 +26,8 @@ const WIDE_SCREEN = '(min-width: 1024px)'
 function ChatPage() {
   const spec = useSpec()
   const profiles = useProfiles()
-  const { messages, status, error, send, reset } = useChat(spec, profiles.selected)
+  const models = useModels()
+  const { messages, status, error, send, reset } = useChat(spec, profiles.selected, models.selected)
   const [typing, setTyping] = useState(false)
   const [specOpen, setSpecOpen] = useState(() => window.matchMedia(WIDE_SCREEN).matches)
 
@@ -42,6 +45,12 @@ function ChatPage() {
             />
           </div>
           <div className="flex shrink-0 items-center gap-1">
+            <ModelSelect
+              models={models.models}
+              selected={models.selected}
+              disabled={status !== 'idle'}
+              onSelect={models.select}
+            />
             {messages.length > 0 && (
               <button
                 type="button"

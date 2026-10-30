@@ -19,8 +19,9 @@ from tools.chat.load_config import ConfigLoader
 from tools.chat.settings import Settings
 
 from .routes.conversation import conversation_router
-from .routes.spec import spec_router
+from .routes.model import model_router
 from .routes.profile import profile_router
+from .routes.spec import spec_router
 
 logger = logging.getLogger(__name__)
 
@@ -78,3 +79,4 @@ async def root() -> dict[str, str]:
 app.include_router(conversation_router, prefix="/api", tags=["conversations"])
 app.include_router(spec_router, prefix="/api", tags=["spec"])
 app.include_router(profile_router, prefix="/api", tags=["profiles"])
+app.include_router(model_router, prefix="/api", tags=["models"])

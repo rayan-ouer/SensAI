@@ -243,6 +243,8 @@ Acceptance criteria:
   can already type the next message.
 - I can switch between the profiles (Wu, Euclid, Sensei, Ada, Mira) from the
   header and the next reply comes from the chosen profile.
+- I can pick another model from the header when the `models` key of the
+  configuration lists several and the next reply comes from it.
 - After a page reload, the conversation is displayed again and "New
   conversation" starts an empty one.
 - If the API is not running, a readable error is shown instead of a blank page.
@@ -307,4 +309,5 @@ Acceptance criteria:
   agent asks one, then `done`, then `spec` (or `error`).
 - `GET /api/conversations/{id}/messages`, `GET /api/spec` and `GET /api/profiles`
   return the history, the specification and the profiles.
-- An unknown conversation returns 404 and an unknown profile returns 400.
+- `GET /api/models` returns the models of the configuration and the default one.
+- An unknown conversation returns 404, an unknown profile or model returns 400.
