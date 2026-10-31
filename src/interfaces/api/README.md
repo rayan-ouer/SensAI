@@ -29,7 +29,7 @@ interfaces/api/
 | `GET` | `/api/spec` | | `{"content": "# Project specification..."}` |
 | `GET` | `/api/monitoring/summary` | | Interaction metrics, 14-day series and latest 100 trace events |
 | `GET` | `/health` | | `{"status": "ok"}` |
-| `GET` | `/version` | | `{"version": "...", "prompt_version": "v2"}` |
+| `GET` | `/version` | | `{"version": "...", "prompt_version": "v3"}` |
 
 `profile` and `model` are optional, the default profile and the `model` of the config answer without them. `model`
 must be one of the `models` of the config and the specification update always uses `model`. An unknown conversation

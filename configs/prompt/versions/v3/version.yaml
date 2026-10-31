@@ -1,0 +1,5 @@
+version: "v3"
+date: "2026-10-31T17:01:57+01:00"
+changes:
+  - "The agent calls search_documents when a document was added and the question may concern it."
+  - "A question that names no subject after a document was added concerns this document, not the specification."

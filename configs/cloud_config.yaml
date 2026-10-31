@@ -2,7 +2,7 @@
 model: "nemotron-3-nano:30b" # cloud model name, key required
 models: ["nemotron-3-nano:30b", "gemma4:31b", "gpt-oss:20b"] # optional: models offered by the web interface
 
-prompt_version: "v2" # key required: folder of prompt/versions with the global prompts
+prompt_version: "v3" # key required: folder of prompt/versions with the global prompts
 system_prompt: "system.txt" # key required
 
 spec_prompt: "spec.txt" # key required
