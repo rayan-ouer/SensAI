@@ -9,6 +9,5 @@ class VectorRecord(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    embedding: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     source: Mapped[str] = mapped_column(String, nullable=False, index=True)
     meta: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)

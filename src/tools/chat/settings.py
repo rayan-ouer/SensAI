@@ -19,3 +19,5 @@ class Settings(BaseSettings):
     conversation_storage: str = Field(default="memory")
     database_url: str | None = Field(default=None)
     monitor_db_path: str = Field(default="workspace/monitoring.sqlite3")
+    vector_store: str = Field(default="sqlite")
+    vector_db_path: str = Field(default="workspace/vectors.sqlite3")

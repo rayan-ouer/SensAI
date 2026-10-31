@@ -18,6 +18,7 @@ from interfaces.cli.conversation_handle import ConversationHandle
 from interfaces.cli.display import ChunkDisplay
 from llm.ollama import OllamaClient
 from memory.conversation.factory import ConversationServiceFactory, ConversationStorage
+from memory.vector.factory import VectorStoreKind
 from tools.agent.profiles import build_profile_prompt, init_profiles
 from tools.chat.config_data import ConfigData
 from tools.chat.settings import Settings
@@ -28,6 +29,7 @@ from tools.file_access.file_access import (
 )
 from tools.human_in_the_loop.mcp_server import create_human_in_the_loop_tools
 from tools.sandbox.sandbox import create_sandbox_tools
+from tools.rag.tool import build_rag_resources, create_rag_tools
 from tools.search.web import create_search_tools
 from tools.spec.spec import build_system_prompt
 
@@ -101,6 +103,11 @@ def create_llm(config: ConfigData, api_key: str | None) -> OllamaClient:
 
 def create_cli_state(config: ConfigData, api_key: str | None) -> CliState:
     active_profile = config.default_profile
+    settings = Settings()
+    vector_store, embedder, retriever = build_rag_resources(
+        settings.vector_db_path,
+        VectorStoreKind(settings.vector_store),
+    )
     return CliState(
         config=config,
         profiles=init_profiles(config),
@@ -109,6 +116,9 @@ def create_cli_state(config: ConfigData, api_key: str | None) -> CliState:
         llm=create_llm(config, api_key),
         conversation=init_conversation(config),
         workspace=create_workspace(config),
+        vector_store=vector_store,
+        embedder=embedder,
+        retriever=retriever,
     )
 
 
@@ -119,4 +129,5 @@ def create_tools(state: CliState) -> list[ITool]:
     tools.extend(create_sandbox_tools(dependencies))
     tools.extend(create_file_access_tools(state.workspace))
     tools.extend(create_human_in_the_loop_tools(state.human_answers))
+    tools.extend(create_rag_tools(state.retriever, state.embedder))
     return tools

@@ -1,12 +1,7 @@
-##
-## EPITECH PROJECT, 2026
-## SensAI
-## File description:
-## vector
-##
-
 from abc import ABC, abstractmethod
+from typing import Any
 
+DEFAULT_TOP_K = 5
 
 class VectorDocument:
     def __init__(
@@ -41,5 +36,10 @@ class IVectorStore(ABC):
         pass
 
     @abstractmethod
-    def search(self, query: str, top_k: int) -> list[VectorMatch]:
+    def search(
+        self,
+        query_embedding: list[float],
+        top_k: int = DEFAULT_TOP_K,
+        filters: dict[str, Any] | None = None,
+    ) -> list[VectorMatch]:
         pass
