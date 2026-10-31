@@ -86,7 +86,7 @@ class SQLiteStore(IVectorStore):
     ) -> list[VectorMatch]:
         self._verify_embeddings([query_embedding])
 
-        where, filter_params = self._filter_clause(filters)
+        where, filter_params = self._create_filter_statement(filters)
         statement = f"""
             SELECT d.id, d.content, d.source, d.meta, v.distance
             FROM (
@@ -115,7 +115,7 @@ class SQLiteStore(IVectorStore):
             for row in rows
         ]
 
-    def _filter_clause(self, filters: dict[str, Any] | None) -> tuple[str, list[Any]]:
+    def _create_filter_statement(self, filters: dict[str, Any] | None) -> tuple[str, list[Any]]:
         if not filters:
             return "", []
 

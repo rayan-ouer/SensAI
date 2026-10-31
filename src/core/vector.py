@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## SensAI
+## File description:
+## vector
+##
+
 from abc import ABC, abstractmethod
 from typing import Any
 
