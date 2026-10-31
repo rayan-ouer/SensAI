@@ -24,8 +24,9 @@ class AddedDocument:
 
 def document_note(added: AddedDocument) -> str:
     return (
-        f"Document {added.source} is available in the knowledge base "
-        f"({added.chunks} passages). Use search_documents to retrieve passages."
+        f"The user just added the document {Path(added.source).name} to the knowledge base "
+        f"({added.chunks} passages). Unless they clearly talk about something else, "
+        "their next questions concern this document: call search_documents before answering."
     )
 
 

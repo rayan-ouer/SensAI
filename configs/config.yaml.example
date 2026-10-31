@@ -8,7 +8,7 @@
 model: "qwen2.5:7b"
 
 # string: version of the global prompts, a folder of prompt_version_dir
-prompt_version: "v2"
+prompt_version: "v3"
 
 # string (optional): folder that holds the prompt versions, "prompt/versions" by default
 prompt_version_dir: "prompt/versions"

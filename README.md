@@ -57,7 +57,7 @@ wu -c configs/cloud_config.yaml -m agents/agent.yaml   # multi-agent, path relat
 ```
 
 ```
-Starting Wu with prompts v2
+Starting Wu with prompts v3
 > I want to build a todo list app in Python
 Answer:
 A fine project. Start small: what should a task contain?

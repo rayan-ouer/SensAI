@@ -1,7 +1,7 @@
 ## REQUIRED KEYS
 model: "qwen2.5:7b" # local model name, key required
 
-prompt_version: "v2" # key required: folder of prompt/versions with the global prompts
+prompt_version: "v3" # key required: folder of prompt/versions with the global prompts
 system_prompt: "system.txt" # key required
 
 spec_prompt: "spec.txt" # key required
