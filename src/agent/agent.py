@@ -112,51 +112,71 @@ class Agent:
                 self._max_loops, AIMessage(content="", truncated=True)
             )
         for index in range(self._max_loops):
-            response: AIMessage = self._llm.chat(
-                self._model,
-                context,
-                self._resolve_tools(),
-                self._response_format,
-                think=self._think,
-                include_thinking=self._keep_thinking,
-                extract_thinking_tags=self._extract_thinking_tags,
-                on_chunk=self._on_chunk,
-                is_cancelled=self._is_cancelled,
-            )
+            response = self._chat(context, self._resolve_tools())
             if response.interrupted:
                 response.tool_calls = []
                 self._record(context, produced, response)
                 return AgentTurn(messages=produced, reply=response)
-            if response.tool_calls and index == self._max_loops - 1:
-                response.truncated = True
-                self._record(context, produced, response)
-                raise AgentIterationLimitError(self._max_loops, response)
             self._record(context, produced, response)
             if not response.tool_calls:
                 return AgentTurn(messages=produced, reply=response)
-            for tool_call in response.tool_calls:
-                started = perf_counter()
-                execution: ToolExecution = self.execute_tool(tool_call, self._handler)
-                if self._on_tool_call is not None:
-                    self._on_tool_call(
-                        tool_call, execution, (perf_counter() - started) * 1000
-                    )
-                tool_call.status = execution.status
-                tool_call.result = execution.result
-                self._record(
-                    context,
-                    produced,
-                    ToolMessage(
-                        content=json.dumps(execution.result, ensure_ascii=False),
-                        tool_call_id=tool_call.id,
-                        tool_name=tool_call.name,
-                        result=execution.result,
-                        status=execution.status,
-                    ),
-                )
+            self._apply_tool_calls(response, context, produced)
+            if index == self._max_loops - 1:
+                return self._final_reply(context, produced)
         raise AgentIterationLimitError(
             self._max_loops, AIMessage(content="", truncated=True)
         )
+
+    def _chat(self, context: list[IMessage], tools: list[ITool]) -> AIMessage:
+        return self._llm.chat(
+            self._model,
+            context,
+            tools,
+            self._response_format,
+            think=self._think,
+            include_thinking=self._keep_thinking,
+            extract_thinking_tags=self._extract_thinking_tags,
+            on_chunk=self._on_chunk,
+            is_cancelled=self._is_cancelled,
+        )
+
+    def _apply_tool_calls(
+        self,
+        response: AIMessage,
+        context: list[IMessage],
+        produced: list[IMessage],
+    ) -> None:
+        for tool_call in response.tool_calls:
+            started = perf_counter()
+            execution: ToolExecution = self.execute_tool(tool_call, self._handler)
+            if self._on_tool_call is not None:
+                self._on_tool_call(
+                    tool_call, execution, (perf_counter() - started) * 1000
+                )
+            tool_call.status = execution.status
+            tool_call.result = execution.result
+            self._record(
+                context,
+                produced,
+                ToolMessage(
+                    content=json.dumps(execution.result, ensure_ascii=False),
+                    tool_call_id=tool_call.id,
+                    tool_name=tool_call.name,
+                    result=execution.result,
+                    status=execution.status,
+                ),
+            )
+
+    def _final_reply(
+        self, context: list[IMessage], produced: list[IMessage]
+    ) -> AgentTurn:
+        response = self._chat(context, [])
+        response.tool_calls = []
+        self._record(context, produced, response)
+        if not response.content.strip():
+            response.truncated = True
+            raise AgentIterationLimitError(self._max_loops, response)
+        return AgentTurn(messages=produced, reply=response)
 
     def set_role(self, role: SystemMessage) -> None:
         self._role = role

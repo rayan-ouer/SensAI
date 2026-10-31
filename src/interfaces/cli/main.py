@@ -21,22 +21,26 @@ from interfaces.cli.setup import (
 from tools.chat.errors import AppError
 from tools.chat.load_config import ConfigLoader
 from tools.chat.module import fatal
+from tools.mcp.client import close_mcp_clients
 from tools.spec.spec import load_spec
 
 
 def run() -> None:
-    args = handle_args()
-    api_key = read_api_key()
-    config = ConfigLoader(args.config).get_configs()
-    state = create_cli_state(config, api_key)
-    print(f"Starting {state.current_profile().name} with prompts {state.config.prompt_version}")
-    spec = load_spec(state.config.spec_path)
-    tools = create_tools(state)
-    agents_config = load_agents_config(args.multi_agent, state.config.config_dir)
-    apply_agents_config(state, agents_config)
-    role = current_role(state, spec)
-    agent = create_agent(state, tools, role, agents_config)
-    agent_loop(agent, state, spec)
+    try:
+        args = handle_args()
+        api_key = read_api_key()
+        config = ConfigLoader(args.config).get_configs()
+        state = create_cli_state(config, api_key)
+        print(f"Starting {state.current_profile().name} with prompts {state.config.prompt_version}")
+        spec = load_spec(state.config.spec_path)
+        tools = create_tools(state)
+        agents_config = load_agents_config(args.multi_agent, state.config.config_dir)
+        apply_agents_config(state, agents_config)
+        role = current_role(state, spec)
+        agent = create_agent(state, tools, role, agents_config)
+        agent_loop(agent, state, spec)
+    finally:
+        close_mcp_clients()
 
 
 def main() -> None:
