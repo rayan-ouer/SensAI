@@ -6,7 +6,9 @@
 ##
 
 from abc import ABC, abstractmethod
+from typing import Any
 
+DEFAULT_TOP_K = 5
 
 class VectorDocument:
     def __init__(
@@ -37,9 +39,18 @@ class VectorMatch:
 
 class IVectorStore(ABC):
     @abstractmethod
-    def add(self, documents: list) -> None:
+    def add(self, documents: list[VectorDocument]) -> None:
         pass
 
     @abstractmethod
-    def search(self, query: str, top_k: int) -> list[str]:
+    def delete_source(self, source: str) -> None:
+        pass
+
+    @abstractmethod
+    def search(
+        self,
+        query_embedding: list[float],
+        top_k: int = DEFAULT_TOP_K,
+        filters: dict[str, Any] | None = None,
+    ) -> list[VectorMatch]:
         pass

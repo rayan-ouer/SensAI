@@ -20,6 +20,8 @@ docker
 numpy
 pgvector
 asyncpg
+sqlite-vec
+sentence_transformers
 
 # Monitoring requierements
 matplotlib

@@ -25,5 +25,6 @@ share/python-wheels/
 *.egg
 MANIFEST
 .vscode/
+.debtlint-vocab.json
 
 workspace

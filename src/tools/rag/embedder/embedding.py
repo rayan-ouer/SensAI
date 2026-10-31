@@ -29,53 +29,77 @@ def _print_progress(completed_chunks: int, total_chunks: int) -> None:
     )
 
 
-def _send_request(texts: list[str]):
-    try:
-        response = requests.post(
-            f"{OLLAMA_URL}/api/embed",
-            json={"model": MODEL, "input": texts},
-            timeout=TIMEOUT,
-        )
-    except requests.ConnectionError:
-        raise EmbeddingError(
-            "No Ollama response, check if it is launched (`ollama serve`) ?"
-        )
-    except requests.Timeout:
-        raise EmbeddingError(
-            f"Timeout after {TIMEOUT}s, try reducing chunks per request"
-        )
+class Embedder:
+    """Embeds texts with the same Ollama model used to index documents."""
 
-    if response.status_code != 200:
-        try:
-            detail = response.json().get("error", response.text)
-        except ValueError:
-            detail = response.text
-        raise EmbeddingError(f"{response.status_code}, {detail}")
-    embeddings = response.json()["embeddings"]
-    if len(embeddings) != len(texts):
-        raise EmbeddingError(f"got {len(embeddings)} vectors for {len(texts)} texts")
-    return embeddings
+    def __init__(
+        self,
+        model: str = MODEL,
+        url: str = OLLAMA_URL,
+        timeout: int = TIMEOUT,
+        chunks_per_request: int = CHUNKS_PER_REQUEST,
+        max_retries: int = MAX_RETRIES,
+    ) -> None:
+        self.model = model
+        self.url = url
+        self.timeout = timeout
+        self.chunks_per_request = chunks_per_request
+        self.max_retries = max_retries
 
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        if not texts:
+            raise EmbeddingError("Empty text list")
+        vectors: list[list[float]] = []
+        for start in range(0, len(texts), self.chunks_per_request):
+            if len(texts) > 1:
+                _print_progress(start, len(texts))
+            batch = texts[start : start + self.chunks_per_request]
+            vectors.extend(self._embed_batch(batch))
+        if len(vectors) != len(texts):
+            raise EmbeddingError(f"got {len(vectors)} vectors for {len(texts)} texts")
+        matrix = _normalize_vector(np.array(vectors, dtype=np.float32))
+        return matrix.tolist()
 
-def embed_chunks(chunks: list[Chunk]) -> np.ndarray:
-    texts = [c.text for c in chunks]
-    if not texts or texts == []:
-        raise EmbeddingError("Empty chunk list")
-    vectors = []
-    for i in range(0, len(texts), CHUNKS_PER_REQUEST):
-        _print_progress(i, len(texts))
-        batch = texts[i : i + CHUNKS_PER_REQUEST]
-        response = []
-        for y in range(MAX_RETRIES):
+    def embed_chunks(self, chunks: list[Chunk]) -> np.ndarray:
+        if not chunks:
+            raise EmbeddingError("Empty chunk list")
+        return np.array(self.embed([chunk.text for chunk in chunks]), dtype=np.float32)
+
+    def _embed_batch(self, texts: list[str]) -> list[list[float]]:
+        for attempt in range(self.max_retries):
             try:
-                response = _send_request(batch)
-                break
-            except EmbeddingError as e:
-                if y == MAX_RETRIES - 1:
-                    raise EmbeddingError(f"{e}")
-                sleep(2 * y)
-        vectors += response
-    if len(vectors) != len(chunks):
-        raise EmbeddingError(f"got {len(vectors)} vectors for {len(chunks)} chunks")
-    matrix = np.array(vectors, dtype=np.float32)
-    return _normalize_vector(matrix)
+                return self._send_request(texts)
+            except EmbeddingError as error:
+                if attempt == self.max_retries - 1:
+                    raise EmbeddingError(f"{error}") from error
+                sleep(2 * attempt)
+        raise EmbeddingError("No embeddings received from Ollama")
+
+    def _send_request(self, texts: list[str]) -> list[list[float]]:
+        try:
+            response = requests.post(
+                f"{self.url}/api/embed",
+                json={"model": self.model, "input": texts},
+                timeout=self.timeout,
+            )
+        except requests.ConnectionError as error:
+            raise EmbeddingError(
+                "No Ollama response, check if it is launched (`ollama serve`) ?"
+            ) from error
+        except requests.Timeout as error:
+            raise EmbeddingError(
+                f"Timeout after {self.timeout}s, try reducing chunks per request"
+            ) from error
+
+        if response.status_code != 200:
+            try:
+                detail = response.json().get("error", response.text)
+            except ValueError:
+                detail = response.text
+            raise EmbeddingError(f"{response.status_code}, {detail}")
+        embeddings = response.json()["embeddings"]
+        if len(embeddings) != len(texts):
+            raise EmbeddingError(
+                f"got {len(embeddings)} vectors for {len(texts)} texts"
+            )
+        return embeddings

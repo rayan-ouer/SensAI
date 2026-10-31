@@ -7,6 +7,7 @@
 
 from core.messages import SystemMessage
 from interfaces.cli.cli_state import CliState
+from tools.rag.ingest import DOCUMENT_ERRORS, add_document
 
 PROFILE_NOTE = (
     "The active agent has changed. From now on you are '{name}'. "
@@ -28,6 +29,24 @@ def switch_profile(state: CliState, args: list[str]) -> None:
     print(f"Switched to '{name}' profile.")
 
 
+def add_document_command(state: CliState, args: list[str]) -> None:
+    path = " ".join(args).strip()
+    if not path:
+        print("Usage: /add <path>")
+        return
+    try:
+        added = add_document(path, state.vector_store, state.embedder)
+    except DOCUMENT_ERRORS as error:
+        print(error)
+        return
+    note = (
+        f"Document {added.source} is available in the knowledge base "
+        f"({added.chunks} passages). Use search_documents to retrieve passages."
+    )
+    state.conversation.add_system_message(SystemMessage(content=note))
+    print(f"Indexed {added.chunks} passages from {added.source}.")
+
+
 def print_profiles(state: CliState, _args: list[str]) -> None:
     for key, profile in state.profiles.items():
         profile_name = profile.name
@@ -38,6 +57,7 @@ def print_profiles(state: CliState, _args: list[str]) -> None:
 COMMANDS = {
     "/profiles": print_profiles,
     "/profile": switch_profile,
+    "/add": add_document_command,
 }
 
 
