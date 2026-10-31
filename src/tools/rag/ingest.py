@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-import tools.loader.type_loaders.csv_loader  # noqa: F401
-import tools.loader.type_loaders.markdown_loader  # noqa: F401
-import tools.loader.type_loaders.pdf_loader  # noqa: F401
-import tools.loader.type_loaders.text_loader  # noqa: F401
+import tools.loader.type_loaders.csv_loader
+import tools.loader.type_loaders.markdown_loader
+import tools.loader.type_loaders.pdf_loader
+import tools.loader.type_loaders.text_loader
 from core.vector import IVectorStore, VectorDocument
 from memory.vector.sqlite.sqlite_store import VectorStoreError
 from tools.loader.core.errors import FileReaderError, LoaderError, UnsupportedFormat
