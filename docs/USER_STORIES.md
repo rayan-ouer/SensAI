@@ -145,6 +145,8 @@ Acceptance criteria:
 - PDF, Markdown, CSV and plain text files can be loaded.
 - A loaded document is split into chunks and each chunk is embedded.
 - An unsupported file type gives a clear error and does not stop the session.
+- In the browser, I can drop a file on the chat or pick it with the paperclip
+  and a label shows when it is indexed or why it failed.
 
 As a student revising for an exam, I want the assistant to retrieve the passages
 related to my question, so that I do not have to search a long document myself.

@@ -22,6 +22,7 @@ interfaces/api/
 | `POST` | `/api/conversations/` | `{"user_id": "..."}` | `{"id": "..."}` |
 | `POST` | `/api/conversations/{id}/messages` | `{"content": "...", "profile": "math_tutor", "model": "..."}` | stream of events, see below |
 | `PUT` | `/api/conversations/{id}/messages/{message_id}` | same as `POST` | stream of events, the message is replaced and what followed it is dropped |
+| `POST` | `/api/conversations/{id}/documents` | multipart field `file` (PDF, Markdown, CSV or text) | `{"source": "...", "chunks": 12}`, the agent of this conversation is told the document is available |
 | `GET` | `/api/conversations/{id}/messages` | | `{"messages": [{"id": "...", "role": "user", "content": "..."}, ...]}` |
 | `GET` | `/api/profiles` | | `{"profiles": [{"key", "name", "role"}, ...], "default": "wu"}` |
 | `GET` | `/api/models` | | `{"models": ["..."], "default": "..."}` |

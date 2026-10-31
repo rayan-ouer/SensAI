@@ -169,5 +169,5 @@ export function useChat(spec: SpecUpdates, profile: string | null, model: string
       await runTurn(text, messages.slice(0, messages.indexOf(message)), message.serverId)
   }
 
-  return { messages, status, error, send, edit, reset }
+  return { messages, status, error, send, edit, reset, currentConversation }
 }
