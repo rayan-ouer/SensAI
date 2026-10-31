@@ -25,7 +25,7 @@ function MessageList({ messages, status, onAnswer, onEdit }: MessageListProps) {
   }, [messages, status])
 
   return (
-    <div className="flex-1 overflow-y-auto [mask-image:linear-gradient(to_bottom,transparent,black_1.5rem,black_calc(100%-1.5rem),transparent)] [scrollbar-color:rgb(255_255_255/0.15)_transparent] [scrollbar-gutter:stable_both-edges] [scrollbar-width:thin]">
+    <div className="min-h-0 flex-1 overflow-y-auto [mask-image:linear-gradient(to_bottom,transparent,black_1.5rem,black_calc(100%-1.5rem),transparent)] [scrollbar-color:rgb(255_255_255/0.15)_transparent] [scrollbar-gutter:stable_both-edges] [scrollbar-width:thin]">
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-6" aria-live="polite">
         {messages.map((message, index) => (
           <MessageBubble
