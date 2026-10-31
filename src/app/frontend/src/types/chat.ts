@@ -26,6 +26,13 @@ export type Message = {
   }
 }
 
+export type UploadedDocument = {
+  id: string
+  name: string
+  status: 'indexing' | 'ready' | 'failed'
+  detail?: string
+}
+
 export type Profile = {
   key: string
   name: string

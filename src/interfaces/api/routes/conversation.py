@@ -5,7 +5,7 @@
 ## conversation
 ##
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, UploadFile
 from fastapi.responses import StreamingResponse
 
 from interfaces.api.dependencies import ConversationDep
@@ -14,7 +14,8 @@ from interfaces.api.schemas.output.conversation import (
     CreateConversationResponse,
     MessagesResponse,
 )
-from interfaces.api.utils.http import check_conversation, check_editable, start_turn
+from interfaces.api.schemas.output.document import AddDocumentResponse
+from interfaces.api.utils.http import check_conversation, check_editable, index_upload, start_turn
 from interfaces.api.utils.messages import is_displayed, to_message_response
 
 conversation_router = APIRouter(
@@ -65,3 +66,14 @@ def edit_message(
 ) -> StreamingResponse:
     check_editable(store, conversation_id, message_id)
     return start_turn(request, store, conversation_id, body, message_id)
+
+
+@conversation_router.post("/{conversation_id}/documents", response_model=AddDocumentResponse)
+def upload_document(
+    conversation_id: str,
+    file: UploadFile,
+    request: Request,
+    store: ConversationDep,
+) -> AddDocumentResponse:
+    check_conversation(store, conversation_id)
+    return index_upload(file, request, store, conversation_id)

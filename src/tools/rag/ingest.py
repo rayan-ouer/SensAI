@@ -22,6 +22,13 @@ class AddedDocument:
     chunks: int
 
 
+def document_note(added: AddedDocument) -> str:
+    return (
+        f"Document {added.source} is available in the knowledge base "
+        f"({added.chunks} passages). Use search_documents to retrieve passages."
+    )
+
+
 def add_document(path: str | Path, store: IVectorStore, embedder: Embedder) -> AddedDocument:
     file_path = Path(path)
     documents = list(FileReader(file_path).get_parser().load())

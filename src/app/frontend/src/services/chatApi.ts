@@ -95,6 +95,20 @@ export async function createConversation(): Promise<string> {
   return body.id
 }
 
+export async function uploadDocument(conversationId: string, file: File): Promise<{ source: string; chunks: number }> {
+  const form = new FormData()
+  form.append('file', file)
+  const response = await fetch(`${API_URL}/conversations/${conversationId}/documents`, {
+    method: 'POST',
+    body: form,
+  }).catch(() => {
+    throw new Error(UNREACHABLE)
+  })
+  if (!response.ok)
+    throw await failure(response)
+  return response.json()
+}
+
 async function* readLines(body: ReadableStream<Uint8Array>): AsyncGenerator<string> {
   const reader = body.getReader()
   const decoder = new TextDecoder()

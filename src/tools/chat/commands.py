@@ -7,7 +7,7 @@
 
 from core.messages import SystemMessage
 from interfaces.cli.cli_state import CliState
-from tools.rag.ingest import DOCUMENT_ERRORS, add_document
+from tools.rag.ingest import DOCUMENT_ERRORS, add_document, document_note
 
 PROFILE_NOTE = (
     "The active agent has changed. From now on you are '{name}'. "
@@ -39,11 +39,7 @@ def add_document_command(state: CliState, args: list[str]) -> None:
     except DOCUMENT_ERRORS as error:
         print(error)
         return
-    note = (
-        f"Document {added.source} is available in the knowledge base "
-        f"({added.chunks} passages). Use search_documents to retrieve passages."
-    )
-    state.conversation.add_system_message(SystemMessage(content=note))
+    state.conversation.add_system_message(SystemMessage(content=document_note(added)))
     print(f"Indexed {added.chunks} passages from {added.source}.")
 
 

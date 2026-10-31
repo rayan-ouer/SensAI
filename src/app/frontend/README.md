@@ -39,6 +39,7 @@ src/
     useSpec.ts          specification content and update state
     useProfiles.ts      available profiles and the selected one
     useModels.ts        available models and the selected one
+    useDocuments.ts     documents sent to the knowledge base and their state
 
   services/             calls to the backend
     chatApi.ts          the only contact point with the API
@@ -72,6 +73,7 @@ or `VITE_API_URL` to call the API directly without the proxy.
   one JSON object per line: `content` and `thinking` chunks, a `question` with its options, then `done` and `spec`,
   or `error`
 - `fetchMessages(conversationId)` returns the history shown after a page reload
+- `uploadDocument(conversationId, file)` sends a dropped or picked file to the knowledge base
 - `fetchSpec()`, `fetchProfiles()` and `fetchModels()` return the specification, the profiles and the models with
   the default ones
 
