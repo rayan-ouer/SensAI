@@ -37,9 +37,9 @@ class VectorMatch:
 
 class IVectorStore(ABC):
     @abstractmethod
-    def add(self, documents: list) -> None:
+    def add(self, documents: list[VectorDocument]) -> None:
         pass
 
     @abstractmethod
-    def search(self, query: str, top_k: int) -> list[str]:
+    def search(self, query: str, top_k: int) -> list[VectorMatch]:
         pass

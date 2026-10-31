@@ -15,6 +15,7 @@ dataclasses-json
 ## Tool requirements
 fastmcp
 docker
+sqlite-vec
 
 ## RAG requirements
 numpy
