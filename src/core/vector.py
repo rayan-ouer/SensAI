@@ -43,6 +43,10 @@ class IVectorStore(ABC):
         pass
 
     @abstractmethod
+    def delete_source(self, source: str) -> None:
+        pass
+
+    @abstractmethod
     def search(
         self,
         query_embedding: list[float],

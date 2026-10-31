@@ -1,5 +1,7 @@
 import json
 import sqlite3
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Any
 
 import sqlite_vec
@@ -31,18 +33,28 @@ class SQLiteStore(IVectorStore):
         vector_dimension: int = VECTOR_DIMENSION,
         table_name: str = TABLE_NAME,
     ):
+        self._db_path = db_path
         self._model_name = model_name
         self._vector_dimension = vector_dimension
         self._table_name = table_name
-        self._db = sqlite3.connect(db_path)
-        self._db.enable_load_extension(True)
-        sqlite_vec.load(self._db)
-        self._db.enable_load_extension(False)
-        self._db.execute("PRAGMA journal_mode=WAL")
-        self._create_table()
+        with self._connect() as db:
+            db.execute("PRAGMA journal_mode=WAL")
+            self._create_table(db)
 
-    def _create_table(self) -> None:
-        self._db.executescript(f"""
+    @contextmanager
+    def _connect(self) -> Iterator[sqlite3.Connection]:
+        connection = sqlite3.connect(self._db_path, timeout=10)
+        connection.enable_load_extension(True)
+        sqlite_vec.load(connection)
+        connection.enable_load_extension(False)
+        try:
+            with connection:
+                yield connection
+        finally:
+            connection.close()
+
+    def _create_table(self, db: sqlite3.Connection) -> None:
+        db.executescript(f"""
             CREATE TABLE IF NOT EXISTS {self._table_name} (
                 id TEXT PRIMARY KEY,
                 content TEXT NOT NULL,
@@ -55,7 +67,7 @@ class SQLiteStore(IVectorStore):
                 embedding float[{self._vector_dimension}] distance_metric=cosine
             );
         """)
-    
+
     def _verify_embeddings(self, embeddings: list[list[float]]) -> None:
         if not embeddings:
             raise VectorStoreError("No embeddings provided")
@@ -70,13 +82,30 @@ class SQLiteStore(IVectorStore):
         self._verify_embeddings([document.embedding for document in documents])
         ids: list[tuple[str]] = [(document.id, ) for document in documents]
 
-        with self._db:
-            self._db.executemany(f"DELETE FROM {self._table_name}_vec WHERE id = ?", ids)
-            self._db.executemany(f"DELETE FROM {self._table_name} WHERE id = ?", ids)
-            self._db.executemany(f"INSERT INTO {self._table_name}(id, content, source, meta) VALUES (?, ?, ?, ?)",
-            [(d.id, d.content, d.source, json.dumps(d.meta)) for d in documents])
-            self._db.executemany(f"INSERT INTO {self._table_name}_vec(id, embedding) VALUES (?, ?)",
-            [(d.id, serialize_float32(d.embedding)) for d in documents])
+        with self._connect() as db:
+            self._delete_ids(db, ids)
+            db.executemany(
+                f"INSERT INTO {self._table_name}(id, content, source, meta) VALUES (?, ?, ?, ?)",
+                [(d.id, d.content, d.source, json.dumps(d.meta)) for d in documents],
+            )
+            db.executemany(
+                f"INSERT INTO {self._table_name}_vec(id, embedding) VALUES (?, ?)",
+                [(d.id, serialize_float32(d.embedding)) for d in documents],
+            )
+
+    def delete_source(self, source: str) -> None:
+        with self._connect() as db:
+            rows = db.execute(
+                f"SELECT id FROM {self._table_name} WHERE source = ?",
+                (source,),
+            ).fetchall()
+            if not rows:
+                return
+            self._delete_ids(db, [(row[0],) for row in rows])
+
+    def _delete_ids(self, db: sqlite3.Connection, ids: list[tuple[str]]) -> None:
+        db.executemany(f"DELETE FROM {self._table_name}_vec WHERE id = ?", ids)
+        db.executemany(f"DELETE FROM {self._table_name} WHERE id = ?", ids)
 
     def search(
         self,
@@ -100,10 +129,11 @@ class SQLiteStore(IVectorStore):
             ORDER BY v.distance
         """
 
-        rows = self._db.execute(
-            statement,
-            [serialize_float32(query_embedding), top_k, *filter_params],
-        ).fetchall()
+        with self._connect() as db:
+            rows = db.execute(
+                statement,
+                [serialize_float32(query_embedding), top_k, *filter_params],
+            ).fetchall()
         return [
             VectorMatch(
                 id=row[0],
