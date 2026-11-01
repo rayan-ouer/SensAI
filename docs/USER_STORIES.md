@@ -156,6 +156,19 @@ Acceptance criteria:
 - The number of chunks returned is limited to a configurable maximum.
 - The answer is built from the retrieved passages.
 
+## Advanced RAG (R2)
+
+As a student revising from long course PDFs, I want the assistant to keep only
+the passages that really match my question, so that near-misses do not dilute
+the answer.
+
+Acceptance criteria:
+- After the vector search, a cross-encoder reranks the candidates and only the
+  top passages are returned, each with a relevance score.
+- Metadata filters (for example by source, page or file type) can narrow the
+  search before the answer is built.
+- The numbered tool result shows the score of each kept passage.
+
 ## Multi-agent orchestration (A2)
 
 As a student with a task that mixes research and code, I want several
