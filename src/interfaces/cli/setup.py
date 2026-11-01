@@ -32,6 +32,7 @@ from tools.sandbox.sandbox import create_sandbox_tools
 from tools.rag.tool import build_rag_resources, create_rag_tools
 from tools.search.web import create_search_tools
 from tools.spec.spec import build_system_prompt
+from tools.mcp.loader import create_external_tools
 
 
 def read_api_key() -> str | None:
@@ -130,4 +131,7 @@ def create_tools(state: CliState) -> list[ITool]:
     tools.extend(create_file_access_tools(state.workspace))
     tools.extend(create_human_in_the_loop_tools(state.human_answers))
     tools.extend(create_rag_tools(state.retriever, state.embedder))
+    tools.extend(
+        create_external_tools(Path(state.config.config_dir) / state.config.mcp_config)
+    )
     return tools

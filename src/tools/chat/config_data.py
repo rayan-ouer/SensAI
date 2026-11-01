@@ -30,3 +30,4 @@ class ConfigData:
     ollama_provider: str = "auto"
     file_access_config: str = "file_access.yaml"
     prompt_version_dir: str = PROMPT_VERSION_DIR
+    mcp_config: str = "mcp.json"
