@@ -1,7 +1,7 @@
 ## REQUIRED KEYS
 model: "qwen2.5:7b" # local model name, key required
 
-prompt_version: "v3" # key required: folder of prompt/versions with the global prompts
+prompt_version: "v4" # key required: folder of prompt/versions with the global prompts
 system_prompt: "system.txt" # key required
 
 spec_prompt: "spec.txt" # key required
@@ -14,6 +14,8 @@ profiles_dir: "profiles" # key required, relative to this file's directory
 default_profile: "wu" # key required, name of a file in profiles_dir (without .yaml)
 
 ## OPTIONAL KEYS
+
+max_loops: 20 # optional: max agent steps (model + tool calls) per message
 
 spec_think: false # optional: false disable model reasoning for spec updates (faster, less careful)
 

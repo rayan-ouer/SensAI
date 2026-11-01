@@ -34,7 +34,7 @@ The CLI takes it with `wu -c configs/local_config.yaml`. The API reads the one s
 | `models` | no | list | models offered by the web interface, on the same server as `model`, only `model` by default |
 | `spec_think` | no | bool | model reasoning during specification updates, `false` is faster |
 | `think` | no | bool | model reasoning for chat replies, by default the model decides |
-| `max_loops` | no | int | maximum agent steps (model and tool calls) for one message, 10 by default |
+| `max_loops` | no | int | maximum agent steps (model and tool calls) for one message, 20 by default |
 | `llm_settings` | no | dict | options passed to the model, for example `{temperature: 0.2, top_k: 50}` |
 | `ollama_provider` | no | string | `auto` (local then cloud), `local` or `cloud`, `auto` by default |
 | `prompt_version_dir` | no | path | folder of the prompt versions, `prompt/versions` by default |

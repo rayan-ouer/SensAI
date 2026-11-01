@@ -1,0 +1,6 @@
+version: "v4"
+date: "2026-11-01T15:46:48+01:00"
+changes:
+  - "Agents prefer tools over guessing and must not debate a tool call in the reply."
+  - "search_web is used for uncertain or current facts, not only when the agent feels unsure."
+  - "A profile's stricter tool policy overrides the general tool rules."

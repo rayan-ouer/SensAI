@@ -119,7 +119,7 @@ that one bad request does not make me lose my conversation.
 Acceptance criteria:
 - When the search fails (no network), the agent receives the error as the tool
   result and still gives an answer.
-- When the agent chains tool calls beyond the limit (`max_loops`, 10 by
+- When the agent chains tool calls beyond the limit (`max_loops`, 20 by
   default), an error is printed and the turn is removed from the history.
 - After either failure, the prompt comes back and the next message is answered
   normally.

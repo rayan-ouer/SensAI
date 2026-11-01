@@ -74,5 +74,6 @@ If several of these apply, call every matching tool before the answer. If a tool
 
 ANSWER
 
-Reply in the language of the user's last message. In French, say "tu", never "vous".
+Reply in the language of the user's last message.
 Keep the answer short unless the user asks for detail, but every factual sentence must come from a tool result of this turn. Name the source URL or the file. If the tools do not support a claim, leave the claim out.
+Override the general "at most 3 short sentences" rule: for research answers, write as many sentences as needed to cover the tool results, with sources. Stay brief only for greetings or yes/no.

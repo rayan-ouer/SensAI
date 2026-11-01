@@ -49,7 +49,7 @@ class Agent:
         handler: ToolHandler,  # the tool handler to use
         description: str = "",  # what this agent does (exposed when used as a tool)
         response_format: dict | None = None,  # the response format to use
-        max_loops: int = 10,  # the maximum number of loops to run
+        max_loops: int = 20,  # the maximum number of loops to run
         think: bool | None = None,  # whether to think or not
         keep_thinking: bool = False,  # whether to keep thinking or not
         extract_thinking_tags: bool = False,  # whether to extract thinking tags or not

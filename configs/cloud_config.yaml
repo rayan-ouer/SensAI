@@ -2,7 +2,7 @@
 model: "nemotron-3-nano:30b" # cloud model name, key required
 models: ["nemotron-3-nano:30b", "gemma4:31b", "gpt-oss:20b"] # optional: models offered by the web interface
 
-prompt_version: "v3" # key required: folder of prompt/versions with the global prompts
+prompt_version: "v4" # key required: folder of prompt/versions with the global prompts
 system_prompt: "system.txt" # key required
 
 spec_prompt: "spec.txt" # key required
@@ -15,6 +15,8 @@ profiles_dir: "profiles" # key required, relative to this file's directory
 default_profile: "wu" # key required, name of a file in profiles_dir (without .yaml)
 
 ## OPTIONAL KEYS
+
+max_loops: 20 # optional: max agent steps (model + tool calls) per message
 
 ollama_provider: cloud # optional: always use Ollama Cloud, even if the model is installed locally
 

@@ -23,7 +23,7 @@ class ConfigData:
     config_dir: str
     spec_think: bool | None = None
     response_format: dict | None = None
-    max_loops: int = 10
+    max_loops: int = 20
     llm_settings: dict = field(default_factory=dict)
     models: list[str] = field(default_factory=list)
     think: bool | None = None

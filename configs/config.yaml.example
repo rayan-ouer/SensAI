@@ -8,7 +8,7 @@
 model: "qwen2.5:7b"
 
 # string: version of the global prompts, a folder of prompt_version_dir
-prompt_version: "v3"
+prompt_version: "v4"
 
 # string (optional): folder that holds the prompt versions, "prompt/versions" by default
 prompt_version_dir: "prompt/versions"
@@ -39,8 +39,8 @@ models: ["qwen2.5:7b"]
 # bool: model reasoning during spec updates, false is faster but less careful (default: model's choice)
 spec_think: false
 
-# int: maximum number of agent steps (model calls and tool calls) for one message (default: 10)
-max_loops: 10
+# int: maximum number of agent steps (model calls and tool calls) for one message (default: 20)
+max_loops: 20
 
 # dict: options passed to the model (default: {})
 # temperature (float, 0 = always the same answer), top_k (int), top_p (float), num_ctx (int), seed (int)
