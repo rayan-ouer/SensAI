@@ -9,12 +9,12 @@ from tools.mcp.client import MCPClient
 class MCPLoader:
     def __init__(self, path: str | Path):
         self.path = Path(path)
-        if not self.path.is_file():
-            raise LoaderError("File not found.", self.path)
-    
+
     def load_mcp_config(self) -> dict:
         servers = {}
 
+        if not self.path.is_file():
+            return {}
         with open(self.path, "r") as file:
             servers = json.load(file)
         return servers
