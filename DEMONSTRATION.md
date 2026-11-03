@@ -12,6 +12,12 @@ Le panneau Specification se met à jour après la description du projet.
 
 ## Tools
 
+### [T1] MCP
+
+Un serveur MCP externe, `mcp-server-time`, est lancé au démarrage. Wu appelle `get_current_time` pour l'heure à Paris.
+
+[18-mcp-externe.webm](demos/18-mcp-externe.webm)
+
 ### [T2] Sandboxed Code Execution
 
 Ada exécute `date` dans le sandbox et cite la date renvoyée.
