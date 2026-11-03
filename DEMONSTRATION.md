@@ -36,11 +36,17 @@ Ada confirme le dossier de travail, puis lit `README.md`.
 
 [13-fichiers.webm](demos/13-fichiers.webm)
 
+### [T5] Structured Output
+
+L’agent critic répond avec un objet JSON : `verdict`, `summary`, `issues`.
+
+[19-structured-output.webm](demos/19-structured-output.webm)
+
 ## RAG
 
-### [R1] Basic RAG
+### [R2] Advanced RAG
 
-Un JSON est refusé, une note Markdown est indexée, puis la réponse s’appuie sur le passage.
+Un JSON est refusé, une note Markdown est indexée, puis la réponse s’appuie sur le passage retrouvé.
 
 [07-documents.webm](demos/07-documents.webm)
 
