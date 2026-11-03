@@ -54,7 +54,7 @@ Un JSON est refusé, une note Markdown est indexée, puis la réponse s’appuie
 
 ### [A1] Reasoning Loops (ReAct)
 
-La réponse défile, le raisonnement se déplie, les tokens s’affichent.
+Iris enchaîne trois recherches : le Nobel de physique 2025, puis le laboratoire du nom trouvé, puis le résultat récompensé.
 
 [04-reponse.webm](demos/04-reponse.webm)
 
